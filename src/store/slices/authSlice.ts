@@ -3,6 +3,8 @@ import { api } from '@/lib';
 import { STORAGE_KEYS } from '@/config';
 import type { AuthState, User, LoginCredentials, RegisterData, AuthResponse } from '@/types';
 
+// Always start with empty state to avoid hydration mismatch
+// Auth will be initialized from localStorage on client side only
 const initialState: AuthState = {
   user: null,
   token: null,
@@ -16,7 +18,7 @@ const initialState: AuthState = {
  */
 export const initializeAuth = createAsyncThunk(
   'auth/initialize',
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, dispatch }) => {
     if (typeof window === 'undefined') {
       return null;
     }
@@ -28,18 +30,47 @@ export const initializeAuth = createAsyncThunk(
       return null;
     }
 
+    // First, set the state from localStorage immediately (for instant display)
+    try {
+      const user = JSON.parse(userJson) as User;
+      dispatch(setInitialState({ 
+        user, 
+        token, 
+        isAuthenticated: true, 
+        isLoading: false 
+      }));
+    } catch {
+      // Invalid JSON, will be cleared below
+      return null;
+    }
+
+    // Then verify token with API
     try {
       // Verify token is still valid
-      const response = await api.get<{ data: User }>('/auth/me');
+      // The /auth/me endpoint returns { user: UserResource }
+      const response = await api.get<{ user: User }>('/auth/me');
       return {
-        user: response.data.data,
+        user: response.data.user,
         token,
       };
-    } catch {
-      // Token invalid, clear storage
-      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.USER);
-      return null;
+    } catch (error: any) {
+      // Only clear if we get a 401 (unauthorized) - token is definitely invalid
+      // For other errors (network, 500, etc.), keep the existing state
+      if (error?.response?.status === 401) {
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        return null;
+      }
+      // For other errors, return the existing localStorage data (already set above)
+      try {
+        const user = JSON.parse(userJson) as User;
+        return {
+          user,
+          token,
+        };
+      } catch {
+        return null;
+      }
     }
   }
 );
@@ -51,8 +82,15 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
-      const response = await api.post<{ data: AuthResponse }>('/auth/login', credentials);
-      const { user, token } = response.data.data;
+      const response = await api.post<{ user: User; token: string; message?: string }>('/auth/login', credentials);
+      
+      // Handle response - user and token are at root level
+      const user = response.data.user;
+      const token = response.data.token;
+
+      if (!user || !token) {
+        return rejectWithValue('Invalid response from server');
+      }
 
       // Store in localStorage
       localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
@@ -61,20 +99,32 @@ export const login = createAsyncThunk(
       return { user, token };
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      return rejectWithValue(err.response?.data?.message || 'Login failed');
+      const errorMessage = err.response?.data?.message || 'Invalid login credentials';
+      return rejectWithValue(errorMessage);
     }
   }
 );
 
 /**
- * Register action
+ * Register action - uses customer register endpoint
  */
 export const register = createAsyncThunk(
   'auth/register',
   async (data: RegisterData, { rejectWithValue }) => {
     try {
-      const response = await api.post<{ data: AuthResponse }>('/auth/register', data);
-      const { user, token } = response.data.data;
+      // Use customer register endpoint for customer signup
+      const response = await api.post<{ user: User; token: string; message?: string }>('/customer/register', {
+        ...data,
+        nationality: data.nationality || 'UAE', // Default nationality if not provided
+      });
+      
+      // Handle response - user and token are at root level
+      const user = response.data.user;
+      const token = response.data.token;
+
+      if (!user || !token) {
+        return rejectWithValue('Invalid response from server');
+      }
 
       // Store in localStorage
       localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
@@ -82,8 +132,11 @@ export const register = createAsyncThunk(
 
       return { user, token };
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      return rejectWithValue(err.response?.data?.message || 'Registration failed');
+      const err = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } };
+      const errorMessage = err.response?.data?.message || 
+        (err.response?.data?.errors ? JSON.stringify(err.response.data.errors) : null) ||
+        'Registration failed';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -108,16 +161,27 @@ const authSlice = createSlice({
   reducers: {
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
+      state.isAuthenticated = true;
     },
     clearError: (state) => {
       state.error = null;
+    },
+    setInitialState: (state, action: PayloadAction<{ user: User; token: string; isAuthenticated: boolean; isLoading: boolean }>) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isAuthenticated = action.payload.isAuthenticated;
+      state.isLoading = action.payload.isLoading;
     },
   },
   extraReducers: (builder) => {
     // Initialize
     builder
       .addCase(initializeAuth.pending, (state) => {
-        state.isLoading = true;
+        // Don't set loading to true if we already have user data
+        // This prevents flickering when user is already set from localStorage
+        if (!state.user) {
+          state.isLoading = true;
+        }
       })
       .addCase(initializeAuth.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -125,11 +189,17 @@ const authSlice = createSlice({
           state.user = action.payload.user;
           state.token = action.payload.token;
           state.isAuthenticated = true;
+        } else {
+          // No payload means no valid token, clear auth state
+          state.user = null;
+          state.token = null;
+          state.isAuthenticated = false;
         }
       })
       .addCase(initializeAuth.rejected, (state) => {
         state.isLoading = false;
-        state.isAuthenticated = false;
+        // Don't clear state on rejection - might be network error
+        // Only clear if we explicitly got null from fulfilled
       });
 
     // Login
@@ -179,5 +249,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, clearError } = authSlice.actions;
+export const { setUser, clearError, setInitialState } = authSlice.actions;
 export default authSlice.reducer;

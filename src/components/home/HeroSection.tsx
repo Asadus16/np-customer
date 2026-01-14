@@ -1,100 +1,127 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, MapPin } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, MapPin, Calendar, Smartphone } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function HeroSection() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
+  const [date, setDate] = useState('');
+  const [count, setCount] = useState(0);
+  const targetCount = 427212;
+
+  useEffect(() => {
+    const duration = 2000; // 2 seconds
+    const steps = 60;
+    const increment = targetCount / steps;
+    const stepDuration = duration / steps;
+
+    let currentStep = 0;
+    const timer = setInterval(() => {
+      currentStep++;
+      const newCount = Math.min(Math.floor(increment * currentStep), targetCount);
+      setCount(newCount);
+      
+      if (currentStep >= steps) {
+        clearInterval(timer);
+        setCount(targetCount);
+      }
+    }, stepDuration);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
     if (searchQuery) params.set('q', searchQuery);
     if (location) params.set('location', location);
+    if (date) params.set('date', date);
     router.push(`/vendors?${params.toString()}`);
   };
 
   return (
-    <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+    <section className="relative bg-white overflow-hidden">
+      {/* Animated rotating gradient background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="animate-gradient-rotate" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
-        <div className="text-center max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-            Find the Perfect
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-              Service Provider
-            </span>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div className="text-center max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+            Book local selfcare services
           </h1>
-          <p className="mt-6 text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
-            Book trusted professionals for home cleaning, repairs, beauty services,
-            and more. Quality service at your doorstep.
+          <p className="mt-4 text-lg md:text-xl text-gray-700 max-w-3xl mx-auto">
+            Discover top-rated salons, barbers, medspas, wellness studios and beauty experts trusted by millions worldwide
           </p>
 
           {/* Search Form */}
-          <form onSubmit={handleSearch} className="mt-10">
-            <div className="bg-white rounded-full p-2 shadow-2xl flex flex-col md:flex-row items-center max-w-2xl mx-auto">
+      <form onSubmit={handleSearch} className="mt-10">
+            <div className="bg-white rounded-2xl border border-purple-200 flex flex-col md:flex-row items-center mx-auto rounded-4xl border-6">
               {/* Service Search */}
-              <div className="flex-1 flex items-center px-4 py-2 w-full md:w-auto">
-                <Search className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <div className="col-2 flex items-center px-4 py-3 w-full md:w-auto border-r-0 md:border-r border-gray-200">
+                <Search className="h-5 w-5 text-gray-900 flex-shrink-0" />
                 <input
                   type="text"
-                  placeholder="What service do you need?"
+                  placeholder="All treatments and venues"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="ml-3 flex-1 bg-transparent border-none outline-none text-gray-900 placeholder-gray-500 text-sm md:text-base"
+                  className="ml-3 flex-1 bg-transparent border-none outline-none text-gray-900 placeholder-gray-600 text-[15px]"
                 />
               </div>
 
-              {/* Divider */}
-              <div className="hidden md:block w-px h-8 bg-gray-200" />
-
               {/* Location */}
-              <div className="flex items-center px-4 py-2 w-full md:w-auto border-t md:border-t-0 border-gray-200">
-                <MapPin className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <div className="col-2 flex items-center px-4 py-3 w-full md:w-auto border-t md:border-t-0 border-r-0 md:border-r border-gray-200">
+                <MapPin className="h-5 w-5 text-gray-900 flex-shrink-0" />
                 <input
                   type="text"
-                  placeholder="Location"
+                  placeholder="Current location"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  className="ml-3 flex-1 bg-transparent border-none outline-none text-gray-900 placeholder-gray-500 text-sm md:text-base"
+                  className="ml-3 flex-1 bg-transparent border-none outline-none text-gray-900 placeholder-gray-600 text-[15px]"
+                />
+              </div>
+
+              {/* Date */}
+              <div className="col-2 flex items-center px-4 py-3 w-full md:w-auto border-t md:border-t-0 border-r-0 ">
+                <Calendar className="h-5 w-5 text-gray-900 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Any time"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="ml-3 flex-1 bg-transparent border-none outline-none text-gray-900 placeholder-gray-600 text-[15px]"
                 />
               </div>
 
               {/* Search Button */}
+              <div className="col-2 flex items-center py-1 w-full md:w-auto">
               <button
                 type="submit"
-                className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-full font-medium transition-colors flex items-center gap-2 w-full md:w-auto justify-center mt-2 md:mt-0"
+                className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2.5 rounded-full font-bold transition-colors flex items-center justify-center w-full md:w-auto mt-2 md:mt-0 mx-2 md:mx-2"
               >
-                <Search className="h-4 w-4" />
-                <span>Search</span>
+                Search
               </button>
+              </div>
             </div>
-          </form>
+          </form>    
 
-          {/* Popular Services */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <span className="text-gray-400 text-sm">Popular:</span>
-            {['Cleaning', 'Plumbing', 'Electrical', 'AC Repair', 'Beauty'].map((service) => (
-              <button
-                key={service}
-                onClick={() => {
-                  setSearchQuery(service);
-                  router.push(`/vendors?q=${service}`);
-                }}
-                className="px-4 py-1.5 bg-white/10 hover:bg-white/20 text-white text-sm rounded-full transition-colors"
-              >
-                {service}
-              </button>
-            ))}
+          {/* Appointment Count - dark pink/purple color */}
+          <div className="mt-6">
+            <p className="text-lg font-bold animate-fade-in">
+              {count.toLocaleString()} appointments booked today
+            </p>
+          </div>
+
+          {/* Get the app button - light gray */}
+          <div className="mt-6">
+            <button className="bg-gray-100 hover:bg-gray-200 text-gray-900 px-6 py-3 rounded-xl font-medium transition-colors flex items-center gap-2 mx-auto">
+              <Smartphone className="h-5 w-5" />
+              <span>Get the app</span>
+            </button>
           </div>
         </div>
       </div>
