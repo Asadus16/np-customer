@@ -87,19 +87,30 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
             ref={imageContainerRef}
             className="relative w-full h-full"
           >
-            {vendor.images.length > 0 ? (
-              <Image
-                src={vendor.images[currentImageIndex]}
-                alt={vendor.name}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-400 text-sm">No image</span>
-              </div>
-            )}
+            {(() => {
+              const imageSrc = vendor.images.length > 0 && vendor.images[currentImageIndex]
+                ? vendor.images[currentImageIndex]
+                : '/placeholder.jpg';
+              
+              // Validate URL - must be http/https URL or absolute path starting with /
+              const isValidUrl = imageSrc && (
+                imageSrc.startsWith('http://') || 
+                imageSrc.startsWith('https://') || 
+                imageSrc.startsWith('/')
+              );
+              
+              const finalSrc = isValidUrl ? imageSrc : '/placeholder.jpg';
+              
+              return (
+                <Image
+                  src={finalSrc}
+                  alt={vendor.name}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                />
+              );
+            })()}
           </div>
 
           {/* Navigation Arrows */}
@@ -145,35 +156,26 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
 
         {/* Content */}
         <div className="mt-3 space-y-1">
-          {/* Title and Rating */}
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="font-medium text-gray-900 text-sm line-clamp-1">
-              {vendor.name}
-            </h3>
-            {vendor.rating > 0 && (
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <Star className="h-3.5 w-3.5 fill-gray-900 text-gray-900" />
-                <span className="text-sm text-gray-900">{vendor.rating.toFixed(1)}</span>
-              </div>
-            )}
-          </div>
+          {/* Title */}
+          <h3 className="font-medium text-gray-900 text-sm line-clamp-1">
+            {vendor.name}
+          </h3>
+
+          {/* Rating */}
+          {vendor.rating > 0 && (
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm text-gray-900 font-medium">
+                {vendor.rating.toFixed(1)} ({vendor.reviewCount})
+              </span>
+            </div>
+          )}
 
           {/* Location */}
-          <div className="flex items-center gap-1 text-gray-500">
-            <MapPin className="h-3 w-3" />
-            <span className="text-xs">{vendor.location}</span>
-          </div>
+          <p className="text-xs text-gray-600">{vendor.location}</p>
 
           {/* Category */}
-          <p className="text-xs text-gray-500">{vendor.category}</p>
-
-          {/* Price */}
-          <p className="text-sm">
-            <span className="font-semibold text-gray-900">
-              AED {vendor.startingPrice}
-            </span>
-            <span className="text-gray-500 font-normal"> starting</span>
-          </p>
+          <p className="text-xs text-gray-600">{vendor.category}</p>
         </div>
       </article>
     </Link>

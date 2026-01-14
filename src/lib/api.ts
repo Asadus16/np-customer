@@ -38,11 +38,19 @@ api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized - clear auth and redirect
-      if (typeof window !== 'undefined') {
+      // Only redirect to login if this is not a public endpoint
+      // Public endpoints should not require authentication
+      const url = error.config?.url || '';
+      const isPublicEndpoint = url.includes('/public/');
+      
+      if (!isPublicEndpoint && typeof window !== 'undefined') {
+        // Clear auth and redirect only for protected endpoints
         localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
         localStorage.removeItem(STORAGE_KEYS.USER);
-        window.location.href = '/auth/login';
+        // Don't redirect if we're already on a public page
+        if (!window.location.pathname.startsWith('/auth/')) {
+          window.location.href = '/auth/login';
+        }
       }
     }
     return Promise.reject(error);
