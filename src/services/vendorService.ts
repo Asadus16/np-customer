@@ -99,3 +99,53 @@ export async function fetchVendors(params?: {
     meta: response.data.meta,
   };
 }
+
+/**
+ * Vendor detail API response
+ */
+export interface VendorDetailApiResponse {
+  id: string;
+  name: string;
+  description?: string;
+  logo: string;
+  category?: {
+    id: string;
+    name: string;
+  };
+  service_areas?: Array<{
+    id: string;
+    name: string;
+  }>;
+  services?: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    image?: string;
+    sub_services?: Array<{
+      id: string;
+      name: string;
+      price: number;
+      duration: number;
+      images?: string[];
+      description?: string;
+    }>;
+  }>;
+  rating: number;
+  reviews_count: number;
+  starting_price: number;
+  response_time?: string;
+  distance_km?: number;
+  is_favorite?: boolean;
+  latitude?: number;
+  longitude?: number;
+  landline?: string;
+  website?: string;
+}
+
+/**
+ * Fetch a single vendor by ID (public endpoint, no auth required)
+ */
+export async function fetchVendorById(vendorId: string): Promise<VendorDetailApiResponse> {
+  const response = await api.get<ApiResponse<VendorDetailApiResponse>>(`/public/vendors/${vendorId}`);
+  return response.data.data;
+}
