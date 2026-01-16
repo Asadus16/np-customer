@@ -65,6 +65,16 @@ const staticRecommendedVendors: VendorCardData[] = [
     isVerified: true,
   },
 ];
+// Static Demo Vendor for showcase
+const DEMO_VENDOR = {
+  id: 'demo-vendor-001',
+  name: 'Glamour Beauty Salon & Spa',
+  image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=300&fit=crop',
+  rating: 4.8,
+  reviewCount: 1247,
+  location: 'Downtown Dubai',
+  category: 'Beauty & Wellness',
+};
 
 export default function HomePage() {
   // Fetch all vendors
