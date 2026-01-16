@@ -7,11 +7,9 @@ import {
   login as loginAction,
   register as registerAction,
   logout as logoutAction,
-  updateProfile as updateProfileAction,
   clearError,
 } from '@/store/slices/authSlice';
 import type { LoginCredentials, RegisterData } from '@/types';
-import type { UpdateProfileData } from '@/store/slices/authSlice';
 import { ROUTES } from '@/config';
 
 /**
@@ -51,14 +49,6 @@ export function useAuth() {
     router.push(ROUTES.LOGIN);
   }, [dispatch, router]);
 
-  const updateProfile = useCallback(
-    async (data: UpdateProfileData) => {
-      const result = await dispatch(updateProfileAction(data));
-      return updateProfileAction.fulfilled.match(result);
-    },
-    [dispatch]
-  );
-
   const clearAuthError = useCallback(() => {
     dispatch(clearError());
   }, [dispatch]);
@@ -71,7 +61,6 @@ export function useAuth() {
     login,
     register,
     logout,
-    updateProfile,
     clearError: clearAuthError,
   };
 }

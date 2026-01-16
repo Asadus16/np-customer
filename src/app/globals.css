@@ -154,3 +154,89 @@ body {
   border-radius: 50%;
   filter: blur(80px);
 }
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Service tabs scroll container */
+.service-tabs-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.service-tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Star rating */
+.star-filled {
+  fill: #facc15;
+  color: #facc15;
+}
+
+.star-empty {
+  fill: #e5e7eb;
+  color: #e5e7eb;
+}
+
+/* Fresha green color */
+.text-fresha-green {
+  color: #00a67e;
+}
+
+/* Button hover animation */
+.btn-hover-grow {
+  transition: transform 0.2s ease;
+}
+
+.btn-hover-grow:hover {
+  transform: scale(1.02);
+}
+
+/* Card shadow on hover */
+.card-hover-shadow {
+  transition: box-shadow 0.2s ease;
+}
+
+.card-hover-shadow:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Tab underline animation */
+@keyframes tabUnderline {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.tab-underline-animate::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: currentColor;
+  transform-origin: left;
+  animation: tabUnderline 0.2s ease forwards;
+}
+
+/* Map container aspect ratio */
+.map-container {
+  aspect-ratio: 2 / 1;
+}
+
+/* Review avatar colors */
+.avatar-purple { background-color: #8b5cf6; }
+.avatar-blue { background-color: #3b82f6; }
+.avatar-green { background-color: #22c55e; }
+.avatar-orange { background-color: #f97316; }
+.avatar-pink { background-color: #ec4899; }
+.avatar-teal { background-color: #14b8a6; }
+.avatar-red { background-color: #ef4444; }
+.avatar-gray { background-color: #6b7280; }

@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { Star, Heart, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { Star, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface VendorCardData {
   id: string;
   name: string;
-  logo: string;
+  logo: string | null;
+  initials?: string;
   images: string[];
   category: string;
   rating: number;
@@ -91,23 +91,22 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
               const imageSrc = vendor.images.length > 0 && vendor.images[currentImageIndex]
                 ? vendor.images[currentImageIndex]
                 : '/placeholder.jpg';
-              
+
               // Validate URL - must be http/https URL or absolute path starting with /
               const isValidUrl = imageSrc && (
-                imageSrc.startsWith('http://') || 
-                imageSrc.startsWith('https://') || 
+                imageSrc.startsWith('http://') ||
+                imageSrc.startsWith('https://') ||
                 imageSrc.startsWith('/')
               );
-              
+
               const finalSrc = isValidUrl ? imageSrc : '/placeholder.jpg';
-              
+
               return (
-                <Image
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   src={finalSrc}
                   alt={vendor.name}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               );
             })()}
