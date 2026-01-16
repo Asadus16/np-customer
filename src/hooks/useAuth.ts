@@ -21,10 +21,12 @@ export function useAuth() {
   const { user, isAuthenticated, isLoading, error } = useAppSelector((state) => state.auth);
 
   const login = useCallback(
-    async (credentials: LoginCredentials) => {
+    async (credentials: LoginCredentials, skipRedirect = false) => {
       const result = await dispatch(loginAction(credentials));
       if (loginAction.fulfilled.match(result)) {
-        router.push(ROUTES.HOME);
+        if (!skipRedirect) {
+          router.push(ROUTES.HOME);
+        }
         return true;
       }
       return false;
@@ -33,10 +35,12 @@ export function useAuth() {
   );
 
   const register = useCallback(
-    async (data: RegisterData) => {
+    async (data: RegisterData, skipRedirect = false) => {
       const result = await dispatch(registerAction(data));
       if (registerAction.fulfilled.match(result)) {
-        router.push(ROUTES.HOME);
+        if (!skipRedirect) {
+          router.push(ROUTES.HOME);
+        }
         return true;
       }
       return false;

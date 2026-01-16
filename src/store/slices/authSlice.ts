@@ -142,6 +142,41 @@ export const register = createAsyncThunk(
 );
 
 /**
+ * Update profile action
+ */
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (data: { first_name?: string; last_name?: string; email?: string; phone?: string }, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await api.put<{ user: User; message?: string }>('/customer/profile', data);
+      
+      const updatedUser = response.data.user;
+
+      if (!updatedUser) {
+        return rejectWithValue('Invalid response from server');
+      }
+
+      // Update localStorage
+      const userJson = localStorage.getItem(STORAGE_KEYS.USER);
+      if (userJson) {
+        const existingUser = JSON.parse(userJson) as User;
+        const mergedUser = { ...existingUser, ...updatedUser };
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(mergedUser));
+      }
+
+      // Update Redux state
+      dispatch(setUser(updatedUser));
+
+      return { user: updatedUser };
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      const errorMessage = err.response?.data?.message || 'Failed to update profile';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+/**
  * Logout action
  */
 export const logout = createAsyncThunk('auth/logout', async () => {
@@ -234,6 +269,22 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(register.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Update Profile
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.error = null;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });
