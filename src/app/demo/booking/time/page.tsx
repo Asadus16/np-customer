@@ -3,7 +3,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, X, ChevronLeft, ChevronRight, Calendar, Zap, Clock, Repeat, Star } from 'lucide-react';
-import { BookingBreadcrumb } from '@/components/booking';
+import { BookingBreadcrumb, LoginModal } from '@/components/booking';
+import { useAuth } from '@/hooks';
 
 type OrderType = 'now' | 'schedule' | 'recurring';
 type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly';
@@ -55,6 +56,7 @@ function formatDurationRange(min: number, max?: number): string {
 
 export default function DemoBookingTimePage() {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -62,6 +64,7 @@ export default function DemoBookingTimePage() {
   const [timeSlots] = useState(generateTimeSlots());
   const [weekStartDate, setWeekStartDate] = useState<Date>(() => new Date());
   const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
   const [orderType, setOrderType] = useState<OrderType | null>(null);
   const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>('weekly');
@@ -125,6 +128,12 @@ export default function DemoBookingTimePage() {
   const handleOrderTypeSelect = (type: OrderType) => {
     setOrderType(type);
     if (type === 'now') {
+      // Check if authenticated
+      if (!isAuthenticated) {
+        setShowLoginModal(true);
+        return;
+      }
+
       const now = new Date();
       if (typeof window !== 'undefined') {
         sessionStorage.setItem(`booking_${DEMO_VENDOR_ID}_date`, now.toISOString());
@@ -140,9 +149,30 @@ export default function DemoBookingTimePage() {
     if (orderType === 'schedule' && !selectedTime) return;
     if (orderType === 'recurring' && !selectedTime) return;
 
+    // Check if authenticated
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+
     if (typeof window !== 'undefined') {
       sessionStorage.setItem(`booking_${DEMO_VENDOR_ID}_date`, selectedDate.toISOString());
       sessionStorage.setItem(`booking_${DEMO_VENDOR_ID}_time`, selectedTime || '');
+      sessionStorage.setItem(`booking_${DEMO_VENDOR_ID}_order_type`, orderType || 'schedule');
+      if (orderType === 'recurring') {
+        sessionStorage.setItem(`booking_${DEMO_VENDOR_ID}_recurring_frequency`, recurringFrequency);
+      }
+    }
+    router.push(`/demo/booking/confirm`);
+  };
+
+  // Handle login success
+  const handleLoginSuccess = () => {
+    setShowLoginModal(false);
+    // After successful login, proceed to confirm page
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(`booking_${DEMO_VENDOR_ID}_date`, selectedDate.toISOString());
+      sessionStorage.setItem(`booking_${DEMO_VENDOR_ID}_time`, selectedTime || 'now');
       sessionStorage.setItem(`booking_${DEMO_VENDOR_ID}_order_type`, orderType || 'schedule');
       if (orderType === 'recurring') {
         sessionStorage.setItem(`booking_${DEMO_VENDOR_ID}_recurring_frequency`, recurringFrequency);
@@ -375,33 +405,33 @@ export default function DemoBookingTimePage() {
                   </div>
 
                   {/* Week Days */}
-                  <div className="grid grid-cols-7 gap-2">
+                  <div className="flex gap-2">
                     {weekDates.map((date, index) => {
                       const isPast = isDateInPast(date);
                       const isSelected = isDateSelected(date);
                       const isTodayDate = isToday(date);
-                      const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                      const isSaturday = date.getDay() === 6;
 
                       return (
                         <button
                           key={index}
                           onClick={() => !isPast && setSelectedDate(date)}
                           disabled={isPast}
-                          className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl transition-all ${
+                          className={`flex flex-col items-center justify-center py-4 px-4 rounded-2xl transition-all min-w-[72px] ${
                             isPast
-                              ? 'opacity-40 cursor-not-allowed'
+                              ? 'opacity-40 cursor-not-allowed border border-gray-200'
                               : isSelected
-                              ? 'bg-[#6950f3] text-white'
-                              : isWeekend
-                              ? 'bg-gray-100 hover:bg-gray-200'
-                              : 'hover:bg-gray-100'
+                              ? 'bg-[#6950f3] text-white border-2 border-[#6950f3]'
+                              : isSaturday
+                              ? 'bg-white border-2 border-gray-300 hover:border-gray-400'
+                              : 'bg-white border border-gray-200 hover:border-gray-300'
                           }`}
                         >
                           <span className={`text-2xl font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
                             {date.getDate()}
                           </span>
-                          <span className={`text-xs font-medium ${
-                            isSelected ? 'text-white/80' : isTodayDate ? 'text-[#6950f3]' : 'text-gray-500'
+                          <span className={`text-xs font-medium mt-1 ${
+                            isSelected ? 'text-white' : isTodayDate ? 'text-[#6950f3]' : 'text-gray-500'
                           }`}>
                             {isTodayDate ? 'Today' : getDayName(date)}
                           </span>
@@ -414,14 +444,14 @@ export default function DemoBookingTimePage() {
                 {/* Time Slots */}
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">Available times</h2>
-                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 max-h-[300px] overflow-y-auto">
+                  <div className="grid grid-cols-6 gap-2">
                     {timeSlots.map((slot) => (
                       <button
                         key={slot.time}
                         onClick={() => setSelectedTime(slot.time)}
-                        className={`py-3 px-2 rounded-lg text-sm font-medium transition-all ${
+                        className={`py-3 px-2 rounded-xl text-sm font-medium transition-all ${
                           selectedTime === slot.time
-                            ? 'bg-gray-200 text-gray-900'
+                            ? 'bg-gray-100 text-gray-900 border-2 border-[#6950f3]'
                             : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
                         }`}
                       >
@@ -445,7 +475,7 @@ export default function DemoBookingTimePage() {
 
           {/* Right Pane - Order Summary */}
           <div className="w-full lg:w-105 shrink-0">
-            <div className="lg:sticky lg:top-24 bg-white border border-gray-200 rounded-2xl overflow-hidden">
+            <div className="lg:sticky lg:top-24 bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col lg:h-[calc(100vh-140px)]">
               {/* Vendor Info */}
               <div className="p-6">
                 <div className="flex gap-4">
@@ -481,15 +511,15 @@ export default function DemoBookingTimePage() {
                 </div>
               </div>
 
-              {/* Selected Services */}
-              <div className="px-6 pb-6">
+              {/* Selected Services - Scrollable */}
+              <div className="px-6 pb-6 flex-1 overflow-y-auto">
                 <div className="space-y-4">
                   {selectedServices.map((service) => (
                     <div key={service.id} className="flex justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-gray-900 text-sm mb-0.5">{service.name}</p>
                         <p className="text-xs text-gray-500">
-                          {formatDurationRange(service.duration, service.durationMax)}
+                          {formatDurationRange(service.duration)}
                         </p>
                       </div>
                       <p className="font-semibold text-gray-900 text-sm shrink-0">AED {service.price}</p>
@@ -510,7 +540,7 @@ export default function DemoBookingTimePage() {
               </div>
 
               {/* Continue Button */}
-              <div className="p-6 pt-0">
+              <div className="p-6 pt-0 mt-auto">
                 <button
                   onClick={handleContinue}
                   disabled={!orderType || (orderType !== 'now' && !selectedTime)}
@@ -616,6 +646,13 @@ export default function DemoBookingTimePage() {
           </div>
         </div>
       )}
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={handleLoginSuccess}
+      />
     </div>
   );
 }
