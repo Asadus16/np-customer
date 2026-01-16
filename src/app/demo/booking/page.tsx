@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, X, Plus, Star, Check, ChevronLeft } from 'lucide-react';
-import { useVendor } from '@/hooks';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, X, Plus, Star, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { BookingBreadcrumb } from '@/components/booking';
-import { SubServiceApiResponse, ServiceApiResponse } from '@/services/vendorService';
 
 interface SelectedService {
   id: string;
@@ -20,9 +18,93 @@ interface SelectedService {
   discount?: number;
 }
 
-/**
- * Format duration range
- */
+interface SubService {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  duration: number;
+}
+
+interface ServiceCategory {
+  id: string;
+  name: string;
+  services: SubService[];
+}
+
+const DEMO_VENDOR_ID = 'demo-vendor-001';
+
+const DEMO_VENDOR = {
+  id: DEMO_VENDOR_ID,
+  name: 'Glamour Beauty Salon & Spa',
+  logo: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=200&h=200&fit=crop',
+  rating: 4.8,
+  reviews_count: 1247,
+  service_areas: [{ name: 'Downtown Dubai' }],
+};
+
+const DEMO_SERVICES: ServiceCategory[] = [
+  {
+    id: 'hair',
+    name: 'Hair Services',
+    services: [
+      { id: 'hair-1', name: "Women's Haircut & Styling", description: 'Professional haircut with wash and styling', price: 150, duration: 45 },
+      { id: 'hair-2', name: "Men's Haircut", description: 'Classic or modern men\'s haircut', price: 80, duration: 30 },
+      { id: 'hair-3', name: 'Hair Coloring - Full', description: 'Full head color with premium products', price: 350, duration: 120 },
+      { id: 'hair-4', name: 'Highlights / Balayage', description: 'Hand-painted highlights for natural look', price: 450, duration: 150 },
+      { id: 'hair-5', name: 'Keratin Treatment', description: 'Smoothing treatment for frizz-free hair', price: 600, duration: 180 },
+      { id: 'hair-6', name: 'Blow Dry & Styling', description: 'Professional blow dry and styling', price: 100, duration: 45 },
+    ],
+  },
+  {
+    id: 'nails',
+    name: 'Nail Services',
+    services: [
+      { id: 'nail-1', name: 'Classic Manicure', description: 'Nail shaping, cuticle care, and polish', price: 75, duration: 30 },
+      { id: 'nail-2', name: 'Gel Manicure', description: 'Long-lasting gel polish manicure', price: 120, duration: 45 },
+      { id: 'nail-3', name: 'Classic Pedicure', description: 'Relaxing pedicure with foot massage', price: 95, duration: 45 },
+      { id: 'nail-4', name: 'Gel Pedicure', description: 'Gel polish pedicure with extra care', price: 150, duration: 60 },
+      { id: 'nail-5', name: 'Nail Art (per nail)', description: 'Custom nail art designs', price: 15, duration: 10 },
+      { id: 'nail-6', name: 'Acrylic Nail Extensions', description: 'Full set of acrylic extensions', price: 250, duration: 90 },
+    ],
+  },
+  {
+    id: 'facial',
+    name: 'Facial Treatments',
+    services: [
+      { id: 'facial-1', name: 'Classic Facial', description: 'Deep cleansing and hydrating facial', price: 200, duration: 60 },
+      { id: 'facial-2', name: 'Deep Cleansing Facial', description: 'Intensive pore cleansing treatment', price: 280, duration: 75 },
+      { id: 'facial-3', name: 'Anti-Aging Facial', description: 'Advanced anti-wrinkle treatment', price: 350, duration: 90 },
+      { id: 'facial-4', name: 'Hydrating Facial', description: 'Moisture-boosting treatment', price: 250, duration: 60 },
+      { id: 'facial-5', name: 'LED Light Therapy', description: 'Skin rejuvenation with LED', price: 180, duration: 30 },
+    ],
+  },
+  {
+    id: 'spa',
+    name: 'Spa & Massage',
+    services: [
+      { id: 'spa-1', name: 'Swedish Massage (60 min)', description: 'Relaxing full body massage', price: 300, duration: 60 },
+      { id: 'spa-2', name: 'Deep Tissue Massage (60 min)', description: 'Therapeutic deep muscle massage', price: 350, duration: 60 },
+      { id: 'spa-3', name: 'Hot Stone Massage', description: 'Heated stone relaxation therapy', price: 400, duration: 75 },
+      { id: 'spa-4', name: 'Aromatherapy Massage', description: 'Essential oil massage therapy', price: 320, duration: 60 },
+      { id: 'spa-5', name: 'Full Body Scrub', description: 'Exfoliating body treatment', price: 250, duration: 45 },
+      { id: 'spa-6', name: 'Moroccan Bath', description: 'Traditional hammam experience', price: 450, duration: 90 },
+    ],
+  },
+  {
+    id: 'waxing',
+    name: 'Waxing & Hair Removal',
+    services: [
+      { id: 'wax-1', name: 'Full Leg Wax', description: 'Complete leg hair removal', price: 150, duration: 30 },
+      { id: 'wax-2', name: 'Full Arm Wax', description: 'Complete arm hair removal', price: 100, duration: 20 },
+      { id: 'wax-3', name: 'Underarm Wax', description: 'Quick underarm waxing', price: 50, duration: 15 },
+      { id: 'wax-4', name: 'Brazilian Wax', description: 'Professional bikini waxing', price: 180, duration: 30 },
+      { id: 'wax-5', name: 'Full Body Wax', description: 'Complete body hair removal', price: 450, duration: 90 },
+      { id: 'wax-6', name: 'Eyebrow Threading', description: 'Precise eyebrow shaping', price: 35, duration: 10 },
+    ],
+  },
+];
+
 function formatDurationRange(min: number, max?: number): string {
   const formatSingle = (mins: number): string => {
     if (mins < 60) return `${mins} mins`;
@@ -36,50 +118,34 @@ function formatDurationRange(min: number, max?: number): string {
   return `${formatSingle(min)} - ${formatSingle(max)}`;
 }
 
-/**
- * Get all sub-services from a service category
- */
-function getAllSubServices(service: ServiceApiResponse): SubServiceApiResponse[] {
-  return service.sub_services || [];
-}
-
-export default function BookingServicesPage() {
-  const params = useParams();
+export default function DemoBookingServicesPage() {
   const router = useRouter();
-  const vendorId = params.vendorId as string;
   const tabsContainerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isScrollingToSection = useRef(false);
 
-  const { vendor, isLoading, error } = useVendor(vendorId);
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [selectedServices, setSelectedServices] = useState<SelectedService[]>([]);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Get all service categories with "Most Popular" first
+  // Service categories with "Most Popular" first
   const serviceCategories = useMemo(() => {
-    if (!vendor?.services) return [];
     return [
-      { id: 'most-popular', name: 'Most Popular', service: null },
-      ...vendor.services.map(service => ({
-        id: service.id,
-        name: service.name,
-        service,
-      })),
+      { id: 'most-popular', name: 'Most Popular', services: [] as SubService[] },
+      ...DEMO_SERVICES,
     ];
-  }, [vendor]);
+  }, []);
 
-  // Get most popular services (top 10 from all categories)
+  // Get most popular services
   const mostPopularServices = useMemo(() => {
-    if (!vendor?.services) return [];
-    const allServices: SubServiceApiResponse[] = [];
-    vendor.services.forEach(service => {
-      allServices.push(...getAllSubServices(service));
+    const allServices: SubService[] = [];
+    DEMO_SERVICES.forEach(category => {
+      allServices.push(...category.services.slice(0, 2));
     });
-    return allServices.slice(0, 10);
-  }, [vendor]);
+    return allServices.slice(0, 8);
+  }, []);
 
   // Set initial category
   useEffect(() => {
@@ -88,15 +154,14 @@ export default function BookingServicesPage() {
     }
   }, [serviceCategories, activeCategory]);
 
-  // Load pre-selected services from session storage (when coming from vendor details page)
+  // Load pre-selected services from session storage
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedServices = sessionStorage.getItem(`booking_${vendorId}_services`);
+      const storedServices = sessionStorage.getItem(`booking_${DEMO_VENDOR_ID}_services`);
       if (storedServices) {
         try {
           const parsed = JSON.parse(storedServices);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            // Ensure all numeric fields are actually numbers
             const normalizedServices = parsed.map((s: any) => ({
               ...s,
               price: typeof s.price === 'number' ? s.price : parseFloat(String(s.price || 0)) || 0,
@@ -110,7 +175,7 @@ export default function BookingServicesPage() {
         }
       }
     }
-  }, [vendorId]);
+  }, []);
 
   // Track scroll position for header styling
   useEffect(() => {
@@ -145,43 +210,6 @@ export default function BookingServicesPage() {
     };
   }, [serviceCategories]);
 
-  // Scroll spy: observe sections and update active category
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (isScrollingToSection.current) return;
-
-        // Find the section that is most visible
-        let maxRatio = 0;
-        let visibleCategoryId = activeCategory;
-
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
-            maxRatio = entry.intersectionRatio;
-            visibleCategoryId = entry.target.getAttribute('data-category-id') || '';
-          }
-        });
-
-        if (visibleCategoryId && visibleCategoryId !== activeCategory) {
-          setActiveCategory(visibleCategoryId);
-          // Scroll the tab into view
-          scrollTabIntoView(visibleCategoryId);
-        }
-      },
-      {
-        rootMargin: '-100px 0px -60% 0px',
-        threshold: [0, 0.25, 0.5, 0.75, 1],
-      }
-    );
-
-    // Observe all section refs
-    sectionRefs.current.forEach((element) => {
-      observer.observe(element);
-    });
-
-    return () => observer.disconnect();
-  }, [activeCategory, serviceCategories]);
-
   // Scroll the active tab into view
   const scrollTabIntoView = (categoryId: string) => {
     const container = tabsContainerRef.current;
@@ -208,10 +236,11 @@ export default function BookingServicesPage() {
   // Handle tab click - scroll to section
   const handleTabClick = useCallback((categoryId: string) => {
     setActiveCategory(categoryId);
+    scrollTabIntoView(categoryId);
     const section = sectionRefs.current.get(categoryId);
     if (section) {
       isScrollingToSection.current = true;
-      const headerOffset = 180; // Account for sticky header and tabs
+      const headerOffset = 180;
       const elementPosition = section.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -220,7 +249,6 @@ export default function BookingServicesPage() {
         behavior: 'smooth',
       });
 
-      // Reset the flag after scrolling completes
       setTimeout(() => {
         isScrollingToSection.current = false;
       }, 1000);
@@ -237,46 +265,34 @@ export default function BookingServicesPage() {
   }, []);
 
   // Calculate totals
-  const { subtotal, discount, total } = useMemo(() => {
-    let sub = 0;
-    let disc = 0;
+  const { total } = useMemo(() => {
     let tot = 0;
-
     selectedServices.forEach(service => {
-      sub += service.originalPrice;
-      disc += service.originalPrice - service.price;
       tot += service.price;
     });
-
-    return { subtotal: sub, discount: disc, total: tot };
+    return { total: tot };
   }, [selectedServices]);
 
   // Toggle service selection
-  const toggleService = (subService: SubServiceApiResponse, categoryName: string) => {
+  const toggleService = (subService: SubService, categoryName: string) => {
     setSelectedServices(prev => {
       const existingIndex = prev.findIndex(s => s.id === subService.id);
       if (existingIndex >= 0) {
         return prev.filter((_, index) => index !== existingIndex);
       } else {
-        const price = typeof subService.price === 'number'
-          ? subService.price
-          : parseFloat(String(subService.price || 0));
-        const duration = typeof subService.duration === 'number'
-          ? subService.duration
-          : parseInt(String(subService.duration || 0), 10);
-
-        // Calculate discount (assume 10-15% off)
-        const discountPercent = Math.floor(Math.random() * 6) + 10; // 10-15%
+        const price = subService.price;
+        const duration = subService.duration;
+        const discountPercent = Math.floor(Math.random() * 6) + 10;
         const originalPrice = Math.round(price / (1 - discountPercent / 100));
 
         return [...prev, {
           id: subService.id,
           name: subService.name,
-          price: isNaN(price) ? 0 : price,
+          price: price,
           originalPrice: originalPrice,
-          duration: isNaN(duration) ? 0 : duration,
-          durationMax: subService.duration ? duration + 15 : undefined,
-          serviceCount: 2, // Placeholder
+          duration: duration,
+          durationMax: duration + 15,
+          serviceCount: 2,
           gender: 'Male only',
           category: categoryName,
           discount: discountPercent,
@@ -290,61 +306,24 @@ export default function BookingServicesPage() {
     return selectedServices.some(s => s.id === serviceId);
   };
 
-  // Get location string
-  const location = useMemo(() => {
-    if (!vendor?.service_areas || vendor.service_areas.length === 0) {
-      return 'Location not available';
-    }
-    return vendor.service_areas[0].name;
-  }, [vendor]);
-
   // Handle continue
   const handleContinue = () => {
     if (selectedServices.length === 0) return;
     if (typeof window !== 'undefined') {
-      sessionStorage.setItem(`booking_${vendorId}_services`, JSON.stringify(selectedServices));
+      sessionStorage.setItem(`booking_${DEMO_VENDOR_ID}_services`, JSON.stringify(selectedServices));
     }
-    router.push(`/booking/${vendorId}/time`);
+    router.push(`/demo/booking/time`);
   };
 
   // Handle back
   const handleBack = () => {
-    router.back();
+    router.push('/demo/vendor');
   };
 
   // Handle close
   const handleClose = () => {
-    router.push(`/vendor/${vendorId}`);
+    router.push('/demo/vendor');
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading services...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !vendor) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <p className="text-gray-600 mb-6">
-            {error?.message || 'Failed to load vendor information.'}
-          </p>
-          <button
-            onClick={handleBack}
-            className="px-6 py-3 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -388,51 +367,47 @@ export default function BookingServicesPage() {
             <h1 className="text-4xl font-bold text-gray-900 mb-8">Services</h1>
 
             {/* Category Tabs - Sticky */}
-            {serviceCategories.length > 0 && (
-              <div className="sticky top-21 bg-white z-10 py-4 -mx-6 px-6 lg:mx-0 lg:px-0 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]">
-                <div className="relative">
-                  {/* Left Arrow */}
-                  {showLeftArrow && (
-                    <button
-                      onClick={() => scrollTabs('left')}
-                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-white rounded-full shadow border border-gray-200 flex items-center justify-center hover:bg-gray-50"
-                    >
-                      <ChevronLeft className="h-4 w-4 text-gray-600" />
-                    </button>
-                  )}
-
-                  <div
-                    ref={tabsContainerRef}
-                    className="flex gap-2 overflow-x-auto hide-scrollbar px-1"
+            <div className="sticky top-21 bg-white z-10 py-4 -mx-6 px-6 lg:mx-0 lg:px-0 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]">
+              <div className="relative">
+                {showLeftArrow && (
+                  <button
+                    onClick={() => scrollTabs('left')}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-white rounded-full shadow border border-gray-200 flex items-center justify-center hover:bg-gray-50"
                   >
-                    {serviceCategories.map((category) => (
-                      <button
-                        key={category.id}
-                        data-tab-id={category.id}
-                        onClick={() => handleTabClick(category.id)}
-                        className={`px-5 py-2.5 rounded-full font-medium whitespace-nowrap transition-colors text-sm ${
-                          activeCategory === category.id
-                            ? 'bg-gray-900 text-white'
-                            : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-                        }`}
-                      >
-                        {category.name}
-                      </button>
-                    ))}
-                  </div>
+                    <ChevronLeft className="h-4 w-4 text-gray-600" />
+                  </button>
+                )}
 
-                  {/* Right Arrow */}
-                  {showRightArrow && (
+                <div
+                  ref={tabsContainerRef}
+                  className="flex gap-2 overflow-x-auto hide-scrollbar px-1"
+                >
+                  {serviceCategories.map((category) => (
                     <button
-                      onClick={() => scrollTabs('right')}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-white rounded-full shadow border border-gray-200 flex items-center justify-center hover:bg-gray-50"
+                      key={category.id}
+                      data-tab-id={category.id}
+                      onClick={() => handleTabClick(category.id)}
+                      className={`px-5 py-2.5 rounded-full font-medium whitespace-nowrap transition-colors text-sm ${
+                        activeCategory === category.id
+                          ? 'bg-gray-900 text-white'
+                          : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                      }`}
                     >
-                      <ChevronRight className="h-4 w-4 text-gray-600" />
+                      {category.name}
                     </button>
-                  )}
+                  ))}
                 </div>
+
+                {showRightArrow && (
+                  <button
+                    onClick={() => scrollTabs('right')}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-white rounded-full shadow border border-gray-200 flex items-center justify-center hover:bg-gray-50"
+                  >
+                    <ChevronRight className="h-4 w-4 text-gray-600" />
+                  </button>
+                )}
               </div>
-            )}
+            </div>
 
             {/* All Category Sections */}
             <div className="space-y-10 mt-6">
@@ -445,17 +420,70 @@ export default function BookingServicesPage() {
                 <p className="text-gray-600 mb-6">
                   Discover the top-rated services customers love, all conveniently grouped for easy selection.
                 </p>
-                {mostPopularServices.length > 0 ? (
-                  <div className="space-y-4">
-                    {mostPopularServices.map((subService) => {
-                      const isSelected = isServiceSelected(subService.id);
-                      const price = typeof subService.price === 'number'
-                        ? subService.price
-                        : parseFloat(String(subService.price || 0));
-                      const duration = typeof subService.duration === 'number'
-                        ? subService.duration
-                        : parseInt(String(subService.duration || 0), 10);
+                <div className="space-y-4">
+                  {mostPopularServices.map((subService) => {
+                    const isSelected = isServiceSelected(subService.id);
+                    return (
+                      <div
+                        key={subService.id}
+                        className={`bg-white rounded-xl p-5 transition-all cursor-pointer border-2 ${
+                          isSelected
+                            ? 'border-indigo-500 shadow-sm'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        onClick={() => toggleService(subService, 'Most Popular')}
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-900 mb-1">{subService.name}</h3>
+                            <p className="text-sm text-gray-500 mb-2">
+                              {formatDurationRange(subService.duration, subService.duration + 15)} • 2 services • Male only
+                            </p>
+                            {subService.description && (
+                              <p className="text-sm text-gray-500 mb-3 line-clamp-1">
+                                {subService.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-gray-900">AED {subService.price.toFixed(0)}</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleService(subService, 'Most Popular');
+                            }}
+                            className={`shrink-0 h-10 w-10 flex items-center justify-center rounded-full transition-all ${
+                              isSelected
+                                ? 'bg-indigo-500 text-white'
+                                : 'bg-white border-2 border-gray-300 text-gray-600 hover:border-gray-400'
+                            }`}
+                            aria-label={isSelected ? 'Remove service' : 'Add service'}
+                          >
+                            {isSelected ? (
+                              <Check className="h-5 w-5" />
+                            ) : (
+                              <Plus className="h-5 w-5" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
 
+              {/* Individual Category Sections */}
+              {DEMO_SERVICES.map((category) => (
+                <div
+                  key={category.id}
+                  ref={(el) => setSectionRef(category.id, el)}
+                  data-category-id={category.id}
+                >
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">{category.name}</h2>
+                  <div className="space-y-4">
+                    {category.services.map((subService) => {
+                      const isSelected = isServiceSelected(subService.id);
                       return (
                         <div
                           key={subService.id}
@@ -464,13 +492,13 @@ export default function BookingServicesPage() {
                               ? 'border-indigo-500 shadow-sm'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
-                          onClick={() => toggleService(subService, 'Most Popular')}
+                          onClick={() => toggleService(subService, category.name)}
                         >
                           <div className="flex items-center justify-between gap-4">
                             <div className="flex-1 min-w-0">
                               <h3 className="font-semibold text-gray-900 mb-1">{subService.name}</h3>
                               <p className="text-sm text-gray-500 mb-2">
-                                {formatDurationRange(duration, duration + 15)} • 2 services • Male only
+                                {formatDurationRange(subService.duration, subService.duration + 15)} • 2 services • Male only
                               </p>
                               {subService.description && (
                                 <p className="text-sm text-gray-500 mb-3 line-clamp-1">
@@ -478,13 +506,13 @@ export default function BookingServicesPage() {
                                 </p>
                               )}
                               <div className="flex items-center gap-2">
-                                <span className="font-semibold text-gray-900">AED {price.toFixed(0)}</span>
+                                <span className="font-semibold text-gray-900">AED {subService.price.toFixed(0)}</span>
                               </div>
                             </div>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                toggleService(subService, 'Most Popular');
+                                toggleService(subService, category.name);
                               }}
                               className={`shrink-0 h-10 w-10 flex items-center justify-center rounded-full transition-all ${
                                 isSelected
@@ -504,86 +532,8 @@ export default function BookingServicesPage() {
                       );
                     })}
                   </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">No popular services available.</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Individual Category Sections */}
-              {vendor?.services?.map((service) => {
-                const subServices = getAllSubServices(service);
-                if (subServices.length === 0) return null;
-
-                return (
-                  <div
-                    key={service.id}
-                    ref={(el) => setSectionRef(service.id, el)}
-                    data-category-id={service.id}
-                  >
-                    <h2 className="text-xl font-bold text-gray-900 mb-6">{service.name}</h2>
-                    <div className="space-y-4">
-                      {subServices.map((subService) => {
-                        const isSelected = isServiceSelected(subService.id);
-                        const price = typeof subService.price === 'number'
-                          ? subService.price
-                          : parseFloat(String(subService.price || 0));
-                        const duration = typeof subService.duration === 'number'
-                          ? subService.duration
-                          : parseInt(String(subService.duration || 0), 10);
-
-                        return (
-                          <div
-                            key={subService.id}
-                            className={`bg-white rounded-xl p-5 transition-all cursor-pointer border-2 ${
-                              isSelected
-                                ? 'border-indigo-500 shadow-sm'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                            onClick={() => toggleService(subService, service.name)}
-                          >
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-gray-900 mb-1">{subService.name}</h3>
-                                <p className="text-sm text-gray-500 mb-2">
-                                  {formatDurationRange(duration, duration + 15)} • 2 services • Male only
-                                </p>
-                                {subService.description && (
-                                  <p className="text-sm text-gray-500 mb-3 line-clamp-1">
-                                    {subService.description}
-                                  </p>
-                                )}
-                                <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-gray-900">AED {price.toFixed(0)}</span>
-                                </div>
-                              </div>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleService(subService, service.name);
-                                }}
-                                className={`shrink-0 h-10 w-10 flex items-center justify-center rounded-full transition-all ${
-                                  isSelected
-                                    ? 'bg-indigo-500 text-white'
-                                    : 'bg-white border-2 border-gray-300 text-gray-600 hover:border-gray-400'
-                                }`}
-                                aria-label={isSelected ? 'Remove service' : 'Add service'}
-                              >
-                                {isSelected ? (
-                                  <Check className="h-5 w-5" />
-                                ) : (
-                                  <Plus className="h-5 w-5" />
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           </div>
 
@@ -593,31 +543,23 @@ export default function BookingServicesPage() {
               {/* Vendor Info */}
               <div className="p-6">
                 <div className="flex gap-4">
-                  {vendor.logo ? (
-                    <img
-                      src={vendor.logo}
-                      alt={vendor.name}
-                      className="w-14 h-14 rounded-lg object-cover shrink-0"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-lg bg-gray-200 flex items-center justify-center shrink-0">
-                      <span className="text-gray-500 text-lg font-semibold">
-                        {vendor.name.charAt(0)}
-                      </span>
-                    </div>
-                  )}
+                  <img
+                    src={DEMO_VENDOR.logo}
+                    alt={DEMO_VENDOR.name}
+                    className="w-14 h-14 rounded-lg object-cover shrink-0"
+                  />
                   <div className="min-w-0">
-                    <h2 className="font-bold text-gray-900 mb-1 truncate">{vendor.name}</h2>
+                    <h2 className="font-bold text-gray-900 mb-1 truncate">{DEMO_VENDOR.name}</h2>
                     <div className="flex items-center gap-1 mb-1">
                       <span className="text-sm font-semibold text-gray-900">
-                        {vendor.rating?.toFixed(1) || '0.0'}
+                        {DEMO_VENDOR.rating.toFixed(1)}
                       </span>
                       <div className="flex items-center">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star
                             key={star}
                             className={`h-3.5 w-3.5 ${
-                              star <= Math.round(vendor.rating || 0)
+                              star <= Math.round(DEMO_VENDOR.rating)
                                 ? 'fill-yellow-400 text-yellow-400'
                                 : 'fill-gray-200 text-gray-200'
                             }`}
@@ -625,10 +567,10 @@ export default function BookingServicesPage() {
                         ))}
                       </div>
                       <span className="text-sm text-gray-500">
-                        ({(vendor.reviews_count || 0).toLocaleString()})
+                        ({DEMO_VENDOR.reviews_count.toLocaleString()})
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500 truncate">{location}</p>
+                    <p className="text-sm text-gray-500 truncate">{DEMO_VENDOR.service_areas[0].name}</p>
                   </div>
                 </div>
               </div>
@@ -674,7 +616,7 @@ export default function BookingServicesPage() {
                 </div>
               </div>
 
-              {/* Continue Button - Bottom */}
+              {/* Continue Button */}
               <div className="p-6 pt-0 mt-auto">
                 <button
                   onClick={handleContinue}

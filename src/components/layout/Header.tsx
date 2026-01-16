@@ -1,49 +1,74 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import Image from 'next/image';
+import { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, Search, MapPin, Calendar } from 'lucide-react';
+import { Menu, X, Search, Globe, ArrowRight } from 'lucide-react';
 import { ROUTES } from '@/config';
 import { useAuth } from '@/hooks';
 import { UserProfileDropdown } from './UserProfileDropdown';
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
+  const desktopMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isVendorPage = pathname?.startsWith('/vendor');
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const router = useRouter();
+
+  // Close desktop menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (desktopMenuRef.current && !desktopMenuRef.current.contains(event.target as Node)) {
+        setIsDesktopMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="bg-white sticky top-0 z-50">
       <div className="px-8 lg:px-12">
-        <div className="flex items-center h-16 gap-4">
+        <div className="flex items-center h-20 gap-6">
           {/* Logo */}
           <Link href={ROUTES.HOME} className="flex items-center shrink-0">
-            <span className="text-2xl font-bold text-gray-900 lowercase">fresha</span>
+            <Image
+              src="/logos/Logo.svg"
+              alt="No Problem"
+              width={220}
+              height={64}
+              className="h-16 w-auto"
+              priority
+            />
           </Link>
 
           {/* Search Bar - Desktop (only on vendor pages) */}
           {isVendorPage && (
             <div className="hidden md:flex flex-1 justify-center">
-              <div className="flex items-center border border-gray-200 rounded-full shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center border border-gray-200 rounded-full shadow-md hover:shadow-lg transition-shadow w-[700px]">
                 {/* All treatments */}
-                <button className="flex items-center gap-2 px-5 py-2.5 border-r border-gray-200 hover:bg-gray-50 rounded-l-full transition-colors">
+                <button className="flex-1 flex items-center justify-center gap-3 py-4 hover:bg-gray-50 rounded-l-full transition-colors">
                   <Search className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-gray-900">All treatments</span>
+                  <span className="text-[15px] font-medium leading-[15px] text-[rgb(20,20,20)]">All treatments</span>
                 </button>
+
+                {/* Divider */}
+                <div className="h-7 w-px bg-gray-200" />
 
                 {/* Location */}
-                <button className="flex items-center gap-2 px-5 py-2.5 border-r border-gray-200 hover:bg-gray-50 transition-colors">
-                  <MapPin className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-gray-500">Current location</span>
+                <button className="flex-1 flex items-center justify-center gap-3 py-4 hover:bg-gray-50 transition-colors">
+                  <span className="text-[15px] font-medium leading-[15px] text-gray-500">Current location</span>
                 </button>
 
+                {/* Divider */}
+                <div className="h-7 w-px bg-gray-200" />
+
                 {/* Time */}
-                <button className="flex items-center gap-2 px-5 py-2.5 hover:bg-gray-50 rounded-r-full transition-colors">
-                  <Calendar className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-gray-500">Any time</span>
+                <button className="flex-1 flex items-center justify-center gap-3 py-4 hover:bg-gray-50 rounded-r-full transition-colors">
+                  <span className="text-[15px] font-medium leading-[15px] text-gray-500">Any time</span>
                 </button>
               </div>
             </div>
@@ -57,18 +82,53 @@ export function Header() {
             {isAuthenticated ? (
               <UserProfileDropdown />
             ) : (
-              <>
-                <Link
-                  href={ROUTES.LOGIN}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+              <div className="relative" ref={desktopMenuRef}>
+                <button
+                  onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-full hover:shadow-md transition-all text-sm font-medium"
                 >
-                  Log in
-                </Link>
-                <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-full hover:shadow-md transition-all text-sm font-medium">
                   Menu
                   <Menu className="h-4 w-4" />
                 </button>
-              </>
+
+                {/* Desktop Dropdown Menu */}
+                {isDesktopMenuOpen && (
+                  <div
+                    className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl border border-gray-100 py-2 z-50"
+                    style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 12px 24px -8px rgba(0, 0, 0, 0.15)' }}
+                  >
+                    <div className="px-4 py-1.5">
+                      <p className="text-sm font-semibold text-gray-900">For customers</p>
+                    </div>
+                    <Link
+                      href={ROUTES.LOGIN}
+                      onClick={() => setIsDesktopMenuOpen(false)}
+                      className="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-50 transition-colors"
+                    >
+                      Log in or sign up
+                    </Link>
+                    <button className="w-full px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 transition-colors text-left">
+                      Download the app
+                    </button>
+                    <button className="w-full px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 transition-colors text-left">
+                      Help and support
+                    </button>
+                    <button className="w-full px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 transition-colors text-left flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      English
+                    </button>
+                    <div className="my-1.5 border-t border-gray-200 mx-4" />
+                    <Link
+                      href="#"
+                      onClick={() => setIsDesktopMenuOpen(false)}
+                      className="flex items-center justify-between px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 transition-colors"
+                    >
+                      For businesses
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                )}
+              </div>
             )}
           </nav>
 

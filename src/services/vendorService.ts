@@ -153,8 +153,11 @@ export interface VendorDetailApiResponse {
   is_favorite?: boolean;
   landline?: string;
   website?: string;
+  latitude?: number;
+  longitude?: number;
   services?: ServiceApiResponse[];
   company_hours?: CompanyHourApiResponse[];
+  reviews?: ReviewApiResponse[];
 }
 
 /**
@@ -163,4 +166,59 @@ export interface VendorDetailApiResponse {
 export async function fetchVendorById(vendorId: string): Promise<VendorDetailApiResponse> {
   const response = await api.get<ApiResponse<VendorDetailApiResponse>>(`/public/vendors/${vendorId}`);
   return response.data.data;
+}
+
+/**
+ * Review API response
+ */
+export interface ReviewApiResponse {
+  id: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  reviewer?: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface ReviewsListResponse {
+  data: ReviewApiResponse[];
+  meta?: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+}
+
+/**
+ * Fetch vendor reviews (public endpoint)
+ */
+export async function fetchVendorReviews(vendorId: string, params?: {
+  page?: number;
+  per_page?: number;
+}): Promise<ReviewsListResponse> {
+  const response = await api.get<ApiResponse<ReviewApiResponse[]>>(`/public/vendors/${vendorId}/reviews`, {
+    params,
+  });
+  return {
+    data: response.data.data || [],
+    meta: response.data.meta,
+  };
+}
+
+/**
+ * Fetch nearby vendors (same service areas)
+ */
+export async function fetchNearbyVendors(vendorId: string, params?: {
+  limit?: number;
+}): Promise<VendorsListResponse> {
+  const response = await api.get<ApiResponse<VendorApiResponse[]>>(`/public/vendors/${vendorId}/nearby`, {
+    params,
+  });
+  return {
+    data: response.data.data || [],
+    meta: response.data.meta,
+  };
 }

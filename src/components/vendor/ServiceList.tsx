@@ -47,7 +47,7 @@ export function ServiceList({ services, onBookService }: ServiceListProps) {
           key={service.id}
           className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
         >
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center justify-between gap-4">
             {/* Service Info */}
             <div className="flex-1 min-w-0">
               {/* Service Name */}
@@ -68,12 +68,11 @@ export function ServiceList({ services, onBookService }: ServiceListProps) {
 
               {/* Price & Discount */}
               <div className="flex items-center gap-2 mt-3">
-                <span className="text-base font-medium text-gray-900">
-                  {service.priceFrom && <span className="font-normal">from </span>}
+                <span className="text-sm font-medium text-gray-900">
                   SAR {service.price}
                 </span>
                 {service.discount && (
-                  <span className="text-green-600 font-medium text-sm">
+                  <span className="text-green-600 font-medium text-xs">
                     Save {service.discount}%
                   </span>
                 )}
