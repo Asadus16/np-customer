@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showPasswordStep, setShowPasswordStep] = useState(false);
   const [signUpData, setSignUpData] = useState({
     first_name: '',
     last_name: '',
@@ -26,10 +27,9 @@ export default function LoginPage() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
-    // Just move to password step - we'll determine signup vs login after password attempt
+    // Move to password step when email is submitted
     if (email) {
-      // Email is set, show password field
-      setIsSignUp(false);
+      setShowPasswordStep(true);
     }
   };
 
@@ -72,8 +72,6 @@ export default function LoginPage() {
     console.log(`Login with ${provider}`);
   };
 
-  const showPasswordStep = email.length > 0 || isSignUp;
-
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Login Form */}
@@ -93,7 +91,7 @@ export default function LoginPage() {
         <div className="flex-1 flex flex-col justify-center px-8 md:px-16 lg:px-24 max-w-2xl mx-auto w-full">
           <div className="w-full max-w-md">
             <h1 className="text-[24px] leading-[32px] font-semibold text-gray-900 mb-2">
-              Fresha for customers
+              No Problem for customers
             </h1>
             <p className="text-[15px] leading-[20px] font-normal text-gray-600 mb-8">
               Create an account or log in to book and manage your appointments.
@@ -181,10 +179,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => {
                       setIsSignUp(true);
-                      // If no email, set a placeholder so password step shows
-                      if (!email) {
-                        setEmail(' ');
-                      }
+                      setShowPasswordStep(true);
                     }}
                     className="text-[15px] leading-[20px] text-purple-600 hover:text-purple-700 font-medium"
                   >
@@ -230,6 +225,7 @@ export default function LoginPage() {
                           setEmail('');
                           setPassword('');
                           setIsSignUp(false);
+                          setShowPasswordStep(false);
                           clearError();
                         }}
                         className="mt-2 text-sm text-purple-600 hover:text-purple-700 font-medium"

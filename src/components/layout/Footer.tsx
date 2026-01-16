@@ -14,7 +14,7 @@ export function Footer() {
           {/* Brand & App Download */}
           <div className="col-span-2 md:col-span-1">
             <Link href={ROUTES.HOME} className="text-2xl font-bold text-gray-900 lowercase">
-              fresha
+              No Problem
             </Link>
 
             {/* App Download Button */}
@@ -33,10 +33,10 @@ export function Footer() {
             </button>
           </div>
 
-          {/* About Fresha */}
+          {/* About No Problem */}
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-4">
-              About Fresha
+              About No Problem
             </h3>
             <ul className="space-y-3">
               <li>

@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import Image from 'next/image';
+import { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, Search, MapPin, Calendar } from 'lucide-react';
+import { Menu, X, Search, Globe, ArrowRight } from 'lucide-react';
 import { ROUTES } from '@/config';
 import { useAuth } from '@/hooks';
 import { UserProfileDropdown } from './UserProfileDropdown';
@@ -14,8 +15,19 @@ export function Header() {
   const desktopMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isVendorPage = pathname?.startsWith('/vendor');
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const router = useRouter();
+
+  // Close desktop menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (desktopMenuRef.current && !desktopMenuRef.current.contains(event.target as Node)) {
+        setIsDesktopMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="bg-white sticky top-0 z-50">
@@ -70,18 +82,53 @@ export function Header() {
             {isAuthenticated ? (
               <UserProfileDropdown />
             ) : (
-              <>
-                <Link
-                  href={ROUTES.LOGIN}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+              <div className="relative" ref={desktopMenuRef}>
+                <button
+                  onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-full hover:shadow-md transition-all text-sm font-medium"
                 >
-                  Log in
-                </Link>
-                <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-full hover:shadow-md transition-all text-sm font-medium">
                   Menu
                   <Menu className="h-4 w-4" />
                 </button>
-              </>
+
+                {/* Desktop Dropdown Menu */}
+                {isDesktopMenuOpen && (
+                  <div
+                    className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl border border-gray-100 py-2 z-50"
+                    style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 12px 24px -8px rgba(0, 0, 0, 0.15)' }}
+                  >
+                    <div className="px-4 py-1.5">
+                      <p className="text-sm font-semibold text-gray-900">For customers</p>
+                    </div>
+                    <Link
+                      href={ROUTES.LOGIN}
+                      onClick={() => setIsDesktopMenuOpen(false)}
+                      className="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-50 transition-colors"
+                    >
+                      Log in or sign up
+                    </Link>
+                    <button className="w-full px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 transition-colors text-left">
+                      Download the app
+                    </button>
+                    <button className="w-full px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 transition-colors text-left">
+                      Help and support
+                    </button>
+                    <button className="w-full px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 transition-colors text-left flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      English
+                    </button>
+                    <div className="my-1.5 border-t border-gray-200 mx-4" />
+                    <Link
+                      href="#"
+                      onClick={() => setIsDesktopMenuOpen(false)}
+                      className="flex items-center justify-between px-4 py-2 text-sm text-gray-900 hover:bg-gray-50 transition-colors"
+                    >
+                      For businesses
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                )}
+              </div>
             )}
           </nav>
 

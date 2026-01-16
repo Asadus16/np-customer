@@ -401,7 +401,33 @@ export default function VendorDetailPage() {
 
   const handleBookService = (service: Service) => {
     if (vendor) {
-      router.push(`/booking?vendor=${vendor.id}&service=${service.id}`);
+      // Ensure price and duration are numbers
+      const price = typeof service.price === 'number'
+        ? service.price
+        : parseFloat(String(service.price || 0));
+      const duration = typeof service.duration === 'number'
+        ? service.duration
+        : parseInt(String(service.duration || 0), 10);
+
+      // Store the selected service in session storage
+      const selectedService = {
+        id: service.id,
+        name: service.name,
+        price: isNaN(price) ? 0 : price,
+        originalPrice: isNaN(price) ? 0 : price,
+        duration: isNaN(duration) ? 0 : duration,
+        category: activeCategory,
+      };
+
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(
+          `booking_${vendor.id}_services`,
+          JSON.stringify([selectedService])
+        );
+      }
+
+      // Navigate to the booking page
+      router.push(`/booking/${vendor.id}`);
     }
   };
 
