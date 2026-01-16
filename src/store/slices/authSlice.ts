@@ -142,45 +142,6 @@ export const register = createAsyncThunk(
 );
 
 /**
- * Update profile action
- */
-export interface UpdateProfileData {
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  phone?: string;
-  nationality?: string;
-  dob?: string;
-  emirates_id?: string;
-}
-
-export const updateProfile = createAsyncThunk(
-  'auth/updateProfile',
-  async (data: UpdateProfileData, { rejectWithValue }) => {
-    try {
-      const response = await api.put<{ data: User; message?: string }>('/customer/profile', data);
-      
-      const user = response.data.data;
-
-      if (!user) {
-        return rejectWithValue('Invalid response from server');
-      }
-
-      // Update user in localStorage
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-
-      return { user };
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } };
-      const errorMessage = err.response?.data?.message || 
-        (err.response?.data?.errors ? JSON.stringify(err.response.data.errors) : null) ||
-        'Failed to update profile';
-      return rejectWithValue(errorMessage);
-    }
-  }
-);
-
-/**
  * Logout action
  */
 export const logout = createAsyncThunk('auth/logout', async () => {
@@ -273,22 +234,6 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(register.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload as string;
-      });
-
-    // Update Profile
-    builder
-      .addCase(updateProfile.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(updateProfile.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload.user;
-        state.error = null;
-      })
-      .addCase(updateProfile.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

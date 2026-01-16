@@ -1,12 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { ChevronLeft, ChevronRight, X, Grid3X3, Share, Heart } from 'lucide-react';
 
 interface ImageGalleryProps {
   images: string[];
   vendorName: string;
+}
+
+/**
+ * Check if a URL is a local/private IP that Next.js Image blocks
+ */
+function isLocalUrl(url: string): boolean {
+  return url.includes('127.0.0.1') || url.includes('localhost:8000');
 }
 
 export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
@@ -28,9 +34,9 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
     if (e.key === 'ArrowRight') handleNext();
   };
 
-  // Show up to 5 images in the grid
-  const displayImages = images.slice(0, 5);
-  const hasMoreImages = images.length > 5;
+  // Show only 3 images in the grid (1 large + 2 small)
+  const displayImages = images.slice(0, 3);
+  const hasMoreImages = images.length > 3;
 
   if (images.length === 0) {
     return (
@@ -45,12 +51,11 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
       {/* Mobile Carousel */}
       <div className="md:hidden relative">
         <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={images[currentIndex]}
             alt={`${vendorName} - Image ${currentIndex + 1}`}
-            fill
-            className="object-cover"
-            priority
+            className="absolute inset-0 w-full h-full object-cover"
           />
 
           {/* Navigation */}
@@ -73,7 +78,7 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
 
           {/* Indicators */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {images.map((_, idx) => (
+            {images.slice(0, 5).map((_, idx) => (
               <span
                 key={idx}
                 className={`w-2 h-2 rounded-full transition-all ${
@@ -81,6 +86,9 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
                 }`}
               />
             ))}
+            {images.length > 5 && (
+              <span className="w-2 h-2 rounded-full bg-white/50" />
+            )}
           </div>
         </div>
 
@@ -102,63 +110,63 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
         </div>
       </div>
 
-      {/* Desktop Grid */}
+      {/* Desktop Grid - 3 images layout */}
       <div className="hidden md:block">
-        <div className="grid-areas rounded-xl overflow-hidden">
-          {displayImages.map((img, index) => (
-            <div
-              key={index}
-              className={`grid-area-image${index + 1} relative cursor-pointer group`}
-              onClick={() => {
-                setCurrentIndex(index);
-                setIsModalOpen(true);
-              }}
-            >
-              <Image
-                src={img}
-                alt={`${vendorName} - Image ${index + 1}`}
-                fill
-                className="object-cover transition-transform group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority={index === 0}
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-
-              {/* Show All Photos Button */}
-              {index === 4 && hasMoreImages && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsModalOpen(true);
-                  }}
-                  className="absolute bottom-4 right-4 bg-white px-4 py-2 rounded-lg shadow-md flex items-center gap-2 text-sm font-medium hover:scale-105 transition-transform"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                  Show all photos
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-4 mt-4">
-          <button className="flex items-center gap-2 text-sm font-medium hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors">
-            <Share className="h-4 w-4" />
-            Share
-          </button>
-          <button
-            onClick={() => setIsFavorite(!isFavorite)}
-            className="flex items-center gap-2 text-sm font-medium hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors"
+        <div className="grid grid-cols-[1fr_1fr] gap-2 rounded-xl overflow-hidden h-[450px]">
+          {/* Large image on left */}
+          <div
+            className="relative cursor-pointer group h-full overflow-hidden"
+            onClick={() => {
+              setCurrentIndex(0);
+              setIsModalOpen(true);
+            }}
           >
-            <Heart
-              className={`h-4 w-4 ${
-                isFavorite ? 'fill-red-500 text-red-500' : ''
-              }`}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={displayImages[0]}
+              alt={`${vendorName} - Image 1`}
+              className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
             />
-            Save
-          </button>
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+          </div>
+
+          {/* Two smaller images on right - stacked */}
+          <div className="flex flex-col gap-2 h-full">
+            {displayImages.slice(1, 3).map((img, index) => (
+              <div
+                key={index + 1}
+                className="relative cursor-pointer group flex-1 min-h-0 overflow-hidden"
+                onClick={() => {
+                  setCurrentIndex(index + 1);
+                  setIsModalOpen(true);
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={img}
+                  alt={`${vendorName} - Image ${index + 2}`}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+
+                {/* Show All Photos Button on last image */}
+                {index === 1 && hasMoreImages && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsModalOpen(true);
+                    }}
+                    className="absolute bottom-4 right-4 bg-white px-4 py-2 rounded-lg shadow-md flex items-center gap-2 text-sm font-medium hover:scale-105 transition-transform"
+                  >
+                    <Grid3X3 className="h-4 w-4" />
+                    See all images
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
+
       </div>
 
       {/* Full Screen Modal */}
@@ -189,12 +197,12 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
           </button>
 
           {/* Image */}
-          <div className="relative w-full h-full max-w-5xl max-h-[80vh] mx-4">
-            <Image
+          <div className="relative w-full h-full max-w-5xl max-h-[80vh] mx-4 flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={images[currentIndex]}
               alt={`${vendorName} - Image ${currentIndex + 1}`}
-              fill
-              className="object-contain"
+              className="max-w-full max-h-full object-contain"
             />
           </div>
 
@@ -211,15 +219,15 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}
-                className={`relative w-16 h-12 rounded overflow-hidden flex-shrink-0 ${
+                className={`relative w-16 h-12 rounded overflow-hidden shrink-0 ${
                   idx === currentIndex ? 'ring-2 ring-white' : 'opacity-60'
                 }`}
               >
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={img}
                   alt={`Thumbnail ${idx + 1}`}
-                  fill
-                  className="object-cover"
+                  className="w-full h-full object-cover"
                 />
               </button>
             ))}

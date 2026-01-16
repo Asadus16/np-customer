@@ -5,7 +5,8 @@ export interface VendorApiResponse {
   id: string;
   name: string;
   description?: string;
-  logo: string;
+  logo: string | null;
+  initials: string;
   category?: {
     id: string;
     name: string;
@@ -56,18 +57,17 @@ export function mapVendorToCardData(vendor: VendorApiResponse): VendorCardData {
   // Get category name
   const category = vendor.category?.name || 'Uncategorized';
 
-  // Handle logo - API returns initials, not a URL
-  // Use placeholder image since we don't have actual image URLs from API
-  const logo = isValidImageUrl(vendor.logo) ? vendor.logo : '/placeholder.jpg';
-  
-  // For images, use placeholder since API doesn't return actual image URLs
-  // The logo field contains initials (like "AB"), not image URLs
-  const images: string[] = ['/placeholder.jpg'];
+  // Handle logo - use actual logo URL if available, otherwise use initials
+  const logo = vendor.logo && isValidImageUrl(vendor.logo) ? vendor.logo : null;
+
+  // For images, use logo if available, otherwise use placeholder
+  const images: string[] = logo ? [logo] : ['/placeholder.jpg'];
 
   return {
     id: vendor.id,
     name: vendor.name,
     logo,
+    initials: vendor.initials,
     images,
     category,
     rating: vendor.rating || 0,
@@ -101,13 +101,44 @@ export async function fetchVendors(params?: {
 }
 
 /**
- * Vendor detail API response
+ * Vendor detail API response with services
  */
+export interface SubServiceApiResponse {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  duration: number;
+  images?: string[];
+}
+
+export interface ServiceApiResponse {
+  id: string;
+  name: string;
+  description?: string;
+  image?: string;
+  sub_services?: SubServiceApiResponse[];
+}
+
+export interface CompanyHourSlotApiResponse {
+  id: string;
+  start_time: string;
+  end_time: string;
+}
+
+export interface CompanyHourApiResponse {
+  id: string;
+  day: string;
+  is_available: boolean;
+  slots: CompanyHourSlotApiResponse[];
+}
+
 export interface VendorDetailApiResponse {
   id: string;
   name: string;
   description?: string;
-  logo: string;
+  logo: string | null;
+  initials: string;
   category?: {
     id: string;
     name: string;
@@ -116,34 +147,18 @@ export interface VendorDetailApiResponse {
     id: string;
     name: string;
   }>;
-  services?: Array<{
-    id: string;
-    name: string;
-    description?: string;
-    image?: string;
-    sub_services?: Array<{
-      id: string;
-      name: string;
-      price: number;
-      duration: number;
-      images?: string[];
-      description?: string;
-    }>;
-  }>;
   rating: number;
   reviews_count: number;
   starting_price: number;
-  response_time?: string;
-  distance_km?: number;
   is_favorite?: boolean;
-  latitude?: number;
-  longitude?: number;
   landline?: string;
   website?: string;
+  services?: ServiceApiResponse[];
+  company_hours?: CompanyHourApiResponse[];
 }
 
 /**
- * Fetch a single vendor by ID (public endpoint, no auth required)
+ * Fetch single vendor by ID (public endpoint)
  */
 export async function fetchVendorById(vendorId: string): Promise<VendorDetailApiResponse> {
   const response = await api.get<ApiResponse<VendorDetailApiResponse>>(`/public/vendors/${vendorId}`);
