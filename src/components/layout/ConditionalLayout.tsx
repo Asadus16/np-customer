@@ -11,7 +11,8 @@ export function ConditionalLayout({
   const pathname = usePathname();
   const isAuthPage = pathname?.startsWith('/auth') ?? false;
   const isBookingPage = pathname?.startsWith('/booking') ?? false;
-  const shouldShowLayout = !isAuthPage && !isBookingPage;
+  const isDemoBookingPage = pathname?.startsWith('/demo/booking') ?? false;
+  const shouldShowLayout = !isAuthPage && !isBookingPage && !isDemoBookingPage;
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -478,10 +478,10 @@ export default function BookingTimePage() {
                 </div>
               </div>
 
-              {/* Week Dates - Circular Buttons with slide animation */}
+              {/* Week Dates - Rectangular Buttons with slide animation */}
               <div className="overflow-hidden">
                 <div
-                  className={`flex justify-start gap-2 transition-all duration-200 ease-out ${
+                  className={`flex gap-2 transition-all duration-200 ease-out ${
                     slideDirection === 'left'
                       ? 'opacity-0 -translate-x-4'
                       : slideDirection === 'right'
@@ -493,26 +493,30 @@ export default function BookingTimePage() {
                     const isSelected = date.toDateString() === selectedDate.toDateString();
                     const isToday = date.toDateString() === new Date().toDateString();
                     const isPast = isDateInPast(date) && !isToday;
+                    const isSaturday = date.getDay() === 6;
 
                     return (
                       <button
                         key={date.toISOString()}
                         onClick={() => !isPast && handleDateSelect(date)}
                         disabled={isPast}
-                        className={`flex flex-col items-center justify-center w-11 h-11 rounded-full transition-all duration-200 shrink-0 ${
-                          isSelected
-                            ? 'text-white'
-                            : isPast
-                            ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                            : 'bg-white text-gray-900 hover:bg-gray-50 border border-gray-200'
+                        className={`flex flex-col items-center justify-center py-4 px-4 rounded-2xl transition-all min-w-[72px] ${
+                          isPast
+                            ? 'opacity-40 cursor-not-allowed border border-gray-200'
+                            : isSelected
+                            ? 'bg-[#6950f3] text-white border-2 border-[#6950f3]'
+                            : isSaturday
+                            ? 'bg-white border-2 border-gray-300 hover:border-gray-400'
+                            : 'bg-white border border-gray-200 hover:border-gray-300'
                         }`}
-                        style={isSelected ? { backgroundColor: '#6950f3' } : undefined}
                       >
-                        <span className={`text-sm font-semibold leading-none ${isSelected ? 'text-white' : ''}`}>
+                        <span className={`text-2xl font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
                           {date.getDate()}
                         </span>
-                        <span className={`text-[8px] leading-none mt-0.5 ${isSelected ? 'text-white/80' : 'text-gray-500'}`}>
-                          {getDayName(date)}
+                        <span className={`text-xs font-medium mt-1 ${
+                          isSelected ? 'text-white' : isToday ? 'text-[#6950f3]' : 'text-gray-500'
+                        }`}>
+                          {isToday ? 'Today' : getDayName(date)}
                         </span>
                       </button>
                     );
@@ -522,30 +526,31 @@ export default function BookingTimePage() {
             </div>
 
             {/* Available Time Slots */}
-            <div className="space-y-2">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Available times</h2>
               {timeSlots.length > 0 ? (
-                timeSlots.map((slot, index) => {
-                  const isSelected = selectedTime === slot.time;
+                <div className="grid grid-cols-6 gap-2">
+                  {timeSlots.map((slot, index) => {
+                    const isSelected = selectedTime === slot.time;
 
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => slot.available && setSelectedTime(slot.time)}
-                      className={`w-full text-left px-4 py-3.5 rounded-xl border-2 transition-all ${
-                        isSelected
-                          ? 'bg-white'
-                          : slot.available
-                          ? 'bg-white border-gray-200 hover:bg-gray-50'
-                          : 'bg-gray-50 border-gray-100 opacity-50 cursor-not-allowed'
-                      }`}
-                      style={isSelected ? { borderColor: '#6950f3' } : undefined}
-                    >
-                      <span className="text-[15px] font-medium text-gray-900">
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => slot.available && setSelectedTime(slot.time)}
+                        disabled={!slot.available}
+                        className={`py-3 px-2 rounded-xl text-sm font-medium transition-all ${
+                          isSelected
+                            ? 'bg-gray-100 text-gray-900 border-2 border-[#6950f3]'
+                            : slot.available
+                            ? 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
+                            : 'bg-gray-50 border border-gray-100 text-gray-300 cursor-not-allowed'
+                        }`}
+                      >
                         {formatTime(slot.time)}
-                      </span>
-                    </button>
-                  );
-                })
+                      </button>
+                    );
+                  })}
+                </div>
               ) : (
                 <div className="text-center py-12">
                   <p className="text-gray-500">No time slots available for this date.</p>
@@ -570,7 +575,7 @@ export default function BookingTimePage() {
 
           {/* Right Pane - Order Summary */}
           <BookingSidebar
-            vendor={vendor}
+            vendor={{ ...vendor, logo: vendor.logo ?? undefined }}
             selectedServices={selectedServices}
             total={total}
             onContinue={handleContinue}
