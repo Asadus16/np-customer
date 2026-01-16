@@ -38,26 +38,50 @@ const nextConfig: NextConfig = {
   // Proxy API requests to backend to avoid mixed content errors
   // This allows HTTPS frontend to communicate with HTTP backend
   async rewrites() {
-    // Get backend URL from environment variable
-    // Format: http://YOUR_AWS_IP:8000 or http://YOUR_AWS_IP:8000/api
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    // Priority: BACKEND_URL (server-only) > NEXT_PUBLIC_API_URL (can be used by both)
+    // Format: http://YOUR_AWS_IP:8000 (with or without /api - we'll handle it)
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
     
-    // Extract host and protocol
-    const urlMatch = backendUrl.match(/^(https?:\/\/)?([^\/]+)/);
-    if (!urlMatch) {
+    // If no backend URL is set, don't add rewrites (will cause errors)
+    if (!backendUrl) {
+      console.warn('⚠️  BACKEND_URL or NEXT_PUBLIC_API_URL not set. API rewrites disabled.');
       return [];
     }
     
-    const backendProtocol = urlMatch[1] ? urlMatch[1].replace('://', '') : 'http';
-    const backendHost = urlMatch[2];
+    // Parse the URL properly
+    let backendBase: string;
     
-    // Remove /api if it's already in the backend URL
-    const backendPath = backendUrl.includes('/api') ? '' : '/api';
+    try {
+      // If it's a full URL, extract base URL
+      if (backendUrl.startsWith('http://') || backendUrl.startsWith('https://')) {
+        const url = new URL(backendUrl);
+        // Remove trailing /api if present (we'll add it back in the destination)
+        let path = url.pathname;
+        if (path.endsWith('/api')) {
+          path = path.replace(/\/api\/?$/, '');
+        }
+        backendBase = `${url.protocol}//${url.host}${path}`;
+      } else {
+        // If it's just a host, assume http
+        backendBase = `http://${backendUrl}`;
+      }
+      
+      console.log(`✅ API Rewrite configured: /api/* -> ${backendBase}/api/*`);
+      console.log(`   Using: ${process.env.BACKEND_URL ? 'BACKEND_URL' : 'NEXT_PUBLIC_API_URL'}`);
+    } catch (error) {
+      console.error('❌ Error parsing backend URL:', error);
+      // Fallback if URL parsing fails
+      backendBase = backendUrl.replace(/\/api\/?$/, '');
+      if (!backendBase.startsWith('http://') && !backendBase.startsWith('https://')) {
+        backendBase = `http://${backendBase}`;
+      }
+    }
     
+    // Always add /api to the destination since frontend uses /api prefix
     return [
       {
         source: '/api/:path*',
-        destination: `${backendProtocol}://${backendHost}${backendPath}/:path*`,
+        destination: `${backendBase}/api/:path*`,
       },
     ];
   },
