@@ -27,11 +27,9 @@ export default function LoginPage() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
-    // Just move to password step - we'll determine signup vs login after password attempt
-    if (email.trim()) {
-      // Email is set, show password field
+    // Move to password step when email is submitted
+    if (email) {
       setShowPasswordStep(true);
-      setIsSignUp(false);
     }
   };
 
@@ -74,7 +72,6 @@ export default function LoginPage() {
     console.log(`Login with ${provider}`);
   };
 
-
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Login Form */}
@@ -94,7 +91,7 @@ export default function LoginPage() {
         <div className="flex-1 flex flex-col justify-center px-8 md:px-16 lg:px-24 max-w-2xl mx-auto w-full">
           <div className="w-full max-w-md">
             <h1 className="text-[24px] leading-[32px] font-semibold text-gray-900 mb-2">
-              Fresha for customers
+              No Problem for customers
             </h1>
             <p className="text-[15px] leading-[20px] font-normal text-gray-600 mb-8">
               Create an account or log in to book and manage your appointments.

@@ -1,6 +1,7 @@
 'use client';
 
-import { MapPin, Check } from 'lucide-react';
+import { BadgeCheck, CreditCard } from 'lucide-react';
+import { VendorMap } from './VendorMap';
 
 export interface OpeningHours {
   day: string;
@@ -13,7 +14,9 @@ interface AboutSectionProps {
   location: string;
   openingHours: OpeningHours[];
   additionalInfo?: string[];
-  mapUrl?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  vendorName?: string;
   onGetDirections?: () => void;
 }
 
@@ -21,8 +24,9 @@ export function AboutSection({
   description,
   location,
   openingHours,
-  additionalInfo = ['Instant Confirmation', 'Pay by app'],
-  mapUrl,
+  latitude,
+  longitude,
+  vendorName = 'Vendor',
   onGetDirections,
 }: AboutSectionProps) {
   return (
@@ -32,41 +36,22 @@ export function AboutSection({
       {/* Description */}
       <p className="text-gray-700 leading-relaxed">{description}</p>
 
-      {/* Map Placeholder */}
-      <div className="relative rounded-xl overflow-hidden bg-gray-100 aspect-[2/1]">
-        {mapUrl ? (
-          <iframe
-            src={mapUrl}
-            className="w-full h-full"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-200">
-            <div className="text-center">
-              <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500">Map view</p>
-            </div>
-          </div>
-        )}
-
-        {/* Map Pin Marker */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
-          <div className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center shadow-lg">
-            <div className="w-3 h-3 bg-white rounded-full" />
-          </div>
-          <div className="w-2 h-2 bg-gray-900 rotate-45 mx-auto -mt-1" />
-        </div>
+      {/* Map */}
+      <div className="rounded-xl overflow-hidden">
+        <VendorMap
+          latitude={latitude || 0}
+          longitude={longitude || 0}
+          vendorName={vendorName}
+          address={location}
+        />
       </div>
 
       {/* Location with Get Directions */}
-      <div className="flex items-center gap-2 text-gray-700">
-        <span>{location}</span>
+      <div className="flex flex-wrap items-center gap-2 text-gray-700 text-sm md:text-base">
+        <span className="break-words">{location}</span>
         <button
           onClick={onGetDirections}
-          className="text-green-600 font-medium hover:underline"
+          className="text-green-600 font-medium hover:underline whitespace-nowrap"
         >
           Get directions
         </button>
@@ -110,17 +95,19 @@ export function AboutSection({
         </div>
 
         {/* Additional Information */}
-        <div>
+        <div className="md:ml-auto">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Additional information
           </h3>
           <div className="space-y-3">
-            {additionalInfo.map((info, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <Check className="h-5 w-5 text-gray-600" />
-                <span className="text-gray-700">{info}</span>
-              </div>
-            ))}
+            <div className="flex items-center gap-3">
+              <BadgeCheck className="h-5 w-5 text-gray-600" />
+              <span className="text-gray-700">Instant Confirmation</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CreditCard className="h-5 w-5 text-gray-600" />
+              <span className="text-gray-700">Pay by app</span>
+            </div>
           </div>
         </div>
       </div>

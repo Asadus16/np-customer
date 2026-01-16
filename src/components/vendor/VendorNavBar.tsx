@@ -15,7 +15,6 @@ type NavSection = 'photos' | 'services' | 'team' | 'reviews' | 'about';
 const navItems: { id: NavSection; label: string }[] = [
   { id: 'photos', label: 'Photos' },
   { id: 'services', label: 'Services' },
-  { id: 'team', label: 'Team' },
   { id: 'reviews', label: 'Reviews' },
   { id: 'about', label: 'About' },
 ];
