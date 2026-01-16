@@ -175,16 +175,12 @@ export default function LoginPage() {
 
                 {/* Sign Up Link */}
                 <div className="mt-4 text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsSignUp(true);
-                      setShowPasswordStep(true);
-                    }}
+                  <Link
+                    href="/auth/register"
                     className="text-[15px] leading-[20px] text-purple-600 hover:text-purple-700 font-medium"
                   >
                     Don&apos;t have an account? Sign up
-                  </button>
+                  </Link>
                 </div>
               </>
             )}
@@ -340,16 +336,12 @@ export default function LoginPage() {
 
                 {!isSignUp && (
                   <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsSignUp(true);
-                        setShowPasswordStep(true);
-                      }}
+                    <Link
+                      href="/auth/register"
                       className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                     >
                       Don&apos;t have an account? Sign up
-                    </button>
+                    </Link>
                   </div>
                 )}
               </form>
