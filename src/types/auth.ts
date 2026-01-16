@@ -1,4 +1,12 @@
 /**
+ * User role type
+ */
+export interface UserRole {
+  id: number;
+  name: string;
+}
+
+/**
  * User type
  */
 export interface User {
@@ -9,6 +17,7 @@ export interface User {
   phone?: string;
   avatar?: string;
   email_verified_at?: string;
+  roles?: UserRole[];
   created_at: string;
   updated_at: string;
 }

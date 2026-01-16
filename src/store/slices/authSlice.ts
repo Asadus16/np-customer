@@ -49,8 +49,20 @@ export const initializeAuth = createAsyncThunk(
       // Verify token is still valid
       // The /auth/me endpoint returns { user: UserResource }
       const response = await api.get<{ user: User }>('/auth/me');
+      const user = response.data.user;
+      
+      // Check if user has customer role
+      const hasCustomerRole = user.roles?.some(role => role.name === 'customer') ?? false;
+      
+      if (!hasCustomerRole) {
+        // User doesn't have customer role, clear auth
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        return null;
+      }
+      
       return {
-        user: response.data.user,
+        user,
         token,
       };
     } catch (error: any) {
@@ -61,9 +73,18 @@ export const initializeAuth = createAsyncThunk(
         localStorage.removeItem(STORAGE_KEYS.USER);
         return null;
       }
-      // For other errors, return the existing localStorage data (already set above)
+      // For other errors, check if existing user has customer role
       try {
         const user = JSON.parse(userJson) as User;
+        const hasCustomerRole = user.roles?.some(role => role.name === 'customer') ?? false;
+        
+        if (!hasCustomerRole) {
+          // User doesn't have customer role, clear auth
+          localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.USER);
+          return null;
+        }
+        
         return {
           user,
           token,
@@ -90,6 +111,16 @@ export const login = createAsyncThunk(
 
       if (!user || !token) {
         return rejectWithValue('Invalid response from server');
+      }
+
+      // Check if user has customer role
+      const hasCustomerRole = user.roles?.some(role => role.name === 'customer') ?? false;
+      
+      if (!hasCustomerRole) {
+        // Clear any partial data
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        return rejectWithValue('Only customers can sign in to this application. Please use the appropriate portal for your account type.');
       }
 
       // Store in localStorage
