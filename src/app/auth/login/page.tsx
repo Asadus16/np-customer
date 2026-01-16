@@ -342,7 +342,10 @@ export default function LoginPage() {
                   <div className="text-center">
                     <button
                       type="button"
-                      onClick={() => setIsSignUp(true)}
+                      onClick={() => {
+                        setIsSignUp(true);
+                        setShowPasswordStep(true);
+                      }}
                       className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                     >
                       Don&apos;t have an account? Sign up
