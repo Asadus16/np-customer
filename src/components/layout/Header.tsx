@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
-import { useState, useRef, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import { Menu, X, Search, ArrowRight, Globe } from 'lucide-react';
+import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Menu, X, Search, MapPin, Calendar } from 'lucide-react';
 import { ROUTES } from '@/config';
+import { useAuth } from '@/hooks';
+import { UserProfileDropdown } from './UserProfileDropdown';
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -13,17 +14,8 @@ export function Header() {
   const desktopMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isVendorPage = pathname?.startsWith('/vendor');
-
-  // Close desktop menu when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (desktopMenuRef.current && !desktopMenuRef.current.contains(event.target as Node)) {
-        setIsDesktopMenuOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const { isAuthenticated, logout, user } = useAuth();
+  const router = useRouter();
 
   return (
     <header className="bg-white sticky top-0 z-50">
@@ -74,48 +66,22 @@ export function Header() {
           {!isVendorPage && <div className="flex-1" />}
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center shrink-0 relative" ref={desktopMenuRef}>
-            <button
-              onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
-              className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-full hover:shadow-md transition-all text-[15px] font-medium"
-            >
-              Menu
-              <Menu className="h-4 w-4" />
-            </button>
-
-            {/* Desktop Dropdown Menu */}
-            {isDesktopMenuOpen && (
-              <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 py-4 z-50" style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 12px 24px -8px rgba(0, 0, 0, 0.15)' }}>
-                <div className="px-5 py-2">
-                  <p className="text-base font-semibold text-gray-900">For customers</p>
-                </div>
+          <nav className="hidden md:flex items-center gap-3 shrink-0">
+            {isAuthenticated ? (
+              <UserProfileDropdown />
+            ) : (
+              <>
                 <Link
                   href={ROUTES.LOGIN}
-                  onClick={() => setIsDesktopMenuOpen(false)}
-                  className="block px-5 py-3 text-indigo-600 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                 >
-                  Log in or sign up
+                  Log in
                 </Link>
-                <button className="w-full px-5 py-3 text-gray-900 hover:bg-gray-50 transition-colors text-left">
-                  Download the app
+                <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-full hover:shadow-md transition-all text-sm font-medium">
+                  Menu
+                  <Menu className="h-4 w-4" />
                 </button>
-                <button className="w-full px-5 py-3 text-gray-900 hover:bg-gray-50 transition-colors text-left">
-                  Help and support
-                </button>
-                <button className="w-full px-5 py-3 text-gray-900 hover:bg-gray-50 transition-colors text-left flex items-center gap-3">
-                  <Globe className="h-5 w-5" />
-                  English
-                </button>
-                <div className="my-2 border-t border-gray-200 mx-5" />
-                <Link
-                  href="#"
-                  onClick={() => setIsDesktopMenuOpen(false)}
-                  className="flex items-center justify-between px-5 py-3 text-gray-900 hover:bg-gray-50 transition-colors"
-                >
-                  For businesses
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-              </div>
+              </>
             )}
           </nav>
 
@@ -142,14 +108,75 @@ export function Header() {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col">
-              <p className="px-4 py-2 text-sm font-semibold text-gray-900">For customers</p>
-              <Link
-                href={ROUTES.LOGIN}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-4 py-2 text-indigo-600 hover:bg-gray-100 rounded-lg"
-              >
-                Log in or sign up
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <p className="px-4 py-2 text-sm font-semibold text-gray-900">Account</p>
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    href="/appointments"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Appointments
+                  </Link>
+                  <Link
+                    href="/wallet"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Wallet
+                  </Link>
+                  <Link
+                    href="/favorites"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Favorites
+                  </Link>
+                  <Link
+                    href="/orders"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Product orders
+                  </Link>
+                  <Link
+                    href="/settings"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Settings
+                  </Link>
+                  <button
+                    onClick={async () => {
+                      await logout();
+                      setIsMobileMenuOpen(false);
+                      router.push(ROUTES.HOME);
+                    }}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Log out
+                  </button>
+                  <div className="my-2 border-t border-gray-200" />
+                </>
+              ) : (
+                <>
+                  <p className="px-4 py-2 text-sm font-semibold text-gray-900">For customers</p>
+                  <Link
+                    href={ROUTES.LOGIN}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-indigo-600 hover:bg-gray-100 rounded-lg"
+                  >
+                    Log in or sign up
+                  </Link>
+                </>
+              )}
               <button className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left">
                 Download the app
               </button>

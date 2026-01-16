@@ -406,10 +406,7 @@ export default function VendorDetailPage() {
   };
 
   const handleBookNow = () => {
-    const servicesSection = document.getElementById('services');
-    if (servicesSection) {
-      servicesSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    router.push(`/booking/${vendorId}`);
   };
 
   const handleGetDirections = () => {

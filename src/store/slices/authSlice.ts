@@ -146,15 +146,28 @@ export const register = createAsyncThunk(
  */
 export const updateProfile = createAsyncThunk(
   'auth/updateProfile',
-  async (data: Partial<User>, { rejectWithValue }) => {
+  async (data: { first_name?: string; last_name?: string; email?: string; phone?: string }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await api.put<{ user: User }>('/auth/profile', data);
-      const user = response.data.user;
+      const response = await api.put<{ user: User; message?: string }>('/customer/profile', data);
+      
+      const updatedUser = response.data.user;
+
+      if (!updatedUser) {
+        return rejectWithValue('Invalid response from server');
+      }
 
       // Update localStorage
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+      const userJson = localStorage.getItem(STORAGE_KEYS.USER);
+      if (userJson) {
+        const existingUser = JSON.parse(userJson) as User;
+        const mergedUser = { ...existingUser, ...updatedUser };
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(mergedUser));
+      }
 
-      return user;
+      // Update Redux state
+      dispatch(setUser(updatedUser));
+
+      return { user: updatedUser };
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       const errorMessage = err.response?.data?.message || 'Failed to update profile';
@@ -268,7 +281,7 @@ const authSlice = createSlice({
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload;
+        state.user = action.payload.user;
         state.error = null;
       })
       .addCase(updateProfile.rejected, (state, action) => {
