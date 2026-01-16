@@ -18,20 +18,16 @@ interface ReviewsSectionProps {
   totalReviews: number;
 }
 
-const avatarColors = [
-  'bg-purple-500',
-  'bg-blue-500',
-  'bg-green-500',
-  'bg-orange-500',
-  'bg-pink-500',
-  'bg-teal-500',
-];
+const MAX_DISPLAY_REVIEWS = 6;
 
 export function ReviewsSection({
   reviews,
   averageRating,
   totalReviews,
 }: ReviewsSectionProps) {
+  // Only show first 6 reviews
+  const displayedReviews = reviews.slice(0, MAX_DISPLAY_REVIEWS);
+
   return (
     <div className="space-y-6" id="reviews">
       {/* Header */}
@@ -56,7 +52,7 @@ export function ReviewsSection({
             <span className="text-lg font-semibold text-gray-900">
               {averageRating.toFixed(1)}
             </span>
-            <span className="text-sm text-green-600 font-medium">
+            <span className="text-sm text-indigo-600 font-medium">
               ({totalReviews.toLocaleString()})
             </span>
           </div>
@@ -64,43 +60,37 @@ export function ReviewsSection({
       </div>
 
       {/* Reviews Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {reviews.map((review, index) => (
-          <ReviewCard
-            key={review.id}
-            review={review}
-            avatarColor={review.avatarColor || avatarColors[index % avatarColors.length]}
-          />
-        ))}
-      </div>
+      {displayedReviews.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {displayedReviews.map((review) => (
+            <ReviewCard key={review.id} review={review} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No reviews yet. Be the first to leave a review!</p>
+        </div>
+      )}
 
-      {/* Show More Button */}
-      {totalReviews > reviews.length && (
-        <button className="text-gray-900 font-medium underline hover:no-underline">
-          Show all {totalReviews.toLocaleString()} reviews
+      {/* See All Button */}
+      {totalReviews > MAX_DISPLAY_REVIEWS && displayedReviews.length > 0 && (
+        <button className="px-6 py-2.5 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors">
+          See all
         </button>
       )}
     </div>
   );
 }
 
-function ReviewCard({
-  review,
-  avatarColor,
-}: {
-  review: Review;
-  avatarColor: string;
-}) {
+function ReviewCard({ review }: { review: Review }) {
   const initial = review.authorInitial || review.authorName.charAt(0).toUpperCase();
 
   return (
     <div className="space-y-3">
       {/* Author */}
       <div className="flex items-center gap-3">
-        {/* Avatar */}
-        <div
-          className={`h-10 w-10 rounded-full ${avatarColor} flex items-center justify-center text-white font-medium text-sm`}
-        >
+        {/* Avatar - consistent indigo color */}
+        <div className="h-14 w-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-xl">
           {initial}
         </div>
         <div>
@@ -127,7 +117,7 @@ function ReviewCard({
       <p className="text-gray-700 text-sm leading-relaxed">
         {review.text}
         {review.text.length > 150 && (
-          <button className="text-green-600 font-medium ml-1 hover:underline">
+          <button className="text-indigo-600 font-medium ml-1 hover:underline">
             Read more
           </button>
         )}

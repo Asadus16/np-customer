@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin, Check } from 'lucide-react';
+import { MapPin, BadgeCheck, CreditCard } from 'lucide-react';
 
 export interface OpeningHours {
   day: string;
@@ -32,33 +32,16 @@ export function AboutSection({
       {/* Description */}
       <p className="text-gray-700 leading-relaxed">{description}</p>
 
-      {/* Map Placeholder */}
-      <div className="relative rounded-xl overflow-hidden bg-gray-100 aspect-[2/1]">
-        {mapUrl ? (
-          <iframe
-            src={mapUrl}
-            className="w-full h-full"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-200">
-            <div className="text-center">
-              <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500">Map view</p>
-            </div>
-          </div>
-        )}
-
-        {/* Map Pin Marker */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
-          <div className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center shadow-lg">
-            <div className="w-3 h-3 bg-white rounded-full" />
-          </div>
-          <div className="w-2 h-2 bg-gray-900 rotate-45 mx-auto -mt-1" />
-        </div>
+      {/* Map */}
+      <div className="rounded-xl overflow-hidden bg-gray-100 aspect-[2/1]">
+        <iframe
+          src={mapUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d115459.99826706795!2d55.13714375!3d25.076022!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f43496ad9c645%3A0xbde66e5084295162!2sDubai%20-%20United%20Arab%20Emirates!5e0!3m2!1sen!2s!4v1705400000000!5m2!1sen!2s"}
+          className="w-full h-full"
+          style={{ border: 0 }}
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
       </div>
 
       {/* Location with Get Directions */}
@@ -110,17 +93,19 @@ export function AboutSection({
         </div>
 
         {/* Additional Information */}
-        <div>
+        <div className="md:ml-auto">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Additional information
           </h3>
           <div className="space-y-3">
-            {additionalInfo.map((info, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <Check className="h-5 w-5 text-gray-600" />
-                <span className="text-gray-700">{info}</span>
-              </div>
-            ))}
+            <div className="flex items-center gap-3">
+              <BadgeCheck className="h-5 w-5 text-gray-600" />
+              <span className="text-gray-700">Instant Confirmation</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CreditCard className="h-5 w-5 text-gray-600" />
+              <span className="text-gray-700">Pay by app</span>
+            </div>
           </div>
         </div>
       </div>

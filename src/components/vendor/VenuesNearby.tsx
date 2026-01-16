@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -62,11 +61,16 @@ export function VenuesNearby({ venues, title = 'Venues nearby' }: VenuesNearbyPr
     });
   };
 
-  if (venues.length === 0) return null;
-
   return (
     <div className="relative">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">{title}</h2>
+
+      {venues.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No other venues in this service area yet.</p>
+        </div>
+      ) : (
+        <>
 
       {/* Left Arrow */}
       {showLeftArrow && (
@@ -97,6 +101,8 @@ export function VenuesNearby({ venues, title = 'Venues nearby' }: VenuesNearbyPr
           <ChevronRight className="h-5 w-5 text-gray-600" />
         </button>
       )}
+        </>
+      )}
     </div>
   );
 }
@@ -109,12 +115,18 @@ function VenueCard({ venue }: { venue: NearbyVenue }) {
     >
       {/* Image */}
       <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 mb-3">
-        <Image
-          src={venue.image}
-          alt={venue.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+        {venue.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={venue.image}
+            alt={venue.name}
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
+            No image
+          </div>
+        )}
       </div>
 
       {/* Info */}

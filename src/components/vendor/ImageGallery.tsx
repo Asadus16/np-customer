@@ -111,11 +111,11 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
       </div>
 
       {/* Desktop Grid - 3 images layout */}
-      <div className="hidden md:block">
-        <div className="grid grid-cols-[1fr_1fr] gap-2 rounded-xl overflow-hidden h-[450px]">
+      <div className="hidden md:block h-125">
+        <div className="grid grid-cols-[7fr_3fr] gap-4 h-full">
           {/* Large image on left */}
           <div
-            className="relative cursor-pointer group h-full overflow-hidden"
+            className="relative cursor-pointer group h-full overflow-hidden rounded-2xl"
             onClick={() => {
               setCurrentIndex(0);
               setIsModalOpen(true);
@@ -127,15 +127,15 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
               alt={`${vendorName} - Image 1`}
               className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-2xl" />
           </div>
 
           {/* Two smaller images on right - stacked */}
-          <div className="flex flex-col gap-2 h-full">
+          <div className="flex flex-col gap-4 h-full">
             {displayImages.slice(1, 3).map((img, index) => (
               <div
                 key={index + 1}
-                className="relative cursor-pointer group flex-1 min-h-0 overflow-hidden"
+                className="relative cursor-pointer group flex-1 min-h-0 overflow-hidden rounded-2xl"
                 onClick={() => {
                   setCurrentIndex(index + 1);
                   setIsModalOpen(true);
@@ -147,7 +147,7 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
                   alt={`${vendorName} - Image ${index + 2}`}
                   className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-2xl" />
 
                 {/* Show All Photos Button on last image */}
                 {index === 1 && hasMoreImages && (
@@ -166,7 +166,6 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
             ))}
           </div>
         </div>
-
       </div>
 
       {/* Full Screen Modal */}

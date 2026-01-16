@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Star, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface OpeningHour {
@@ -43,40 +43,92 @@ export function FreshaSideCard({
   onGetDirections,
 }: FreshaSideCardProps) {
   const [isHoursExpanded, setIsHoursExpanded] = useState(false);
+  const [showHeader, setShowHeader] = useState(true);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer with hysteresis to prevent jitter
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+
+    const SHOW_THRESHOLD = 0.75; // Show when 75%+ visible
+    const HIDE_THRESHOLD = 0.60; // Hide when below 60% visible
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const ratio = entry.intersectionRatio;
+          // Use hysteresis: different thresholds for show/hide to prevent jitter
+          if (ratio >= SHOW_THRESHOLD) {
+            setShowHeader(true);
+          } else if (ratio < HIDE_THRESHOLD) {
+            setShowHeader(false);
+          }
+          // Between 60-75%: maintain current state (no change)
+        });
+      },
+      {
+        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 0.9, 1],
+        rootMargin: '0px',
+      }
+    );
+
+    observer.observe(card);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden">
+    <div ref={cardRef} className="bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden w-110">
       {/* Header Section */}
-      <div className="p-6 space-y-4">
-        {/* Vendor Name */}
-        <h2 className="text-2xl font-bold text-gray-900 leading-tight">{vendorName}</h2>
+      <div className="p-8 space-y-5">
+        {/* Vendor Name, Rating, Featured with shutter slider transition */}
+        <div
+          className="overflow-hidden transition-[grid-template-rows] duration-300 ease-out grid"
+          style={{
+            gridTemplateRows: showHeader ? '1fr' : '0fr',
+          }}
+        >
+          <div className="min-h-0 space-y-5">
+            {/* Vendor Name */}
+            <h2 className={`text-4xl font-bold text-gray-900 leading-tight transition-all duration-300 ${
+              showHeader ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+            }`}>{vendorName}</h2>
 
-        {/* Rating */}
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-bold text-gray-900">{rating.toFixed(1)}</span>
-          <div className="flex items-center">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star
-                key={star}
-                className={`h-5 w-5 ${
-                  star <= Math.round(rating)
-                    ? 'fill-yellow-400 text-yellow-400'
-                    : 'fill-gray-200 text-gray-200'
-                }`}
-              />
-            ))}
+            {/* Rating */}
+            <div className={`flex items-center gap-2 transition-all duration-300 ${
+              showHeader ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+            }`}>
+              <span className="text-xl font-bold text-gray-900">{rating.toFixed(1)}</span>
+              <div className="flex items-center">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`h-5 w-5 ${
+                      star <= Math.round(rating)
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'fill-gray-200 text-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-base text-indigo-600 font-medium">
+                ({reviewCount.toLocaleString()})
+              </span>
+            </div>
+
+            {/* Featured Badge */}
+            <span className={`inline-block px-4 py-1.5 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-full transition-all duration-300 ${
+              showHeader ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+            }`}>
+              Featured
+            </span>
           </div>
-          <span className="text-base text-indigo-600 font-medium">
-            ({reviewCount.toLocaleString()})
-          </span>
         </div>
 
-        {/* Featured Badge */}
-        <span className="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-full">
-          Featured
-        </span>
-
-        {/* Book Now Button */}
+        {/* Book Now Button - Always visible */}
         <button
           onClick={onBookNow}
           className="w-full bg-gray-900 text-white py-4 rounded-full text-base font-semibold hover:bg-gray-800 transition-colors"
@@ -89,7 +141,7 @@ export function FreshaSideCard({
       <div className="border-t border-gray-200" />
 
       {/* Info Section */}
-      <div className="p-6 space-y-5">
+      <div className="p-8 space-y-6">
         {/* Opening Hours */}
         <div>
           <button
@@ -102,8 +154,12 @@ export function FreshaSideCard({
               <path d="M12 6v6l4 2" />
             </svg>
             <div className="flex items-center gap-2 flex-1">
-              <span className="text-green-600 font-medium">Open</span>
-              <span className="text-gray-700">until {closeTime}</span>
+              <span className={`font-medium ${isOpen ? 'text-green-600' : 'text-red-600'}`}>
+                {isOpen ? 'Open' : 'Closed'}
+              </span>
+              {closeTime && (
+                <span className="text-gray-700">until {closeTime}</span>
+              )}
             </div>
             {isHoursExpanded ? (
               <ChevronUp className="h-5 w-5 text-gray-500" />
@@ -114,21 +170,24 @@ export function FreshaSideCard({
 
           {/* Expanded Hours */}
           {isHoursExpanded && (
-            <div className="mt-4 space-y-3 pl-8">
-              {openingHours.map((item) => (
-                <div
-                  key={item.day}
-                  className={`flex items-center justify-between ${
-                    item.isToday ? 'font-semibold' : ''
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 bg-green-500 rounded-full" />
-                    <span className="text-gray-900">{item.day}</span>
+            <div className="mt-4 space-y-3">
+              {openingHours.map((item) => {
+                const isClosed = item.hours === 'Closed' || item.hours === 'Not set';
+                return (
+                  <div
+                    key={item.day}
+                    className={`flex items-center justify-between ${
+                      item.isToday ? 'font-semibold' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${isClosed ? 'bg-gray-400' : 'bg-green-500'}`} />
+                      <span className="text-gray-900">{item.day}</span>
+                    </div>
+                    <span className={isClosed ? 'text-gray-500' : 'text-gray-700'}>{item.hours}</span>
                   </div>
-                  <span className="text-gray-700">{item.hours}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
