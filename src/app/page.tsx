@@ -4,8 +4,65 @@ import { useMemo } from 'react';
 import {
   HeroSection,
   VendorSection,
+  VendorCardData,
+  AppDownloadSection,
+  ReviewsSection,
+  StatsSection,
+  BusinessSection,
 } from '@/components/home';
 import { useVendors } from '@/hooks';
+
+// Static recommended vendors data
+const staticRecommendedVendors: VendorCardData[] = [
+  {
+    id: 'static-1',
+    name: "Rooster's Barbershop",
+    logo: null,
+    images: ['/1.jpg'],
+    category: 'Barber',
+    rating: 5.0,
+    reviewCount: 8789,
+    location: 'Ampelokipoi',
+    startingPrice: 0,
+    isVerified: true,
+  },
+  {
+    id: 'static-2',
+    name: 'Hair by Common Studio - Queenstown',
+    logo: null,
+    images: ['/2.jpg'],
+    category: 'Hair Salon',
+    rating: 4.9,
+    reviewCount: 1419,
+    location: 'Queenstown, Singapore',
+    startingPrice: 0,
+    isVerified: true,
+  },
+  {
+    id: 'static-3',
+    name: "Padioi Men's Grooming",
+    logo: null,
+    images: ['/3.jpg'],
+    category: 'Barber',
+    rating: 5.0,
+    reviewCount: 1059,
+    location: "PADIOI Men's Grooming, Prince Sultan Bin Fah...",
+    startingPrice: 0,
+    isVerified: true,
+  },
+  {
+    id: 'static-4',
+    name: 'Luxio Nail Ladies Salon',
+    logo: null,
+    images: ['/4.jpg'],
+    category: 'Nails',
+    rating: 5.0,
+    reviewCount: 779,
+    location: 'Arenco Tower, Shop 8 Exit 33, Dubai Media Cit...',
+    startingPrice: 0,
+    isVerified: true,
+  },
+];
 
 export default function HomePage() {
   // Fetch all vendors
@@ -47,19 +104,40 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Recommended Section */}
-        <VendorSection
-          title="Recommended"
-          vendors={recommendedVendors}
-          isLoading={isLoading}
-        />
-
-        {/* New to Platform Section */}
+        {/* New to Platform Section - Dynamic (on top) */}
         <VendorSection
           title="New to Platform"
           vendors={newToFreshaVendors}
           isLoading={isLoading}
         />
+
+        {/* Static Recommended Section */}
+        <VendorSection
+          title="Recommended"
+          vendors={staticRecommendedVendors}
+          isLoading={false}
+        />
+
+        {/* Dynamic Top Rated Section (if needed) */}
+        {recommendedVendors.length > 0 && (
+          <VendorSection
+            title="Top Rated"
+            vendors={recommendedVendors}
+            isLoading={isLoading}
+          />
+        )}
+
+        {/* App Download Section */}
+        <AppDownloadSection />
+
+        {/* Reviews Section */}
+        <ReviewsSection />
+
+        {/* Stats Section */}
+        <StatsSection />
+
+        {/* Business Section */}
+        <BusinessSection />
       </main>
     </div>
   );
