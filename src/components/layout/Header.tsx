@@ -2,14 +2,18 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X, Search, MapPin, Calendar } from 'lucide-react';
 import { ROUTES } from '@/config';
+import { useAuth } from '@/hooks';
+import { UserProfileDropdown } from './UserProfileDropdown';
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const isVendorPage = pathname?.startsWith('/vendor');
+  const { isAuthenticated, logout, user } = useAuth();
+  const router = useRouter();
 
   return (
     <header className="bg-white sticky top-0 z-50">
@@ -49,11 +53,23 @@ export function Header() {
           {!isVendorPage && <div className="flex-1" />}
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center shrink-0">
-            <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-full hover:shadow-md transition-all text-sm font-medium">
-              Menu
-              <Menu className="h-4 w-4" />
-            </button>
+          <nav className="hidden md:flex items-center gap-3 shrink-0">
+            {isAuthenticated ? (
+              <UserProfileDropdown />
+            ) : (
+              <>
+                <Link
+                  href={ROUTES.LOGIN}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  Log in
+                </Link>
+                <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-full hover:shadow-md transition-all text-sm font-medium">
+                  Menu
+                  <Menu className="h-4 w-4" />
+                </button>
+              </>
+            )}
           </nav>
 
           {/* Mobile Search Button */}
@@ -79,14 +95,75 @@ export function Header() {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col">
-              <p className="px-4 py-2 text-sm font-semibold text-gray-900">For customers</p>
-              <Link
-                href={ROUTES.LOGIN}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-4 py-2 text-indigo-600 hover:bg-gray-100 rounded-lg"
-              >
-                Log in or sign up
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <p className="px-4 py-2 text-sm font-semibold text-gray-900">Account</p>
+                  <Link
+                    href="/profile"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    href="/appointments"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Appointments
+                  </Link>
+                  <Link
+                    href="/wallet"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Wallet
+                  </Link>
+                  <Link
+                    href="/favorites"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Favorites
+                  </Link>
+                  <Link
+                    href="/orders"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Product orders
+                  </Link>
+                  <Link
+                    href="/settings"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Settings
+                  </Link>
+                  <button
+                    onClick={async () => {
+                      await logout();
+                      setIsMobileMenuOpen(false);
+                      router.push(ROUTES.HOME);
+                    }}
+                    className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left"
+                  >
+                    Log out
+                  </button>
+                  <div className="my-2 border-t border-gray-200" />
+                </>
+              ) : (
+                <>
+                  <p className="px-4 py-2 text-sm font-semibold text-gray-900">For customers</p>
+                  <Link
+                    href={ROUTES.LOGIN}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-2 text-indigo-600 hover:bg-gray-100 rounded-lg"
+                  >
+                    Log in or sign up
+                  </Link>
+                </>
+              )}
               <button className="px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg text-left">
                 Download the app
               </button>
