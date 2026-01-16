@@ -232,6 +232,10 @@ export default function DemoBookingConfirmPage() {
     setIsSubmitting(false);
 
     // Redirect to demo vendor page after 3 seconds
+    // Set flag to indicate coming from booking flow
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('came_from_booking_redirect', 'true');
+    }
     setTimeout(() => {
       router.push('/demo/vendor');
     }, 3000);

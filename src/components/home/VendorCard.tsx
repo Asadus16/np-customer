@@ -22,9 +22,10 @@ export interface VendorCardData {
 interface VendorCardProps {
   vendor: VendorCardData;
   index?: number;
+  href?: string;
 }
 
-export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
+export function VendorCard({ vendor, index = 0, href }: VendorCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -49,9 +50,10 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
   };
 
   const hasMultipleImages = vendor.images.length > 1;
+  const cardHref = href || `/vendor/${vendor.id}`;
 
   return (
-    <Link href={`/vendor/${vendor.id}`}>
+    <Link href={cardHref}>
       <article
         className="group cursor-pointer animate-fade-in"
         style={{ animationDelay: `${index * 50}ms` }}

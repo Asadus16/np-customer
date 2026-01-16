@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, X, ChevronLeft, ChevronRight, Calendar, Zap, Clock, Repeat, Star } from 'lucide-react';
-import { BookingBreadcrumb, LoginModal } from '@/components/booking';
+import { ArrowLeft, X, ChevronLeft, ChevronRight, Calendar, Zap, Clock, Repeat } from 'lucide-react';
+import { BookingBreadcrumb, BookingSidebar, LoginModal } from '@/components/booking';
 import { useAuth } from '@/hooks';
 
 type OrderType = 'now' | 'schedule' | 'recurring';
@@ -42,17 +42,6 @@ function generateTimeSlots(): { time: string; available: boolean }[] {
   return slots;
 }
 
-function formatDurationRange(min: number, max?: number): string {
-  const formatSingle = (mins: number): string => {
-    if (mins < 60) return `${mins} mins`;
-    const hours = Math.floor(mins / 60);
-    const remaining = mins % 60;
-    if (remaining === 0) return `${hours} hr`;
-    return `${hours} hr, ${remaining} mins`;
-  };
-  if (!max || min === max) return formatSingle(min);
-  return `${formatSingle(min)} - ${formatSingle(max)}`;
-}
 
 export default function DemoBookingTimePage() {
   const router = useRouter();
@@ -66,6 +55,8 @@ export default function DemoBookingTimePage() {
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right' | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [orderType, setOrderType] = useState<OrderType | null>(null);
   const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>('weekly');
 
@@ -91,26 +82,34 @@ export default function DemoBookingTimePage() {
     }, 0);
   }, [selectedServices]);
 
-  // Get week dates
+  // Get dates for the week view (14 days starting from weekStartDate)
   const weekDates = useMemo(() => {
     const dates: Date[] = [];
-    const start = new Date(weekStartDate);
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(start);
-      date.setDate(start.getDate() + i);
+    for (let i = 0; i < 14; i++) {
+      const date = new Date(weekStartDate);
+      date.setDate(weekStartDate.getDate() + i);
       dates.push(date);
     }
     return dates;
   }, [weekStartDate]);
 
-  // Get month and year for display
+  // Get month name for week view
   const weekMonthYear = useMemo(() => {
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    return `${monthNames[selectedDate.getMonth()]} ${selectedDate.getFullYear()}`;
-  }, [selectedDate]);
+    const firstDate = weekDates[0];
+    const lastDate = weekDates[weekDates.length - 1];
+    const firstMonth = firstDate.toLocaleDateString('en-US', { month: 'long' });
+    const lastMonth = lastDate.toLocaleDateString('en-US', { month: 'long' });
+    const year = firstDate.getFullYear();
 
-  // Format time for display
-  const formatTimeForDisplay = (time: string): string => {
+    if (firstMonth === lastMonth) {
+      return `${firstMonth} ${year}`;
+    }
+    return `${firstMonth} - ${lastMonth} ${year}`;
+  }, [weekDates]);
+
+  // Format time for display (e.g., "9:00 am")
+  const formatTime = (time: string): string => {
+    if (!time) return '';
     const [hours, minutes] = time.split(':');
     const hour = parseInt(hours, 10);
     const ampm = hour >= 12 ? 'pm' : 'am';
@@ -181,6 +180,13 @@ export default function DemoBookingTimePage() {
     router.push(`/demo/booking/confirm`);
   };
 
+  // Handle date selection
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    setSelectedTime(null);
+    setShowCalendarModal(false);
+  };
+
   // Handle back
   const handleBack = () => {
     router.push('/demo/booking');
@@ -191,33 +197,67 @@ export default function DemoBookingTimePage() {
     router.push('/demo/vendor');
   };
 
-  // Navigate weeks
-  const goToPreviousWeek = () => {
+  // Navigate weeks with animation
+  const handlePreviousWeek = () => {
+    if (isAnimating) return;
     const newStart = new Date(weekStartDate);
-    newStart.setDate(newStart.getDate() - 7);
-    setWeekStartDate(newStart);
-  };
-
-  const goToNextWeek = () => {
-    const newStart = new Date(weekStartDate);
-    newStart.setDate(newStart.getDate() + 7);
-    setWeekStartDate(newStart);
-  };
-
-  // Check if date is today
-  const isToday = (date: Date): boolean => {
+    newStart.setDate(weekStartDate.getDate() - 7);
     const today = new Date();
-    return date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear();
+    today.setHours(0, 0, 0, 0);
+    if (newStart >= today) {
+      setSlideDirection('right');
+      setIsAnimating(true);
+      setTimeout(() => {
+        setWeekStartDate(newStart);
+        setSlideDirection(null);
+        setIsAnimating(false);
+      }, 200);
+    }
   };
 
-  // Check if date is selected
-  const isDateSelected = (date: Date): boolean => {
-    return date.getDate() === selectedDate.getDate() &&
-      date.getMonth() === selectedDate.getMonth() &&
-      date.getFullYear() === selectedDate.getFullYear();
+  const handleNextWeek = () => {
+    if (isAnimating) return;
+    const newStart = new Date(weekStartDate);
+    newStart.setDate(weekStartDate.getDate() + 7);
+    setSlideDirection('left');
+    setIsAnimating(true);
+    setTimeout(() => {
+      setWeekStartDate(newStart);
+      setSlideDirection(null);
+      setIsAnimating(false);
+    }, 200);
   };
+
+  // Calendar modal - navigate months
+  const handlePreviousMonth = () => {
+    setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCalendarMonth(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1));
+  };
+
+  // Get calendar days for the modal
+  const calendarDays = useMemo(() => {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+
+    const firstDay = new Date(year, month, 1);
+    const startDate = new Date(firstDay);
+    const dayOfWeek = firstDay.getDay();
+    const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    startDate.setDate(firstDay.getDate() - daysToSubtract);
+
+    const days: Date[] = [];
+    const current = new Date(startDate);
+
+    for (let i = 0; i < 42; i++) {
+      days.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+
+    return days;
+  }, [calendarMonth]);
 
   // Check if date is in past
   const isDateInPast = (date: Date): boolean => {
@@ -227,23 +267,6 @@ export default function DemoBookingTimePage() {
     compareDate.setHours(0, 0, 0, 0);
     return compareDate < today;
   };
-
-  // Calendar days
-  const calendarDays = useMemo(() => {
-    const year = calendarMonth.getFullYear();
-    const month = calendarMonth.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDayOfWeek = (firstDay.getDay() + 6) % 7;
-    const days: (Date | null)[] = [];
-    for (let i = 0; i < startDayOfWeek; i++) {
-      days.push(null);
-    }
-    for (let d = 1; d <= lastDay.getDate(); d++) {
-      days.push(new Date(year, month, d));
-    }
-    return days;
-  }, [calendarMonth]);
 
   if (selectedServices.length === 0) {
     return (
@@ -376,222 +399,176 @@ export default function DemoBookingTimePage() {
               </div>
             )}
 
-            {/* Week View Date Selection */}
+            {/* Week View Date Selection - Show only when schedule or recurring is selected */}
             {(orderType === 'schedule' || orderType === 'recurring') && (
-              <>
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900">{weekMonthYear}</h2>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setShowCalendarModal(true)}
-                        className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-                      >
-                        <Calendar className="h-5 w-5 text-gray-600" />
-                      </button>
-                      <button
-                        onClick={goToPreviousWeek}
-                        className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-                      >
-                        <ChevronLeft className="h-5 w-5 text-gray-600" />
-                      </button>
-                      <button
-                        onClick={goToNextWeek}
-                        className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-                      >
-                        <ChevronRight className="h-5 w-5 text-gray-600" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Week Days */}
-                  <div className="flex gap-2">
-                    {weekDates.map((date, index) => {
-                      const isPast = isDateInPast(date);
-                      const isSelected = isDateSelected(date);
-                      const isTodayDate = isToday(date);
-                      const isSaturday = date.getDay() === 6;
-
-                      return (
-                        <button
-                          key={index}
-                          onClick={() => !isPast && setSelectedDate(date)}
-                          disabled={isPast}
-                          className={`flex flex-col items-center justify-center py-4 px-4 rounded-2xl transition-all min-w-[72px] ${
-                            isPast
-                              ? 'opacity-40 cursor-not-allowed border border-gray-200'
-                              : isSelected
-                              ? 'bg-[#6950f3] text-white border-2 border-[#6950f3]'
-                              : isSaturday
-                              ? 'bg-white border-2 border-gray-300 hover:border-gray-400'
-                              : 'bg-white border border-gray-200 hover:border-gray-300'
-                          }`}
-                        >
-                          <span className={`text-2xl font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                            {date.getDate()}
-                          </span>
-                          <span className={`text-xs font-medium mt-1 ${
-                            isSelected ? 'text-white' : isTodayDate ? 'text-[#6950f3]' : 'text-gray-500'
-                          }`}>
-                            {isTodayDate ? 'Today' : getDayName(date)}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Time Slots */}
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Available times</h2>
-                  <div className="grid grid-cols-6 gap-2">
-                    {timeSlots.map((slot) => (
-                      <button
-                        key={slot.time}
-                        onClick={() => setSelectedTime(slot.time)}
-                        className={`py-3 px-2 rounded-xl text-sm font-medium transition-all ${
-                          selectedTime === slot.time
-                            ? 'bg-gray-100 text-gray-900 border-2 border-[#6950f3]'
-                            : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        {formatTimeForDisplay(slot.time)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-6">
+            <>
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {weekMonthYear}
+                </h2>
+                <div className="flex items-center gap-2">
+                  {/* Calendar Icon Button */}
                   <button
-                    className="text-sm font-medium hover:opacity-80 transition-opacity"
-                    style={{ color: '#6950f3' }}
+                    onClick={() => setShowCalendarModal(true)}
+                    className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+                    aria-label="Open calendar"
                   >
-                    Can&apos;t find a suitable time? Join waitlist
+                    <Calendar className="h-5 w-5 text-gray-700" />
+                  </button>
+                  <button
+                    onClick={handlePreviousWeek}
+                    className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+                    aria-label="Previous week"
+                  >
+                    <ChevronLeft className="h-5 w-5 text-gray-700" />
+                  </button>
+                  <button
+                    onClick={handleNextWeek}
+                    className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+                    aria-label="Next week"
+                  >
+                    <ChevronRight className="h-5 w-5 text-gray-700" />
                   </button>
                 </div>
-              </>
+              </div>
+
+              {/* Week Dates - Rectangular Buttons with slide animation */}
+              <div className="overflow-hidden">
+                <div
+                  className={`flex gap-2 transition-all duration-200 ease-out ${
+                    slideDirection === 'left'
+                      ? 'opacity-0 -translate-x-4'
+                      : slideDirection === 'right'
+                      ? 'opacity-0 translate-x-4'
+                      : 'opacity-100 translate-x-0'
+                  }`}
+                >
+                  {weekDates.map((date) => {
+                    const isSelected = date.toDateString() === selectedDate.toDateString();
+                    const isToday = date.toDateString() === new Date().toDateString();
+                    const isPast = isDateInPast(date) && !isToday;
+                    const isSaturday = date.getDay() === 6;
+
+                    return (
+                      <button
+                        key={date.toISOString()}
+                        onClick={() => !isPast && handleDateSelect(date)}
+                        disabled={isPast}
+                        className={`flex flex-col items-center justify-center py-4 px-4 rounded-2xl transition-all min-w-[72px] ${
+                          isPast
+                            ? 'opacity-40 cursor-not-allowed border border-gray-200'
+                            : isSelected
+                            ? 'bg-[#6950f3] text-white border-2 border-[#6950f3]'
+                            : isSaturday
+                            ? 'bg-white border-2 border-gray-300 hover:border-gray-400'
+                            : 'bg-white border border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <span className={`text-2xl font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                          {date.getDate()}
+                        </span>
+                        <span className={`text-xs font-medium mt-1 ${
+                          isSelected ? 'text-white' : isToday ? 'text-[#6950f3]' : 'text-gray-500'
+                        }`}>
+                          {isToday ? 'Today' : getDayName(date)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Available Time Slots */}
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Available times</h2>
+              {timeSlots.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  {timeSlots.map((slot, index) => {
+                    const isSelected = selectedTime === slot.time;
+
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => slot.available && setSelectedTime(slot.time)}
+                        disabled={!slot.available}
+                        className={`w-full py-3 px-4 rounded-xl text-sm font-medium transition-all text-left ${
+                          isSelected
+                            ? 'bg-gray-100 text-gray-900 border-2 border-[#6950f3]'
+                            : slot.available
+                            ? 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
+                            : 'bg-gray-50 border border-gray-100 text-gray-300 cursor-not-allowed'
+                        }`}
+                      >
+                        {formatTime(slot.time)}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">No time slots available for this date.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Waitlist Link */}
+            {timeSlots.length > 0 && (
+              <div className="mt-6 text-center">
+                <button
+                  className="text-sm font-medium hover:opacity-80 transition-opacity"
+                  style={{ color: '#6950f3' }}
+                >
+                  Can&apos;t find a suitable time? Join waitlist
+                </button>
+              </div>
+            )}
+            </>
             )}
           </div>
 
           {/* Right Pane - Order Summary */}
-          <div className="w-full lg:w-105 shrink-0">
-            <div className="lg:sticky lg:top-24 bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col lg:h-[calc(100vh-140px)]">
-              {/* Vendor Info */}
-              <div className="p-6">
-                <div className="flex gap-4">
-                  <img
-                    src={DEMO_VENDOR.logo}
-                    alt={DEMO_VENDOR.name}
-                    className="w-14 h-14 rounded-lg object-cover shrink-0"
-                  />
-                  <div className="min-w-0">
-                    <h2 className="font-bold text-gray-900 mb-1 truncate">{DEMO_VENDOR.name}</h2>
-                    <div className="flex items-center gap-1 mb-1">
-                      <span className="text-sm font-semibold text-gray-900">
-                        {DEMO_VENDOR.rating.toFixed(1)}
-                      </span>
-                      <div className="flex items-center">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`h-3.5 w-3.5 ${
-                              star <= Math.round(DEMO_VENDOR.rating)
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'fill-gray-200 text-gray-200'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        ({DEMO_VENDOR.reviews_count.toLocaleString()})
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-500 truncate">{DEMO_VENDOR.service_areas[0].name}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Selected Services - Scrollable */}
-              <div className="px-6 pb-6 flex-1 overflow-y-auto">
-                <div className="space-y-4">
-                  {selectedServices.map((service) => (
-                    <div key={service.id} className="flex justify-between gap-3">
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-gray-900 text-sm mb-0.5">{service.name}</p>
-                        <p className="text-xs text-gray-500">
-                          {formatDurationRange(service.duration)}
-                        </p>
-                      </div>
-                      <p className="font-semibold text-gray-900 text-sm shrink-0">AED {service.price}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="mx-6 border-t border-gray-100" />
-
-              {/* Total */}
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-900">Total</span>
-                  <span className="font-bold text-lg text-gray-900">AED {total.toLocaleString()}</span>
-                </div>
-              </div>
-
-              {/* Continue Button */}
-              <div className="p-6 pt-0 mt-auto">
-                <button
-                  onClick={handleContinue}
-                  disabled={!orderType || (orderType !== 'now' && !selectedTime)}
-                  className={`w-full py-4 rounded-full font-semibold transition-colors ${
-                    orderType && (orderType === 'now' || selectedTime)
-                      ? 'bg-gray-900 text-white hover:bg-gray-800'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  Continue
-                </button>
-              </div>
-            </div>
-          </div>
+          <BookingSidebar
+            vendor={{ ...DEMO_VENDOR, logo: DEMO_VENDOR.logo ?? undefined }}
+            selectedServices={selectedServices}
+            total={total}
+            onContinue={handleContinue}
+            continueDisabled={!orderType || (orderType !== 'now' && !selectedTime)}
+            showDurationRange={false}
+          />
         </div>
       </div>
 
       {/* Calendar Modal */}
       {showCalendarModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6">
+            {/* Modal Header */}
             <div className="flex items-center justify-between mb-6">
               <button
-                onClick={() => {
-                  const newMonth = new Date(calendarMonth);
-                  newMonth.setMonth(newMonth.getMonth() - 1);
-                  setCalendarMonth(newMonth);
-                }}
-                className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded-full"
+                onClick={handlePreviousMonth}
+                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Previous month"
               >
-                <ChevronLeft className="h-5 w-5 text-gray-600" />
+                <ChevronLeft className="h-5 w-5 text-gray-700" />
               </button>
               <h3 className="text-lg font-semibold text-gray-900">
                 {calendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </h3>
               <button
-                onClick={() => {
-                  const newMonth = new Date(calendarMonth);
-                  newMonth.setMonth(newMonth.getMonth() + 1);
-                  setCalendarMonth(newMonth);
-                }}
-                className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded-full"
+                onClick={handleNextMonth}
+                className="h-8 w-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Next month"
               >
-                <ChevronRight className="h-5 w-5 text-gray-600" />
+                <ChevronRight className="h-5 w-5 text-gray-700" />
               </button>
             </div>
 
-            {/* Day Headers */}
+            {/* Days of Week Header */}
             <div className="grid grid-cols-7 gap-1 mb-2">
               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-                <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
+                <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
                   {day}
                 </div>
               ))}
@@ -600,36 +577,34 @@ export default function DemoBookingTimePage() {
             {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((date, index) => {
-                if (!date) {
-                  return <div key={`empty-${index}`} className="h-10" />;
-                }
-
-                const isPast = isDateInPast(date);
-                const isSelected = isDateSelected(date);
-                const isTodayDate = isToday(date);
+                const isCurrentMonth = date.getMonth() === calendarMonth.getMonth();
+                const isSelected = date.toDateString() === selectedDate.toDateString();
+                const isToday = date.toDateString() === new Date().toDateString();
+                const isPast = isDateInPast(date) && !isToday;
 
                 return (
                   <button
-                    key={date.toISOString()}
-                    onClick={() => {
-                      if (!isPast) {
-                        setSelectedDate(date);
-                        const newWeekStart = new Date(date);
-                        newWeekStart.setDate(date.getDate() - date.getDay());
-                        setWeekStartDate(newWeekStart);
-                        setShowCalendarModal(false);
-                      }
-                    }}
-                    disabled={isPast}
-                    className={`h-10 w-10 flex items-center justify-center rounded-full text-sm font-medium transition-all mx-auto ${
-                      isPast
+                    key={index}
+                    onClick={() => !isPast && isCurrentMonth && handleDateSelect(date)}
+                    disabled={isPast || !isCurrentMonth}
+                    className={`h-10 w-10 flex items-center justify-center rounded-full text-sm transition-all mx-auto ${
+                      isSelected
+                        ? 'text-white font-semibold'
+                        : isToday && isCurrentMonth
+                        ? 'border-2 font-semibold'
+                        : !isCurrentMonth
+                        ? 'text-gray-300'
+                        : isPast
                         ? 'text-gray-300 cursor-not-allowed'
-                        : isSelected
-                        ? 'bg-[#6950f3] text-white'
-                        : isTodayDate
-                        ? 'border-2 border-[#6950f3] text-[#6950f3]'
-                        : 'hover:bg-gray-100 text-gray-900'
+                        : 'text-gray-900 hover:bg-gray-100'
                     }`}
+                    style={
+                      isSelected
+                        ? { backgroundColor: '#6950f3' }
+                        : isToday && isCurrentMonth
+                        ? { borderColor: '#6950f3', color: '#6950f3' }
+                        : undefined
+                    }
                   >
                     {date.getDate()}
                   </button>
@@ -637,11 +612,12 @@ export default function DemoBookingTimePage() {
               })}
             </div>
 
+            {/* Close Button */}
             <button
               onClick={() => setShowCalendarModal(false)}
-              className="w-full mt-6 py-3 bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 transition-colors"
+              className="mt-6 w-full py-3 border border-gray-300 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              Done
+              Cancel
             </button>
           </div>
         </div>
