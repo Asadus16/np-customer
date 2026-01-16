@@ -15,7 +15,7 @@ export function BusinessSection() {
           <div className="text-center lg:text-left relative z-10">
             {/* Headline */}
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
-              Fresha for business
+              noproblem for business
             </h2>
 
             {/* Description */}
@@ -59,7 +59,7 @@ export function BusinessSection() {
         <div className="relative w-full h-[600px] max-h-[700px] rounded-lg overflow-hidden">
           <Image
             src="/section3.webp"
-            alt="Fresha for business - Platform screenshots"
+            alt="noproblem for business - Platform screenshots"
             fill
             className="object-cover"
             priority
@@ -72,7 +72,7 @@ export function BusinessSection() {
         <div className="relative aspect-[4/3] rounded-lg overflow-hidden">
           <Image
             src="/section3.webp"
-            alt="Fresha for business - Platform screenshots"
+            alt="noproblem for business - Platform screenshots"
             fill
             className="object-cover"
             priority

@@ -41,12 +41,12 @@ export function AppDownloadSection() {
 
             {/* Main Heading */}
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Download the Fresha app
+              Download the noproblem app
             </h2>
 
             {/* Description */}
             <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto lg:mx-0">
-              Book unforgettable beauty and wellness experiences with the Fresha mobile app.
+              Book unforgettable beauty and wellness experiences with the noproblem mobile app.
             </p>
 
             {/* QR Code */}
@@ -72,7 +72,7 @@ export function AppDownloadSection() {
                 <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden bg-gray-100 shadow-2xl border-8 border-gray-900">
                   <Image
                     src="/homeImage.webp"
-                    alt="Trendy Studio - Fresha app preview"
+                    alt="Trendy Studio - noproblem app preview"
                     fill
                     className="object-cover"
                     priority
