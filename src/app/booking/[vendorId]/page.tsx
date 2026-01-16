@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, X, Plus, Star, Check, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, X, Plus, Star, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useVendor } from '@/hooks';
 import { BookingBreadcrumb } from '@/components/booking';
 import { SubServiceApiResponse, ServiceApiResponse } from '@/services/vendorService';

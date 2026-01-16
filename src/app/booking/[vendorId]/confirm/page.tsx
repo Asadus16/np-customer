@@ -641,7 +641,7 @@ export default function BookingConfirmPage() {
 
           {/* Right Pane - Booking Summary */}
           <BookingSidebar
-            vendor={vendor}
+            vendor={{ ...vendor, logo: vendor.logo ?? undefined }}
             selectedServices={selectedServices}
             total={total}
             onContinue={handleConfirm}
