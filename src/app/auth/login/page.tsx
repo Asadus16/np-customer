@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showPasswordStep, setShowPasswordStep] = useState(false);
   const [signUpData, setSignUpData] = useState({
     first_name: '',
     last_name: '',
@@ -27,8 +28,9 @@ export default function LoginPage() {
     e.preventDefault();
     clearError();
     // Just move to password step - we'll determine signup vs login after password attempt
-    if (email) {
+    if (email.trim()) {
       // Email is set, show password field
+      setShowPasswordStep(true);
       setIsSignUp(false);
     }
   };
@@ -72,7 +74,6 @@ export default function LoginPage() {
     console.log(`Login with ${provider}`);
   };
 
-  const showPasswordStep = email.length > 0 || isSignUp;
 
   return (
     <div className="min-h-screen flex">
@@ -181,10 +182,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => {
                       setIsSignUp(true);
-                      // If no email, set a placeholder so password step shows
-                      if (!email) {
-                        setEmail(' ');
-                      }
+                      setShowPasswordStep(true);
                     }}
                     className="text-[15px] leading-[20px] text-purple-600 hover:text-purple-700 font-medium"
                   >
@@ -230,6 +228,7 @@ export default function LoginPage() {
                           setEmail('');
                           setPassword('');
                           setIsSignUp(false);
+                          setShowPasswordStep(false);
                           clearError();
                         }}
                         className="mt-2 text-sm text-purple-600 hover:text-purple-700 font-medium"
@@ -346,7 +345,10 @@ export default function LoginPage() {
                   <div className="text-center">
                     <button
                       type="button"
-                      onClick={() => setIsSignUp(true)}
+                      onClick={() => {
+                        setIsSignUp(true);
+                        setShowPasswordStep(true);
+                      }}
                       className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                     >
                       Don&apos;t have an account? Sign up
