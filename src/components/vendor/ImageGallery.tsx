@@ -40,7 +40,7 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
 
   if (images.length === 0) {
     return (
-      <div className="w-full aspect-[2/1] bg-gray-200 rounded-xl flex items-center justify-center">
+      <div className="w-full min-h-[100px] md:min-h-[400px] flex items-center justify-center">
         <span className="text-gray-400">No images available</span>
       </div>
     );

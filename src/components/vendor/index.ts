@@ -9,3 +9,4 @@ export { AboutSection, type OpeningHours } from './AboutSection';
 export { ServiceTabs } from './ServiceTabs';
 export { VenuesNearby, type NearbyVenue } from './VenuesNearby';
 export { TreatYourselfSection, type ServiceLink } from './TreatYourselfSection';
+export { VendorMap } from './VendorMap';

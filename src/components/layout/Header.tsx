@@ -2,15 +2,28 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, X, Search, ArrowRight, Globe } from 'lucide-react';
 import { ROUTES } from '@/config';
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
+  const desktopMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isVendorPage = pathname?.startsWith('/vendor');
+
+  // Close desktop menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (desktopMenuRef.current && !desktopMenuRef.current.contains(event.target as Node)) {
+        setIsDesktopMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="bg-white sticky top-0 z-50">
@@ -61,11 +74,49 @@ export function Header() {
           {!isVendorPage && <div className="flex-1" />}
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center shrink-0">
-            <button className="flex items-center gap-2 px-6 py-4 border border-gray-200 rounded-full hover:shadow-md transition-all text-[15px] font-medium">
+          <nav className="hidden md:flex items-center shrink-0 relative" ref={desktopMenuRef}>
+            <button
+              onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
+              className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-full hover:shadow-md transition-all text-[15px] font-medium"
+            >
               Menu
               <Menu className="h-4 w-4" />
             </button>
+
+            {/* Desktop Dropdown Menu */}
+            {isDesktopMenuOpen && (
+              <div className="absolute top-full right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 py-4 z-50" style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 12px 24px -8px rgba(0, 0, 0, 0.15)' }}>
+                <div className="px-5 py-2">
+                  <p className="text-base font-semibold text-gray-900">For customers</p>
+                </div>
+                <Link
+                  href={ROUTES.LOGIN}
+                  onClick={() => setIsDesktopMenuOpen(false)}
+                  className="block px-5 py-3 text-indigo-600 hover:bg-gray-50 transition-colors"
+                >
+                  Log in or sign up
+                </Link>
+                <button className="w-full px-5 py-3 text-gray-900 hover:bg-gray-50 transition-colors text-left">
+                  Download the app
+                </button>
+                <button className="w-full px-5 py-3 text-gray-900 hover:bg-gray-50 transition-colors text-left">
+                  Help and support
+                </button>
+                <button className="w-full px-5 py-3 text-gray-900 hover:bg-gray-50 transition-colors text-left flex items-center gap-3">
+                  <Globe className="h-5 w-5" />
+                  English
+                </button>
+                <div className="my-2 border-t border-gray-200 mx-5" />
+                <Link
+                  href="#"
+                  onClick={() => setIsDesktopMenuOpen(false)}
+                  className="flex items-center justify-between px-5 py-3 text-gray-900 hover:bg-gray-50 transition-colors"
+                >
+                  For businesses
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </div>
+            )}
           </nav>
 
           {/* Mobile Search Button */}

@@ -153,6 +153,8 @@ export interface VendorDetailApiResponse {
   is_favorite?: boolean;
   landline?: string;
   website?: string;
+  latitude?: number;
+  longitude?: number;
   services?: ServiceApiResponse[];
   company_hours?: CompanyHourApiResponse[];
   reviews?: ReviewApiResponse[];

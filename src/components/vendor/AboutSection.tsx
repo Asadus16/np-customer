@@ -1,6 +1,7 @@
 'use client';
 
-import { MapPin, BadgeCheck, CreditCard } from 'lucide-react';
+import { BadgeCheck, CreditCard } from 'lucide-react';
+import { VendorMap } from './VendorMap';
 
 export interface OpeningHours {
   day: string;
@@ -13,7 +14,9 @@ interface AboutSectionProps {
   location: string;
   openingHours: OpeningHours[];
   additionalInfo?: string[];
-  mapUrl?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  vendorName?: string;
   onGetDirections?: () => void;
 }
 
@@ -21,8 +24,9 @@ export function AboutSection({
   description,
   location,
   openingHours,
-  additionalInfo = ['Instant Confirmation', 'Pay by app'],
-  mapUrl,
+  latitude,
+  longitude,
+  vendorName = 'Vendor',
   onGetDirections,
 }: AboutSectionProps) {
   return (
@@ -33,23 +37,21 @@ export function AboutSection({
       <p className="text-gray-700 leading-relaxed">{description}</p>
 
       {/* Map */}
-      <div className="rounded-xl overflow-hidden bg-gray-100 aspect-[2/1]">
-        <iframe
-          src={mapUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d115459.99826706795!2d55.13714375!3d25.076022!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f43496ad9c645%3A0xbde66e5084295162!2sDubai%20-%20United%20Arab%20Emirates!5e0!3m2!1sen!2s!4v1705400000000!5m2!1sen!2s"}
-          className="w-full h-full"
-          style={{ border: 0 }}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
+      <div className="rounded-xl overflow-hidden">
+        <VendorMap
+          latitude={latitude || 0}
+          longitude={longitude || 0}
+          vendorName={vendorName}
+          address={location}
         />
       </div>
 
       {/* Location with Get Directions */}
-      <div className="flex items-center gap-2 text-gray-700">
-        <span>{location}</span>
+      <div className="flex flex-wrap items-center gap-2 text-gray-700 text-sm md:text-base">
+        <span className="break-words">{location}</span>
         <button
           onClick={onGetDirections}
-          className="text-green-600 font-medium hover:underline"
+          className="text-green-600 font-medium hover:underline whitespace-nowrap"
         >
           Get directions
         </button>

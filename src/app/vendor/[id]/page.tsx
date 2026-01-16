@@ -189,6 +189,8 @@ function mapVendorData(apiVendor: VendorDetailApiResponse) {
     images,
     phone: apiVendor.landline,
     website: apiVendor.website,
+    latitude: apiVendor.latitude || null,
+    longitude: apiVendor.longitude || null,
   };
 }
 
@@ -464,7 +466,7 @@ export default function VendorDetailPage() {
 
       <div className="min-h-screen bg-white pb-24 lg:pb-0">
         {/* Breadcrumb */}
-        <div className="px-8 lg:px-12 py-4">
+        <div className="px-4 md:px-8 lg:px-12 py-4">
           <nav className="flex items-center gap-2 text-sm text-gray-500 overflow-x-auto hide-scrollbar">
             {vendor.breadcrumb.map((item, index) => (
               <div key={index} className="flex items-center gap-2 shrink-0">
@@ -485,23 +487,15 @@ export default function VendorDetailPage() {
         </div>
 
         {/* Vendor Header */}
-        <div className="px-8 lg:px-12 mt-2 mb-6">
-          <h1
-                className="font-bold"
-                style={{
-                  fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif',
-                  fontSize: '48px',
-                  lineHeight: '52px',
-                  color: 'rgb(20, 20, 20)',
-                }}
-              >
-                {vendor.name}
-              </h1>
-              <div className="flex items-center justify-between mt-2">
-                <div className="flex flex-wrap items-center gap-3">
+        <div className="px-4 md:px-8 lg:px-12 mt-2 mb-4 md:mb-6">
+          <h1 className="font-bold text-2xl md:text-4xl lg:text-5xl text-gray-900">
+            {vendor.name}
+          </h1>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-3 gap-3">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3 text-sm md:text-base">
                   {/* Rating */}
                   <div className="flex items-center gap-1">
-                    <span className="font-semibold text-gray-900">
+                    <span className="font-semibold text-blue-600">
                       {vendor.rating.toFixed(1)}
                     </span>
                     <div className="flex items-center">
@@ -521,57 +515,57 @@ export default function VendorDetailPage() {
                     </span>
                   </div>
 
-                  <span className="text-gray-300">•</span>
+              <span className="text-gray-300 hidden md:inline">•</span>
 
-                  {/* Open Status */}
-                  <span className={`font-medium ${openStatus.isOpen ? 'text-blue-600' : 'text-red-600'}`}>
-                    {openStatus.isOpen ? 'Open' : 'Closed'}
-                  </span>
-                  {openStatus.closeTime && (
-                    <span className="text-gray-600">until {openStatus.closeTime}</span>
-                  )}
+              {/* Open Status */}
+              <span className={`font-medium ${openStatus.isOpen ? 'text-green-600' : 'text-red-600'}`}>
+                {openStatus.isOpen ? 'Open' : 'Closed'}
+              </span>
+              {openStatus.closeTime && (
+                <span className="text-gray-600">until {openStatus.closeTime}</span>
+              )}
 
-                  <span className="text-gray-300">•</span>
+              <span className="text-gray-300 hidden md:inline">•</span>
 
-                  {/* Location */}
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <MapPin className="h-4 w-4" />
-                    <span>{vendor.shortLocation}</span>
-                  </div>
-                  <button
-                    onClick={handleGetDirections}
-                    className="text-blue-600 font-medium hover:underline"
-                  >
-                    Get directions
-                  </button>
-                </div>
-
-                {/* Action Buttons - Desktop */}
-                <div className="hidden lg:flex items-center gap-3">
-                  <button className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors">
-                    <Share className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => setIsFavorite(!isFavorite)}
-                    className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-                  >
-                    <Heart
-                      className={`h-5 w-5 ${
-                        isFavorite ? 'fill-red-500 text-red-500' : ''
-                      }`}
-                    />
-                  </button>
-                </div>
+              {/* Location */}
+              <div className="flex items-center gap-1 text-gray-600">
+                <MapPin className="h-4 w-4" />
+                <span className="truncate max-w-[150px] md:max-w-none">{vendor.shortLocation}</span>
               </div>
+              <button
+                onClick={handleGetDirections}
+                className="text-blue-600 font-medium hover:underline"
+              >
+                Get directions
+              </button>
+            </div>
+
+            {/* Action Buttons - Desktop */}
+            <div className="hidden md:flex items-center gap-3">
+              <button className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors">
+                <Share className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => setIsFavorite(!isFavorite)}
+                className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+              >
+                <Heart
+                  className={`h-5 w-5 ${
+                    isFavorite ? 'fill-red-500 text-red-500' : ''
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Image Gallery */}
-        <div className="px-8 lg:px-12" id="photos">
+        <div className="px-4 md:px-8 lg:px-12" id="photos">
           <ImageGallery images={vendor.images} vendorName={vendor.name} />
         </div>
 
         {/* Main Content - Two Column Layout */}
-        <div className="px-8 lg:px-12 mt-6">
+        <div className="px-4 md:px-8 lg:px-12 mt-6">
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
             {/* Left Column - Main Content */}
             <div className="flex-1 min-w-0 space-y-10">
@@ -596,7 +590,9 @@ export default function VendorDetailPage() {
                       onBookService={handleBookService}
                     />
                   ) : (
-                    <p className="text-gray-500 py-4">No services available in this category.</p>
+                    <div className="flex items-center justify-center min-h-[80px] md:min-h-[300px]">
+                      <p className="text-gray-500">No services available in this category.</p>
+                    </div>
                   )}
                 </div>
               </div>
@@ -613,6 +609,9 @@ export default function VendorDetailPage() {
                 description={vendor.description}
                 location={vendor.location}
                 openingHours={openingHours}
+                latitude={vendor.latitude}
+                longitude={vendor.longitude}
+                vendorName={vendor.name}
                 onGetDirections={handleGetDirections}
               />
             </div>
@@ -637,12 +636,12 @@ export default function VendorDetailPage() {
         </div>
 
         {/* Full Width Sections */}
-        <div className="px-8 lg:px-12 mt-10">
+        <div className="px-4 md:px-8 lg:px-12 mt-10">
           {/* Venues Nearby */}
           <VenuesNearby venues={nearbyVenues} />
         </div>
 
-        <div className="px-8 lg:px-12">
+        <div className="px-4 md:px-8 lg:px-12">
           {/* Treat Yourself Section */}
           <TreatYourselfSection
             location={vendor.shortLocation}

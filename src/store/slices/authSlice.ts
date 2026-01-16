@@ -142,6 +142,28 @@ export const register = createAsyncThunk(
 );
 
 /**
+ * Update profile action
+ */
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (data: Partial<User>, { rejectWithValue }) => {
+    try {
+      const response = await api.put<{ user: User }>('/auth/profile', data);
+      const user = response.data.user;
+
+      // Update localStorage
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+
+      return user;
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      const errorMessage = err.response?.data?.message || 'Failed to update profile';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+/**
  * Logout action
  */
 export const logout = createAsyncThunk('auth/logout', async () => {
@@ -234,6 +256,22 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(register.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Update Profile
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

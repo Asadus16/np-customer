@@ -67,7 +67,7 @@ export function ReviewsSection({
           ))}
         </div>
       ) : (
-        <div className="text-center py-8">
+        <div className="flex items-center justify-center min-h-[80px] md:min-h-[300px]">
           <p className="text-gray-500">No reviews yet. Be the first to leave a review!</p>
         </div>
       )}
