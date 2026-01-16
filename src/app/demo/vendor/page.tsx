@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Star, MapPin, Share, Heart } from 'lucide-react';
@@ -175,6 +175,46 @@ export default function DemoVendorPage() {
 
   // Get all category names for tabs
   const categoryNames = DEMO_SERVICE_CATEGORIES.map((c) => c.name);
+
+  // If coming from a booking flow, modify history so back button goes to home
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Check if we came from booking flow (from sessionStorage or referrer)
+      const cameFromBooking = sessionStorage.getItem('came_from_booking_redirect') === 'true';
+      const referrer = document.referrer;
+      const isFromBookingFlow = cameFromBooking || 
+                                referrer.includes('/demo/booking') || 
+                                referrer.includes('/booking/');
+      
+      if (isFromBookingFlow) {
+        // Clear the flag
+        sessionStorage.removeItem('came_from_booking_redirect');
+        
+        // Modify history so that home is the previous entry
+        // We do this after a small delay to ensure page is fully loaded
+        const timer = setTimeout(() => {
+          // Only modify if we're still on vendor page
+          if (window.location.pathname === '/demo/vendor') {
+            // Save current state
+            const currentState = window.history.state;
+            
+            // Replace current history entry with home
+            // This makes home the previous entry
+            window.history.replaceState(currentState, '', '/');
+            
+            // Push vendor page back as current entry
+            // Now history stack: ... -> home -> vendor (current)
+            // When user clicks back, they'll go to home
+            window.history.pushState(currentState, '', '/demo/vendor');
+          }
+        }, 100);
+        
+        return () => {
+          clearTimeout(timer);
+        };
+      }
+    }
+  }, []);
 
   const handleBookService = (service: Service) => {
     // Store the selected service in session storage
