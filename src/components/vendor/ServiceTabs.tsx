@@ -67,8 +67,8 @@ export function ServiceTabs({
             onClick={() => onCategoryChange(category)}
             className={`whitespace-nowrap transition-colors ${
               activeCategory === category
-                ? 'px-5 py-2.5 bg-gray-900 text-white rounded-full text-sm font-medium'
-                : 'text-gray-600 hover:text-gray-900 text-sm font-medium'
+                ? 'px-4 py-2 bg-gray-900 text-white rounded-full text-sm font-semibold'
+                : 'text-gray-600 hover:text-gray-900 text-sm font-semibold'
             }`}
           >
             {category}

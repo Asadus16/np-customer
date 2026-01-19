@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, X, ChevronLeft, ChevronRight, Calendar, Zap, Clock, Repeat } from 'lucide-react';
 import { useVendor, useAuth } from '@/hooks';
-import { BookingBreadcrumb, BookingSidebar, LoginModal } from '@/components/booking';
+import { BookingBreadcrumb, BookingLayout, BookingSidebar, ExitConfirmModal, LoginModal } from '@/components/booking';
 
 type OrderType = 'now' | 'schedule' | 'recurring';
 type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly';
@@ -44,6 +44,7 @@ export default function BookingTimePage() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [orderType, setOrderType] = useState<OrderType | null>(null);
   const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>('weekly');
+  const [showExitModal, setShowExitModal] = useState(false);
 
   // Load selected services from session storage
   useEffect(() => {
@@ -116,10 +117,10 @@ export default function BookingTimePage() {
     }, 0);
   }, [selectedServices]);
 
-  // Get dates for the week view (14 days starting from weekStartDate)
+  // Get dates for the week view (7 days starting from weekStartDate)
   const weekDates = useMemo(() => {
     const dates: Date[] = [];
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 7; i++) {
       const date = new Date(weekStartDate);
       date.setDate(weekStartDate.getDate() + i);
       dates.push(date);
@@ -217,8 +218,14 @@ export default function BookingTimePage() {
     router.push(`/booking/${vendorId}`);
   };
 
-  // Handle close
+  // Handle close - show confirmation modal
   const handleClose = () => {
+    setShowExitModal(true);
+  };
+
+  // Confirm exit
+  const handleConfirmExit = () => {
+    setShowExitModal(false);
     router.push(`/vendor/${vendorId}`);
   };
 
@@ -333,38 +340,43 @@ export default function BookingTimePage() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 bg-white z-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex items-center justify-between py-5">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleBack}
-                className="h-11 w-11 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-                aria-label="Go back"
-              >
-                <ArrowLeft className="h-5 w-5 text-gray-700" />
-              </button>
-            </div>
+        <div className="flex items-center justify-between pl-8 pr-6 lg:pl-12 lg:pr-10 pt-3 pb-3">
+          <button
+            onClick={handleBack}
+            className="h-12 w-12 flex items-center justify-center border border-[#d3d3d3] rounded-full hover:bg-gray-50 transition-colors"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="h-5 w-5 text-gray-700" />
+          </button>
 
-            <button
-              onClick={handleClose}
-              className="h-11 w-11 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-              aria-label="Close"
-            >
-              <X className="h-5 w-5 text-gray-700" />
-            </button>
-          </div>
+          <button
+            onClick={handleClose}
+            className="h-12 w-12 flex items-center justify-center border border-[#d3d3d3] rounded-full hover:bg-gray-50 transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5 text-gray-700" />
+          </button>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         {/* Breadcrumb */}
-        <div className="mb-6 pt-6">
+        <div className="mb-4">
           <BookingBreadcrumb currentStep="time" />
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-          {/* Left Pane - Time Selection */}
-          <div className="flex-1 min-w-0 pb-8">
+        <BookingLayout
+          sidebar={
+            <BookingSidebar
+              vendor={{ ...vendor, logo: vendor.logo ?? undefined }}
+              selectedServices={selectedServices}
+              total={total}
+              onContinue={handleContinue}
+              continueDisabled={!orderType || (orderType !== 'now' && !selectedTime)}
+              showDurationRange={false}
+            />
+          }
+        >
             <h1 className="text-4xl font-bold text-gray-900 mb-8">Select time</h1>
 
             {/* Order Type Selection */}
@@ -447,41 +459,43 @@ export default function BookingTimePage() {
             {/* Week View Date Selection - Show only when schedule or recurring is selected */}
             {(orderType === 'schedule' || orderType === 'recurring') && (
             <>
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">
+            <div className="mb-8">
+              {/* Calendar Icon Button */}
+              <button
+                onClick={() => setShowCalendarModal(true)}
+                className="h-12 w-12 flex items-center justify-center border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors mb-6"
+                aria-label="Open calendar"
+              >
+                <Calendar className="h-5 w-5 text-gray-700" />
+              </button>
+
+              {/* Month/Year and Navigation */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">
                   {weekMonthYear}
                 </h2>
-                <div className="flex items-center gap-2">
-                  {/* Calendar Icon Button */}
-                  <button
-                    onClick={() => setShowCalendarModal(true)}
-                    className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-                    aria-label="Open calendar"
-                  >
-                    <Calendar className="h-5 w-5 text-gray-700" />
-                  </button>
+                <div className="flex items-center gap-1">
                   <button
                     onClick={handlePreviousWeek}
-                    className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+                    className="h-8 w-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
                     aria-label="Previous week"
                   >
-                    <ChevronLeft className="h-5 w-5 text-gray-700" />
+                    <ChevronLeft className="h-5 w-5 text-gray-400" />
                   </button>
                   <button
                     onClick={handleNextWeek}
-                    className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+                    className="h-8 w-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
                     aria-label="Next week"
                   >
-                    <ChevronRight className="h-5 w-5 text-gray-700" />
+                    <ChevronRight className="h-5 w-5 text-gray-400" />
                   </button>
                 </div>
               </div>
 
-              {/* Week Dates - Rectangular Buttons with slide animation */}
+              {/* Week Dates - Circular Buttons */}
               <div className="overflow-hidden">
                 <div
-                  className={`flex gap-2 transition-all duration-200 ease-out ${
+                  className={`flex justify-between transition-all duration-200 ease-out ${
                     slideDirection === 'left'
                       ? 'opacity-0 -translate-x-4'
                       : slideDirection === 'right'
@@ -493,30 +507,31 @@ export default function BookingTimePage() {
                     const isSelected = date.toDateString() === selectedDate.toDateString();
                     const isToday = date.toDateString() === new Date().toDateString();
                     const isPast = isDateInPast(date) && !isToday;
-                    const isSaturday = date.getDay() === 6;
 
                     return (
                       <button
                         key={date.toISOString()}
                         onClick={() => !isPast && handleDateSelect(date)}
                         disabled={isPast}
-                        className={`flex flex-col items-center justify-center py-4 px-4 rounded-2xl transition-all min-w-[72px] ${
-                          isPast
-                            ? 'opacity-40 cursor-not-allowed border border-gray-200'
-                            : isSelected
-                            ? 'bg-[#6950f3] text-white border-2 border-[#6950f3]'
-                            : isSaturday
-                            ? 'bg-white border-2 border-gray-300 hover:border-gray-400'
-                            : 'bg-white border border-gray-200 hover:border-gray-300'
-                        }`}
+                        className={`flex flex-col items-center ${isPast ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                       >
-                        <span className={`text-2xl font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                          {date.getDate()}
-                        </span>
-                        <span className={`text-xs font-medium mt-1 ${
-                          isSelected ? 'text-white' : isToday ? 'text-[#6950f3]' : 'text-gray-500'
+                        <div
+                          className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
+                            isPast
+                              ? 'opacity-40 border border-gray-200'
+                              : isSelected
+                              ? 'bg-[#6950f3] text-white'
+                              : 'border border-gray-200 hover:border-gray-300 bg-white'
+                          }`}
+                        >
+                          <span className={`text-2xl font-semibold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                            {date.getDate()}
+                          </span>
+                        </div>
+                        <span className={`text-sm mt-2 ${
+                          isPast ? 'text-gray-400' : isSelected ? 'text-gray-900 font-medium' : 'text-gray-500'
                         }`}>
-                          {isToday ? 'Today' : getDayName(date)}
+                          {getDayName(date)}
                         </span>
                       </button>
                     );
@@ -529,7 +544,7 @@ export default function BookingTimePage() {
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Available times</h2>
               {timeSlots.length > 0 ? (
-                <div className="grid grid-cols-6 gap-2">
+                <div className="flex flex-col gap-3">
                   {timeSlots.map((slot, index) => {
                     const isSelected = selectedTime === slot.time;
 
@@ -538,11 +553,11 @@ export default function BookingTimePage() {
                         key={index}
                         onClick={() => slot.available && setSelectedTime(slot.time)}
                         disabled={!slot.available}
-                        className={`py-3 px-2 rounded-xl text-sm font-medium transition-all ${
+                        className={`py-4 px-5 rounded-lg text-base font-medium transition-all text-left ${
                           isSelected
-                            ? 'bg-gray-100 text-gray-900 border-2 border-[#6950f3]'
+                            ? 'bg-gray-100 text-gray-900 border-2 border-[#6950f3] cursor-pointer'
                             : slot.available
-                            ? 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300'
+                            ? 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300 cursor-pointer'
                             : 'bg-gray-50 border border-gray-100 text-gray-300 cursor-not-allowed'
                         }`}
                       >
@@ -571,18 +586,7 @@ export default function BookingTimePage() {
             )}
             </>
             )}
-          </div>
-
-          {/* Right Pane - Order Summary */}
-          <BookingSidebar
-            vendor={{ ...vendor, logo: vendor.logo ?? undefined }}
-            selectedServices={selectedServices}
-            total={total}
-            onContinue={handleContinue}
-            continueDisabled={!orderType || (orderType !== 'now' && !selectedTime)}
-            showDurationRange={false}
-          />
-        </div>
+        </BookingLayout>
       </div>
 
       {/* Calendar Modal */}
@@ -673,6 +677,13 @@ export default function BookingTimePage() {
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         onSuccess={handleLoginSuccess}
+      />
+
+      {/* Exit Confirmation Modal */}
+      <ExitConfirmModal
+        isOpen={showExitModal}
+        onCancel={() => setShowExitModal(false)}
+        onConfirm={handleConfirmExit}
       />
     </div>
   );

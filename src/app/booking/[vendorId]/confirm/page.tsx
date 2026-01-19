@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, X, Calendar, Clock, Store, CreditCard, Wallet, Check, Plus, Home, ChevronRight } from 'lucide-react';
 import { useVendor, useAuth } from '@/hooks';
-import { BookingBreadcrumb, BookingSidebar } from '@/components/booking';
+import { BookingBreadcrumb, BookingLayout, BookingSidebar, ExitConfirmModal } from '@/components/booking';
 import api from '@/lib/api';
 import { getPaymentMethods, PaymentMethod, getCardBrandDisplay } from '@/services/paymentService';
 
@@ -50,6 +50,7 @@ export default function BookingConfirmPage() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
 
   // Load booking data from session storage
   useEffect(() => {
@@ -270,8 +271,14 @@ export default function BookingConfirmPage() {
     router.push(`/booking/${vendorId}/time`);
   };
 
-  // Handle close
+  // Handle close - show confirmation modal
   const handleClose = () => {
+    setShowExitModal(true);
+  };
+
+  // Confirm exit
+  const handleConfirmExit = () => {
+    setShowExitModal(false);
     router.push(`/vendor/${vendorId}`);
   };
 
@@ -335,38 +342,57 @@ export default function BookingConfirmPage() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="sticky top-0 bg-white z-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex items-center justify-between py-5">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleBack}
-                className="h-11 w-11 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-                aria-label="Go back"
-              >
-                <ArrowLeft className="h-5 w-5 text-gray-700" />
-              </button>
-            </div>
+        <div className="flex items-center justify-between pl-8 pr-6 lg:pl-12 lg:pr-10 pt-3 pb-3">
+          <button
+            onClick={handleBack}
+            className="h-12 w-12 flex items-center justify-center border border-[#d3d3d3] rounded-full hover:bg-gray-50 transition-colors"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="h-5 w-5 text-gray-700" />
+          </button>
 
-            <button
-              onClick={handleClose}
-              className="h-11 w-11 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-              aria-label="Close"
-            >
-              <X className="h-5 w-5 text-gray-700" />
-            </button>
-          </div>
+          <button
+            onClick={handleClose}
+            className="h-12 w-12 flex items-center justify-center border border-[#d3d3d3] rounded-full hover:bg-gray-50 transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5 text-gray-700" />
+          </button>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         {/* Breadcrumb */}
-        <div className="mb-6 pt-6">
+        <div className="mb-4">
           <BookingBreadcrumb currentStep="confirm" />
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-          {/* Left Pane - Booking Details */}
-          <div className="flex-1 min-w-0 pb-8">
+        <BookingLayout
+          sidebar={
+            <BookingSidebar
+              vendor={{ ...vendor, logo: vendor.logo ?? undefined }}
+              selectedServices={selectedServices}
+              total={total}
+              onContinue={handleConfirm}
+              continueDisabled={isSubmitting || !selectedAddress || (paymentType === 'card' && !selectedPaymentMethod)}
+              continueLabel={isSubmitting ? 'Processing...' : 'Confirm Booking'}
+              isLoading={isSubmitting}
+              showDurationRange={false}
+            >
+              {/* Date and Time */}
+              <div className="px-6 pb-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span>{formattedDate}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <Clock className="h-4 w-4 text-gray-500" />
+                  <span>{formattedTimeRange}</span>
+                </div>
+              </div>
+            </BookingSidebar>
+          }
+        >
             <h1 className="text-4xl font-bold text-gray-900 mb-8">Review and confirm</h1>
 
             {/* Address Selection */}
@@ -637,33 +663,15 @@ export default function BookingConfirmPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
               />
             </div>
-          </div>
-
-          {/* Right Pane - Booking Summary */}
-          <BookingSidebar
-            vendor={{ ...vendor, logo: vendor.logo ?? undefined }}
-            selectedServices={selectedServices}
-            total={total}
-            onContinue={handleConfirm}
-            continueDisabled={isSubmitting || !selectedAddress || (paymentType === 'card' && !selectedPaymentMethod)}
-            continueLabel={isSubmitting ? 'Processing...' : 'Confirm Booking'}
-            isLoading={isSubmitting}
-            showDurationRange={false}
-          >
-            {/* Date and Time */}
-            <div className="px-6 pb-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <span>{formattedDate}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <Clock className="h-4 w-4 text-gray-500" />
-                <span>{formattedTimeRange}</span>
-              </div>
-            </div>
-          </BookingSidebar>
-        </div>
+        </BookingLayout>
       </div>
+
+      {/* Exit Confirmation Modal */}
+      <ExitConfirmModal
+        isOpen={showExitModal}
+        onCancel={() => setShowExitModal(false)}
+        onConfirm={handleConfirmExit}
+      />
     </div>
   );
 }

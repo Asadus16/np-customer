@@ -31,7 +31,10 @@ export function AboutSection({
 }: AboutSectionProps) {
   return (
     <div className="space-y-8" id="about">
-      <h2 className="text-2xl font-bold text-gray-900">About</h2>
+      <h2
+        className="text-[28px] font-[550] leading-9 text-[rgb(20,20,20)]"
+        style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
+      >About</h2>
 
       {/* Description */}
       <p className="text-gray-700 leading-relaxed">{description}</p>
@@ -51,14 +54,14 @@ export function AboutSection({
         <span className="break-words">{location}</span>
         <button
           onClick={onGetDirections}
-          className="text-green-600 font-medium hover:underline whitespace-nowrap"
+          className="text-blue-600 font-medium hover:underline whitespace-nowrap"
         >
           Get directions
         </button>
       </div>
 
       {/* Opening Times & Additional Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 mt-8">
         {/* Opening Times */}
         <div>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Opening times</h3>

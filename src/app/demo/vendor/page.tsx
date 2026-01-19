@@ -258,12 +258,7 @@ export default function DemoVendorPage() {
   return (
     <>
       {/* Scroll-aware NavBar */}
-      <VendorNavBar
-        vendorName={DEMO_VENDOR.name}
-        rating={DEMO_VENDOR.rating}
-        reviewCount={DEMO_VENDOR.reviewCount}
-        onBookNow={handleBookNow}
-      />
+      <VendorNavBar />
 
       <div className="min-h-screen bg-white pb-24 lg:pb-0">
         {/* Breadcrumb */}
@@ -289,10 +284,10 @@ export default function DemoVendorPage() {
 
         {/* Vendor Header */}
         <div className="px-4 md:px-8 lg:px-12 mt-2 mb-4 md:mb-6">
-          <h1 className="font-bold text-2xl md:text-4xl lg:text-5xl text-gray-900">
+          <h1 className="font-bold text-2xl md:text-4xl lg:text-5xl text-gray-900 leading-none">
             {DEMO_VENDOR.name}
           </h1>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-3 gap-3">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 -mt-2">
             <div className="flex flex-wrap items-center gap-2 md:gap-3 text-sm md:text-base">
               {/* Rating */}
               <div className="flex items-center gap-1">

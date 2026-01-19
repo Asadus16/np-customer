@@ -3,25 +3,27 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { 
-  User, 
-  Calendar, 
-  Wallet, 
-  Heart, 
-  ClipboardList, 
-  Package, 
-  Settings, 
-  ChevronUp, 
+import {
+  User,
+  Calendar,
+  Wallet,
+  Heart,
+  ClipboardList,
+  Package,
+  Settings,
   ChevronDown,
+  ChevronUp,
   Globe,
   ChevronRight,
   LogOut
 } from 'lucide-react';
 import { useAuth } from '@/hooks';
 import { ROUTES } from '@/config';
+import { LogoutConfirmModal } from './LogoutConfirmModal';
 
 export function UserProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, logout, isAuthenticated } = useAuth();
   const router = useRouter();
@@ -43,9 +45,14 @@ export function UserProfileDropdown() {
     };
   }, [isOpen]);
 
-  const handleLogout = async () => {
-    await logout();
+  const handleLogoutClick = () => {
     setIsOpen(false);
+    setShowLogoutModal(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    await logout();
+    setShowLogoutModal(false);
     router.push(ROUTES.HOME);
   };
 
@@ -72,17 +79,17 @@ export function UserProfileDropdown() {
       {/* Profile Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+        className="flex items-center justify-between w-20 pl-1 pr-3 py-1 bg-white border border-[#d3d3d3] rounded-full hover:shadow-sm transition-all"
       >
         {/* Avatar */}
-        <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-medium text-gray-700">
+        <div className="w-9 h-9 rounded-full bg-[#f0f0ff] flex items-center justify-center text-sm font-semibold text-blue-600">
           {getUserInitials()}
         </div>
         {/* Chevron */}
         {isOpen ? (
-          <ChevronUp className="h-4 w-4 text-gray-600" />
+          <ChevronDown className="h-4 w-4 text-gray-500" />
         ) : (
-          <ChevronDown className="h-4 w-4 text-gray-600" />
+          <ChevronUp className="h-4 w-4 text-gray-500" />
         )}
       </button>
 
@@ -167,7 +174,7 @@ export function UserProfileDropdown() {
               <span className="text-sm text-gray-900">Settings</span>
             </Link>
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 transition-colors text-left"
             >
               <div className="w-5 h-5 flex items-center justify-center">
@@ -221,6 +228,14 @@ export function UserProfileDropdown() {
           </div>
         </div>
       )}
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmModal
+        isOpen={showLogoutModal}
+        email={user?.email || ''}
+        onCancel={() => setShowLogoutModal(false)}
+        onConfirm={handleLogoutConfirm}
+      />
     </div>
   );
 }

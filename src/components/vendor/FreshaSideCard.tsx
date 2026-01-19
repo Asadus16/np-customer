@@ -51,20 +51,18 @@ export function FreshaSideCard({
     const card = cardRef.current;
     if (!card) return;
 
-    const SHOW_THRESHOLD = 0.75; // Show when 75%+ visible
-    const HIDE_THRESHOLD = 0.60; // Hide when below 60% visible
+    const SHOW_THRESHOLD = 0.75;
+    const HIDE_THRESHOLD = 0.60;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const ratio = entry.intersectionRatio;
-          // Use hysteresis: different thresholds for show/hide to prevent jitter
           if (ratio >= SHOW_THRESHOLD) {
             setShowHeader(true);
           } else if (ratio < HIDE_THRESHOLD) {
             setShowHeader(false);
           }
-          // Between 60-75%: maintain current state (no change)
         });
       },
       {
@@ -81,7 +79,7 @@ export function FreshaSideCard({
   }, []);
 
   return (
-    <div ref={cardRef} className="bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden w-110">
+    <div ref={cardRef} className="bg-white border border-gray-200 rounded-lg shadow-2xl overflow-hidden w-110">
       {/* Header Section */}
       <div className="p-8 space-y-5">
         {/* Vendor Name, Rating, Featured with shutter slider transition */}
@@ -102,11 +100,11 @@ export function FreshaSideCard({
               showHeader ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
             }`}>
               <span className="text-xl font-bold text-gray-900">{rating.toFixed(1)}</span>
-              <div className="flex items-center">
+              <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`h-5 w-5 ${
+                    className={`h-6 w-6 ${
                       star <= Math.round(rating)
                         ? 'fill-yellow-400 text-yellow-400'
                         : 'fill-gray-200 text-gray-200'
@@ -114,13 +112,13 @@ export function FreshaSideCard({
                   />
                 ))}
               </div>
-              <span className="text-base text-indigo-600 font-medium">
+              <span className="text-lg text-indigo-600 font-medium">
                 ({reviewCount.toLocaleString()})
               </span>
             </div>
 
             {/* Featured Badge */}
-            <span className={`inline-block px-4 py-1.5 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-full transition-all duration-300 ${
+            <span className={`inline-block px-4 py-1.5 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-full border border-indigo-200 transition-all duration-300 ${
               showHeader ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
             }`}>
               Featured
@@ -131,7 +129,7 @@ export function FreshaSideCard({
         {/* Book Now Button - Always visible */}
         <button
           onClick={onBookNow}
-          className="w-full bg-gray-900 text-white py-4 rounded-full text-base font-semibold hover:bg-gray-800 transition-colors"
+          className="w-full bg-gray-900 text-white py-3 rounded-full text-base font-semibold hover:bg-gray-800 transition-colors"
         >
           Book now
         </button>
@@ -168,28 +166,35 @@ export function FreshaSideCard({
             )}
           </button>
 
-          {/* Expanded Hours */}
-          {isHoursExpanded && (
-            <div className="mt-4 space-y-3">
-              {openingHours.map((item) => {
-                const isClosed = item.hours === 'Closed' || item.hours === 'Not set';
-                return (
-                  <div
-                    key={item.day}
-                    className={`flex items-center justify-between ${
-                      item.isToday ? 'font-semibold' : ''
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full shrink-0 ${isClosed ? 'bg-gray-400' : 'bg-green-500'}`} />
-                      <span className="text-gray-900">{item.day}</span>
+          {/* Expanded Hours with slide transition */}
+          <div
+            className="overflow-hidden transition-[grid-template-rows] duration-300 ease-out grid"
+            style={{
+              gridTemplateRows: isHoursExpanded ? '1fr' : '0fr',
+            }}
+          >
+            <div className="min-h-0">
+              <div className="mt-4 space-y-3">
+                {openingHours.map((item) => {
+                  const isClosed = item.hours === 'Closed' || item.hours === 'Not set';
+                  return (
+                    <div
+                      key={item.day}
+                      className={`flex items-center justify-between ${
+                        item.isToday ? 'font-semibold' : ''
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${isClosed ? 'bg-gray-400' : 'bg-green-500'}`} />
+                        <span className="text-gray-900">{item.day}</span>
+                      </div>
+                      <span className={isClosed ? 'text-gray-500' : 'text-gray-700'}>{item.hours}</span>
                     </div>
-                    <span className={isClosed ? 'text-gray-500' : 'text-gray-700'}>{item.hours}</span>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Location */}
