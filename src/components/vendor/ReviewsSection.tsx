@@ -32,15 +32,18 @@ export function ReviewsSection({
     <div className="space-y-6" id="reviews">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Reviews</h2>
+        <h2
+          className="text-[28px] font-[550] leading-9 text-[rgb(20,20,20)] mb-6"
+          style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
+        >Reviews</h2>
 
         {/* Rating Summary */}
-        <div className="flex items-center gap-3">
+        <div className="space-y-2">
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
-                className={`h-6 w-6 ${
+                className={`h-7 w-7 ${
                   star <= Math.round(averageRating)
                     ? 'fill-yellow-400 text-yellow-400'
                     : 'fill-gray-200 text-gray-200'
@@ -48,11 +51,11 @@ export function ReviewsSection({
               />
             ))}
           </div>
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-center gap-2">
             <span className="text-lg font-semibold text-gray-900">
               {averageRating.toFixed(1)}
             </span>
-            <span className="text-sm text-indigo-600 font-medium">
+            <span className="text-lg text-indigo-600 font-medium">
               ({totalReviews.toLocaleString()})
             </span>
           </div>

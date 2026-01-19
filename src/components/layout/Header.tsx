@@ -12,9 +12,12 @@ import { UserProfileDropdown } from './UserProfileDropdown';
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
   const desktopMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isVendorPage = pathname?.startsWith('/vendor');
+  const isProfilePage = pathname === '/profile' || pathname === '/appointments' || pathname === '/wallet' || pathname === '/favorites' || pathname === '/forms' || pathname === '/orders' || pathname === '/settings';
+  const showSearchBar = isVendorPage || isProfilePage;
   const { isAuthenticated, logout } = useAuth();
   const router = useRouter();
 
@@ -29,10 +32,33 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Hide header on scroll for vendor pages
+  useEffect(() => {
+    if (!isVendorPage) {
+      setIsHidden(false);
+      return;
+    }
+
+    const SHOW_THRESHOLD = 350;
+    const HIDE_THRESHOLD = 400;
+
+    function handleScroll() {
+      const scrollY = window.scrollY;
+      if (scrollY > HIDE_THRESHOLD && !isHidden) {
+        setIsHidden(true);
+      } else if (scrollY < SHOW_THRESHOLD && isHidden) {
+        setIsHidden(false);
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isVendorPage, isHidden]);
+
   return (
-    <header className="bg-white sticky top-0 z-50">
-      <div className="px-8 lg:px-12">
-        <div className="flex items-center h-20 gap-6">
+    <header className={`bg-white sticky top-0 z-50 transition-transform duration-300 ${isHidden ? '-translate-y-full' : 'translate-y-0'} ${isProfilePage ? 'border-b border-gray-200' : ''}`}>
+      <div className="px-6 lg:px-9">
+        <div className="flex items-center h-18 gap-6">
           {/* Logo */}
           <Link href={ROUTES.HOME} className="flex items-center shrink-0">
             <Image
@@ -45,12 +71,12 @@ export function Header() {
             />
           </Link>
 
-          {/* Search Bar - Desktop (only on vendor pages) */}
-          {isVendorPage && (
-            <div className="hidden md:flex flex-1 justify-center">
-              <div className="flex items-center border border-gray-200 rounded-full shadow-md hover:shadow-lg transition-shadow w-[700px]">
+          {/* Search Bar - Desktop */}
+          {showSearchBar && (
+            <div className="hidden md:flex flex-1 justify-start ml-37">
+              <div className="flex items-center border border-gray-200 rounded-full shadow-md hover:shadow-lg transition-shadow w-[720px]">
                 {/* All treatments */}
-                <button className="flex-1 flex items-center justify-center gap-3 py-4 hover:bg-gray-50 rounded-l-full transition-colors">
+                <button className="flex-1 flex items-center justify-start gap-3 py-4 pl-4 hover:bg-gray-50 rounded-l-full transition-colors">
                   <Search className="h-4 w-4 text-gray-400" />
                   <span className="text-[15px] font-medium leading-[15px] text-[rgb(20,20,20)]">All treatments</span>
                 </button>
@@ -59,23 +85,23 @@ export function Header() {
                 <div className="h-7 w-px bg-gray-200" />
 
                 {/* Location */}
-                <button className="flex-1 flex items-center justify-center gap-3 py-4 hover:bg-gray-50 transition-colors">
-                  <span className="text-[15px] font-medium leading-[15px] text-gray-500">Current location</span>
+                <button className="flex-1 flex items-center justify-start gap-3 py-4 pl-4 hover:bg-gray-50 transition-colors">
+                  <span className="text-[15px] font-medium leading-[15px] text-[rgb(20,20,20)]">Current location</span>
                 </button>
 
                 {/* Divider */}
                 <div className="h-7 w-px bg-gray-200" />
 
                 {/* Time */}
-                <button className="flex-1 flex items-center justify-center gap-3 py-4 hover:bg-gray-50 rounded-r-full transition-colors">
-                  <span className="text-[15px] font-medium leading-[15px] text-gray-500">Any time</span>
+                <button className="flex-1 flex items-center justify-start gap-3 py-4 pl-4 hover:bg-gray-50 rounded-r-full transition-colors">
+                  <span className="text-[15px] font-medium leading-[15px] text-[rgb(20,20,20)]">Any time</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* Spacer for non-vendor pages */}
-          {!isVendorPage && <div className="flex-1" />}
+          {/* Spacer for pages without search bar */}
+          {!showSearchBar && <div className="flex-1" />}
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-3 shrink-0">
@@ -85,10 +111,10 @@ export function Header() {
               <div className="relative" ref={desktopMenuRef}>
                 <button
                   onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-full hover:shadow-md transition-all text-sm font-medium"
+                  className="flex items-center gap-2 px-5 py-2.5 border border-[#d3d3d3] rounded-full hover:shadow-md transition-all text-base font-semibold"
                 >
                   Menu
-                  <Menu className="h-4 w-4" />
+                  <Menu className="h-5 w-5" />
                 </button>
 
                 {/* Desktop Dropdown Menu */}

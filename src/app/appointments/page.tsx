@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, Clock, MapPin, Building2, ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronRight, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks';
 import api from '@/lib/api';
 import { ROUTES } from '@/config';
 import Link from 'next/link';
+import Image from 'next/image';
+import { ProfileLayout } from '@/components/layout/ProfileLayout';
 
 interface Order {
   id: string;
@@ -38,7 +40,6 @@ export default function AppointmentsPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled'>('all');
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -55,11 +56,7 @@ export default function AppointmentsPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const params: any = { per_page: 50 };
-        if (filter !== 'all') {
-          params.status = filter;
-        }
-        const response = await api.get('/customer/orders', { params });
+        const response = await api.get('/customer/orders', { params: { per_page: 50 } });
         setOrders(response.data.data || []);
       } catch (err: any) {
         console.error('Failed to fetch orders', err);
@@ -70,9 +67,9 @@ export default function AppointmentsPage() {
     };
 
     fetchOrders();
-  }, [isAuthenticated, filter]);
+  }, [isAuthenticated]);
 
-  // Format date
+  // Format date - "Wednesday, 22 January"
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -83,7 +80,7 @@ export default function AppointmentsPage() {
     return `${dayName}, ${day} ${month}`;
   };
 
-  // Format time
+  // Format time - "9:00 am"
   const formatTime = (timeString: string) => {
     if (!timeString) return '';
     const [hours, minutes] = timeString.split(':');
@@ -93,48 +90,12 @@ export default function AppointmentsPage() {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-  // Get status color
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'confirmed':
-        return 'bg-blue-100 text-blue-800';
-      case 'in_progress':
-        return 'bg-purple-100 text-purple-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  // Get status label
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'confirmed':
-        return 'Confirmed';
-      case 'in_progress':
-        return 'In Progress';
-      case 'completed':
-        return 'Completed';
-      case 'cancelled':
-        return 'Cancelled';
-      default:
-        return status;
-    }
-  };
-
-  if (authLoading || isLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-600">Loading appointments...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -145,140 +106,88 @@ export default function AppointmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Appointments</h1>
-          <p className="text-gray-600">View and manage your upcoming and past appointments</p>
+    <ProfileLayout>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-32">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600">Loading appointments...</p>
+          </div>
         </div>
-
-        {/* Filters */}
-        <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
-          {(['all', 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'] as const).map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilter(status)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-colors ${
-                filter === status
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {status === 'all' ? 'All' : getStatusLabel(status)}
-            </button>
-          ))}
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-800 text-sm mb-2">{error}</p>
+      ) : error ? (
+        <div className="flex items-center justify-center py-32">
+          <div className="text-center max-w-md">
+            <p className="text-red-600 text-sm mb-2">{error}</p>
             {error.includes('Customer access required') && (
-              <p className="text-red-700 text-xs">
+              <p className="text-red-500 text-xs">
                 It looks like your account doesn't have customer permissions. Please contact support or try logging out and registering again.
               </p>
             )}
           </div>
-        )}
-
-        {/* Orders List */}
-        {orders.length === 0 ? (
-          <div className="text-center py-12">
-            <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No appointments found</h3>
-            <p className="text-gray-600 mb-6">
-              {filter === 'all' 
-                ? "You don't have any appointments yet."
-                : `You don't have any ${getStatusLabel(filter).toLowerCase()} appointments.`}
+        </div>
+      ) : orders.length === 0 ? (
+        /* Empty State */
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)] pt-32">
+          <div className="text-center">
+            <div className="mb-6">
+              <Image
+                src="/appointments/calendar.png"
+                alt="No appointments"
+                width={55}
+                height={55}
+                className="mx-auto"
+              />
+            </div>
+            <h2 className="text-[20px] font-semibold leading-[28px] text-[rgb(20,20,20)] mb-2">
+              No appointments yet
+            </h2>
+            <p className="text-[15px] font-normal leading-[20px] text-[rgb(118,118,118)] mb-6">
+              Your upcoming and past appointments will appear when you book
             </p>
             <Link
               href="/"
-              className="inline-block px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              className="inline-block px-4 py-2 bg-white border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
             >
-              Browse Services
+              Start searching
             </Link>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {orders.map((order) => (
-              <Link
-                key={order.id}
-                href={`/customer/orders/${order.id}`}
-                className="block bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  {/* Left: Order Info */}
-                  <div className="flex-1 min-w-0">
-                    {/* Vendor Info */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-gray-900 truncate">
-                          {order.vendor?.name || 'Vendor'}
-                        </h3>
-                        <p className="text-sm text-gray-500">Order #{order.order_number}</p>
-                      </div>
-                    </div>
+        </div>
+      ) : (
+        /* Appointments List */
+        <div className="space-y-4">
+          {orders.map((order) => (
+            <Link
+              key={order.id}
+              href={`/customer/orders/${order.id}`}
+              className="block bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  {/* Vendor Name */}
+                  <h3 className="text-base font-semibold text-gray-900 mb-1">
+                    {order.vendor?.name || 'Vendor'}
+                  </h3>
 
-                    {/* Services */}
-                    {order.items && order.items.length > 0 && (
-                      <div className="mb-3">
-                        <p className="text-sm font-medium text-gray-900 mb-1">
-                          {order.items.map(item => item.sub_service_name || item.service_name).join(', ')}
-                        </p>
-                        {order.items.length > 1 && (
-                          <p className="text-xs text-gray-500">
-                            {order.items.length} services
-                          </p>
-                        )}
-                      </div>
-                    )}
+                  {/* Services */}
+                  {order.items && order.items.length > 0 && (
+                    <p className="text-sm text-gray-600 mb-2">
+                      {order.items.map(item => item.sub_service_name || item.service_name).join(', ')}
+                    </p>
+                  )}
 
-                    {/* Date and Time */}
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
-                      {order.scheduled_date && (
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="h-4 w-4" />
-                          <span>{formatDate(order.scheduled_date)}</span>
-                        </div>
-                      )}
-                      {order.scheduled_time && (
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="h-4 w-4" />
-                          <span>{formatTime(order.scheduled_time)}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Technician */}
-                    {order.technician && (
-                      <div className="flex items-center gap-1.5 text-sm text-gray-600 mb-3">
-                        <Building2 className="h-4 w-4" />
-                        <span>{order.technician.name}</span>
-                      </div>
-                    )}
-
-                    {/* Status and Price */}
-                    <div className="flex items-center gap-3">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                        {getStatusLabel(order.status)}
-                      </span>
-                      <span className="text-sm font-semibold text-gray-900">
-                        {typeof order.total === 'number' ? order.total.toFixed(2) : parseFloat(String(order.total || 0)).toFixed(2)} AED
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Right: Arrow */}
-                  <div className="shrink-0">
-                    <ChevronRight className="h-5 w-5 text-gray-400" />
-                  </div>
+                  {/* Date and Time */}
+                  <p className="text-sm text-gray-500">
+                    {order.scheduled_date && formatDate(order.scheduled_date)}
+                    {order.scheduled_time && ` at ${formatTime(order.scheduled_time)}`}
+                  </p>
                 </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+
+                <ChevronRight className="h-5 w-5 text-gray-400 shrink-0 ml-4" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </ProfileLayout>
   );
 }

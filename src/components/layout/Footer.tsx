@@ -1,24 +1,30 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ROUTES } from '@/config';
-import { ExternalLink } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-100 border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="bg-[#f2f2f2] mt-16">
+      <div className="px-4 md:px-8 lg:px-12 py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand & App Download */}
           <div className="col-span-2 md:col-span-1">
-            <Link href={ROUTES.HOME} className="text-2xl font-bold text-gray-900 lowercase">
-              No Problem
+            <Link href={ROUTES.HOME} className="block">
+              <Image
+                src="/logos/Logo.svg"
+                alt="No Problem"
+                width={160}
+                height={46}
+                className="h-12 w-auto"
+              />
             </Link>
 
             {/* App Download Button */}
-            <button className="mt-6 flex items-center gap-3 px-5 py-3 border border-gray-300 rounded-full hover:bg-white transition-colors">
+            <button className="mt-6 flex items-center gap-3 px-5 py-3 bg-white border border-gray-300 rounded-full hover:shadow-md transition-all">
               <span className="text-sm font-medium text-gray-900">Get the app</span>
               <div className="flex items-center gap-2">
                 {/* Apple Icon */}
@@ -35,27 +41,34 @@ export function Footer() {
 
           {/* About No Problem */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+            <h3
+              className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4"
+              style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
+            >
               About No Problem
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
+                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
                   Careers
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
+                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
                   Help and support
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
+                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
                   Blog
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
+                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
                   Sitemap
                 </Link>
               </li>
@@ -64,27 +77,34 @@ export function Footer() {
 
           {/* For business */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+            <h3
+              className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4"
+              style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
+            >
               For business
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
+                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
                   For partners
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
+                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
+                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
                   Support
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
+                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
                   Status
                 </Link>
               </li>
@@ -93,22 +113,28 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+            <h3
+              className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4"
+              style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
+            >
               Legal
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
+                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
+                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
                   Terms of service
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
+                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
                   Terms of use
                 </Link>
               </li>
@@ -117,7 +143,10 @@ export function Footer() {
 
           {/* Find us on social */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+            <h3
+              className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4"
+              style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
+            >
               Find us on social
             </h3>
             <ul className="space-y-3">
@@ -126,10 +155,14 @@ export function Footer() {
                   href="https://facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-2"
+                  className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
+                  style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
                 >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7" />
+                    <polyline points="7 7 17 7 17 17" />
+                  </svg>
                   Facebook
-                  <ExternalLink className="h-3 w-3" />
                 </a>
               </li>
               <li>
@@ -137,10 +170,14 @@ export function Footer() {
                   href="https://twitter.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-2"
+                  className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
+                  style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
                 >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7" />
+                    <polyline points="7 7 17 7 17 17" />
+                  </svg>
                   Twitter
-                  <ExternalLink className="h-3 w-3" />
                 </a>
               </li>
               <li>
@@ -148,10 +185,14 @@ export function Footer() {
                   href="https://linkedin.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-2"
+                  className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
+                  style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
                 >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7" />
+                    <polyline points="7 7 17 7 17 17" />
+                  </svg>
                   Linkedin
-                  <ExternalLink className="h-3 w-3" />
                 </a>
               </li>
               <li>
@@ -159,20 +200,27 @@ export function Footer() {
                   href="https://instagram.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-2"
+                  className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
+                  style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
                 >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7" />
+                    <polyline points="7 7 17 7 17 17" />
+                  </svg>
                   Instagram
-                  <ExternalLink className="h-3 w-3" />
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+      </div>
+
+      {/* Trademark Section */}
+      <div className="bg-white px-4 md:px-8 lg:px-12 py-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Language Selector */}
-          <button className="flex items-center gap-2 text-sm text-green-600 hover:underline">
+          <button className="flex items-center gap-2 text-sm text-blue-600 hover:underline">
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"/>
               <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
@@ -182,7 +230,7 @@ export function Footer() {
 
           {/* Copyright */}
           <p className="text-sm text-gray-500">
-            &copy; {currentYear} Fresha.com SV Ltd
+            &copy; {currentYear} No Problem
           </p>
         </div>
       </div>

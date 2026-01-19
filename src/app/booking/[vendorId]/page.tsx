@@ -2,9 +2,9 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, X, Plus, Star, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, X, Plus, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useVendor } from '@/hooks';
-import { BookingBreadcrumb } from '@/components/booking';
+import { BookingBreadcrumb, BookingLayout, BookingSidebar, ExitConfirmModal } from '@/components/booking';
 import { SubServiceApiResponse, ServiceApiResponse } from '@/services/vendorService';
 
 interface SelectedService {
@@ -57,6 +57,8 @@ export default function BookingServicesPage() {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number }>({ left: 0, width: 0 });
+  const [showExitModal, setShowExitModal] = useState(false);
 
   // Get all service categories with "Most Popular" first
   const serviceCategories = useMemo(() => {
@@ -129,6 +131,40 @@ export default function BookingServicesPage() {
     setShowLeftArrow(scrollLeft > 10);
     setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
   };
+
+  // Update sliding indicator position
+  const updateIndicatorPosition = useCallback(() => {
+    const container = tabsContainerRef.current;
+    if (!container || !activeCategory) return;
+
+    const activeTab = container.querySelector(`[data-tab-id="${activeCategory}"]`) as HTMLElement;
+    if (activeTab) {
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = activeTab.getBoundingClientRect();
+      setIndicatorStyle({
+        left: tabRect.left - containerRect.left + container.scrollLeft,
+        width: tabRect.width,
+      });
+    }
+  }, [activeCategory]);
+
+  // Update indicator when active category changes or on scroll/resize
+  useEffect(() => {
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(updateIndicatorPosition, 10);
+    const container = tabsContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', updateIndicatorPosition, { passive: true });
+    }
+    window.addEventListener('resize', updateIndicatorPosition);
+    return () => {
+      clearTimeout(timer);
+      if (container) {
+        container.removeEventListener('scroll', updateIndicatorPosition);
+      }
+      window.removeEventListener('resize', updateIndicatorPosition);
+    };
+  }, [activeCategory, updateIndicatorPosition, serviceCategories]);
 
   useEffect(() => {
     checkScrollPosition();
@@ -290,14 +326,6 @@ export default function BookingServicesPage() {
     return selectedServices.some(s => s.id === serviceId);
   };
 
-  // Get location string
-  const location = useMemo(() => {
-    if (!vendor?.service_areas || vendor.service_areas.length === 0) {
-      return 'Location not available';
-    }
-    return vendor.service_areas[0].name;
-  }, [vendor]);
-
   // Handle continue
   const handleContinue = () => {
     if (selectedServices.length === 0) return;
@@ -312,8 +340,14 @@ export default function BookingServicesPage() {
     router.back();
   };
 
-  // Handle close
+  // Handle close - show confirmation modal
   const handleClose = () => {
+    setShowExitModal(true);
+  };
+
+  // Confirm exit
+  const handleConfirmExit = () => {
+    setShowExitModal(false);
     router.push(`/vendor/${vendorId}`);
   };
 
@@ -350,70 +384,98 @@ export default function BookingServicesPage() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className={`sticky top-0 bg-white z-20 transition-shadow ${isScrolled ? 'border-b border-gray-200 shadow-sm' : ''}`}>
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex items-center justify-between py-5">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleBack}
-                className="h-11 w-11 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
-                aria-label="Go back"
-              >
-                <ArrowLeft className="h-5 w-5 text-gray-700" />
-              </button>
-              {isScrolled && (
-                <span className="font-semibold text-gray-900">Services</span>
-              )}
-            </div>
+        <div className="relative">
+          {/* Buttons at edges */}
+          <div className="flex items-center justify-between pl-8 pr-6 lg:pl-12 lg:pr-10 pt-3 pb-3">
+            <button
+              onClick={handleBack}
+              className="h-12 w-12 flex items-center justify-center border border-[#d3d3d3] rounded-full hover:bg-gray-50 transition-colors"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="h-5 w-5 text-gray-700" />
+            </button>
 
             <button
               onClick={handleClose}
-              className="h-11 w-11 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+              className="h-12 w-12 flex items-center justify-center border border-[#d3d3d3] rounded-full hover:bg-gray-50 transition-colors"
               aria-label="Close"
             >
               <X className="h-5 w-5 text-gray-700" />
             </button>
           </div>
+
+          {/* Services text aligned with content */}
+          {isScrolled && (
+            <div className="absolute inset-0 pointer-events-none flex items-center">
+              <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full">
+                <span
+                  className="text-[20px] font-semibold leading-[28px]"
+                  style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif', color: 'rgb(20, 20, 20)' }}
+                >
+                  Services
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         {/* Breadcrumb */}
-        <div className="mb-6">
+        <div className="mb-4">
           <BookingBreadcrumb currentStep="services" />
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-          {/* Left Pane - Service Selection */}
-          <div className="flex-1 min-w-0 pb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-8">Services</h1>
+        <BookingLayout
+          sidebar={
+            <BookingSidebar
+              vendor={{ ...vendor, logo: vendor.logo ?? undefined }}
+              selectedServices={selectedServices}
+              total={total}
+              onContinue={handleContinue}
+              continueDisabled={selectedServices.length === 0}
+            />
+          }
+        >
+            <h1
+              className="text-[37px] font-bold leading-[44px] mb-4"
+              style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif', color: 'rgb(20, 20, 20)' }}
+            >
+              Services
+            </h1>
 
             {/* Category Tabs - Sticky */}
             {serviceCategories.length > 0 && (
-              <div className="sticky top-21 bg-white z-10 py-4 -mx-6 px-6 lg:mx-0 lg:px-0 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]">
-                <div className="relative">
-                  {/* Left Arrow */}
+              <div className={`sticky top-21 bg-white z-10 py-4 transition-shadow ${isScrolled ? 'shadow-[0_4px_6px_-1px_rgba(0,0,0,0.05)]' : ''}`}>
+                <div className="relative flex items-center">
+                  {/* Left Fade Gradient */}
                   {showLeftArrow && (
-                    <button
-                      onClick={() => scrollTabs('left')}
-                      className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-white rounded-full shadow border border-gray-200 flex items-center justify-center hover:bg-gray-50"
-                    >
-                      <ChevronLeft className="h-4 w-4 text-gray-600" />
-                    </button>
+                    <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
                   )}
 
+                  {/* Tabs Container */}
                   <div
                     ref={tabsContainerRef}
-                    className="flex gap-2 overflow-x-auto hide-scrollbar px-1"
+                    className="relative flex gap-2 overflow-x-auto hide-scrollbar flex-1"
                   >
+                    {/* Sliding indicator */}
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 h-[36px] bg-gray-900 rounded-full transition-all duration-300 ease-out pointer-events-none"
+                      style={{
+                        left: indicatorStyle.left,
+                        width: indicatorStyle.width,
+                        opacity: indicatorStyle.width > 0 ? 1 : 0,
+                      }}
+                    />
                     {serviceCategories.map((category) => (
                       <button
                         key={category.id}
                         data-tab-id={category.id}
                         onClick={() => handleTabClick(category.id)}
-                        className={`px-5 py-2.5 rounded-full font-medium whitespace-nowrap transition-colors text-sm ${
+                        className={`relative z-10 px-4 py-2 rounded-full font-medium whitespace-nowrap transition-colors duration-300 ease-out text-sm ${
                           activeCategory === category.id
-                            ? 'bg-gray-900 text-white'
-                            : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                            ? 'text-white'
+                            : 'text-gray-700 hover:bg-gray-100'
                         }`}
                       >
                         {category.name}
@@ -421,30 +483,45 @@ export default function BookingServicesPage() {
                     ))}
                   </div>
 
-                  {/* Right Arrow */}
+                  {/* Right Fade Gradient */}
                   {showRightArrow && (
-                    <button
-                      onClick={() => scrollTabs('right')}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 bg-white rounded-full shadow border border-gray-200 flex items-center justify-center hover:bg-gray-50"
-                    >
-                      <ChevronRight className="h-4 w-4 text-gray-600" />
-                    </button>
+                    <div className="absolute right-8 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+                  )}
+
+                  {/* Arrow Buttons */}
+                  {(showLeftArrow || showRightArrow) && (
+                    <div className="flex items-center gap-2 ml-4 shrink-0">
+                      <button
+                        onClick={() => scrollTabs('left')}
+                        disabled={!showLeftArrow}
+                        className={`p-1 transition-colors ${showLeftArrow ? 'text-gray-700 hover:text-gray-900' : 'text-gray-300 cursor-not-allowed'}`}
+                        aria-label="Scroll left"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => scrollTabs('right')}
+                        disabled={!showRightArrow}
+                        className={`p-1 transition-colors ${showRightArrow ? 'text-gray-700 hover:text-gray-900' : 'text-gray-300 cursor-not-allowed'}`}
+                        aria-label="Scroll right"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
             )}
 
             {/* All Category Sections */}
-            <div className="space-y-10 mt-6">
+            <div className="space-y-14 mt-4">
               {/* Most Popular Section */}
               <div
                 ref={(el) => setSectionRef('most-popular', el)}
                 data-category-id="most-popular"
               >
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Most Popular</h2>
-                <p className="text-gray-600 mb-6">
-                  Discover the top-rated services customers love, all conveniently grouped for easy selection.
-                </p>
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Most Popular</h2>
+               
                 {mostPopularServices.length > 0 ? (
                   <div className="space-y-4">
                     {mostPopularServices.map((subService) => {
@@ -459,10 +536,10 @@ export default function BookingServicesPage() {
                       return (
                         <div
                           key={subService.id}
-                          className={`bg-white rounded-xl p-5 transition-all cursor-pointer border-2 ${
+                          className={`bg-white rounded-lg p-5 transition-all cursor-pointer border ${
                             isSelected
                               ? 'border-indigo-500 shadow-sm'
-                              : 'border-gray-200 hover:border-gray-300'
+                              : 'border-[#d3d3d3] hover:border-gray-400'
                           }`}
                           onClick={() => toggleService(subService, 'Most Popular')}
                         >
@@ -470,7 +547,7 @@ export default function BookingServicesPage() {
                             <div className="flex-1 min-w-0">
                               <h3 className="font-semibold text-gray-900 mb-1">{subService.name}</h3>
                               <p className="text-sm text-gray-500 mb-2">
-                                {formatDurationRange(duration, duration + 15)} • 2 services • Male only
+                                {formatDurationRange(duration, duration + 15)}
                               </p>
                               {subService.description && (
                                 <p className="text-sm text-gray-500 mb-3 line-clamp-1">
@@ -486,17 +563,17 @@ export default function BookingServicesPage() {
                                 e.stopPropagation();
                                 toggleService(subService, 'Most Popular');
                               }}
-                              className={`shrink-0 h-10 w-10 flex items-center justify-center rounded-full transition-all ${
+                              className={`shrink-0 h-9 w-9 flex items-center justify-center rounded-full transition-all ${
                                 isSelected
                                   ? 'bg-indigo-500 text-white'
-                                  : 'bg-white border-2 border-gray-300 text-gray-600 hover:border-gray-400'
+                                  : 'bg-white border border-[#d3d3d3] text-gray-600 hover:border-gray-400 shadow-md'
                               }`}
                               aria-label={isSelected ? 'Remove service' : 'Add service'}
                             >
                               {isSelected ? (
-                                <Check className="h-5 w-5" />
+                                <Check className="h-4 w-4" />
                               ) : (
-                                <Plus className="h-5 w-5" />
+                                <Plus className="h-4 w-4" />
                               )}
                             </button>
                           </div>
@@ -522,7 +599,7 @@ export default function BookingServicesPage() {
                     ref={(el) => setSectionRef(service.id, el)}
                     data-category-id={service.id}
                   >
-                    <h2 className="text-xl font-bold text-gray-900 mb-6">{service.name}</h2>
+                    <h2 className="text-xl font-bold text-gray-900 mb-8">{service.name}</h2>
                     <div className="space-y-4">
                       {subServices.map((subService) => {
                         const isSelected = isServiceSelected(subService.id);
@@ -536,10 +613,10 @@ export default function BookingServicesPage() {
                         return (
                           <div
                             key={subService.id}
-                            className={`bg-white rounded-xl p-5 transition-all cursor-pointer border-2 ${
+                            className={`bg-white rounded-lg p-5 transition-all cursor-pointer border ${
                               isSelected
                                 ? 'border-indigo-500 shadow-sm'
-                                : 'border-gray-200 hover:border-gray-300'
+                                : 'border-[#d3d3d3] hover:border-gray-400'
                             }`}
                             onClick={() => toggleService(subService, service.name)}
                           >
@@ -547,7 +624,7 @@ export default function BookingServicesPage() {
                               <div className="flex-1 min-w-0">
                                 <h3 className="font-semibold text-gray-900 mb-1">{subService.name}</h3>
                                 <p className="text-sm text-gray-500 mb-2">
-                                  {formatDurationRange(duration, duration + 15)} • 2 services • Male only
+                                  {formatDurationRange(duration, duration + 15)}
                                 </p>
                                 {subService.description && (
                                   <p className="text-sm text-gray-500 mb-3 line-clamp-1">
@@ -563,17 +640,17 @@ export default function BookingServicesPage() {
                                   e.stopPropagation();
                                   toggleService(subService, service.name);
                                 }}
-                                className={`shrink-0 h-10 w-10 flex items-center justify-center rounded-full transition-all ${
+                                className={`shrink-0 h-9 w-9 flex items-center justify-center rounded-full transition-all ${
                                   isSelected
                                     ? 'bg-indigo-500 text-white'
-                                    : 'bg-white border-2 border-gray-300 text-gray-600 hover:border-gray-400'
+                                    : 'bg-white border border-[#d3d3d3] text-gray-600 hover:border-gray-400 shadow-md'
                                 }`}
                                 aria-label={isSelected ? 'Remove service' : 'Add service'}
                               >
                                 {isSelected ? (
-                                  <Check className="h-5 w-5" />
+                                  <Check className="h-4 w-4" />
                                 ) : (
-                                  <Plus className="h-5 w-5" />
+                                  <Plus className="h-4 w-4" />
                                 )}
                               </button>
                             </div>
@@ -585,116 +662,18 @@ export default function BookingServicesPage() {
                 );
               })}
             </div>
-          </div>
-
-          {/* Right Pane - Order Summary */}
-          <div className="w-full lg:w-105 shrink-0">
-            <div className="lg:sticky lg:top-24 bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col lg:h-[calc(100vh-140px)]">
-              {/* Vendor Info */}
-              <div className="p-6">
-                <div className="flex gap-4">
-                  {vendor.logo ? (
-                    <img
-                      src={vendor.logo}
-                      alt={vendor.name}
-                      className="w-14 h-14 rounded-lg object-cover shrink-0"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-lg bg-gray-200 flex items-center justify-center shrink-0">
-                      <span className="text-gray-500 text-lg font-semibold">
-                        {vendor.name.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                  <div className="min-w-0">
-                    <h2 className="font-bold text-gray-900 mb-1 truncate">{vendor.name}</h2>
-                    <div className="flex items-center gap-1 mb-1">
-                      <span className="text-sm font-semibold text-gray-900">
-                        {vendor.rating?.toFixed(1) || '0.0'}
-                      </span>
-                      <div className="flex items-center">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`h-3.5 w-3.5 ${
-                              star <= Math.round(vendor.rating || 0)
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'fill-gray-200 text-gray-200'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        ({(vendor.reviews_count || 0).toLocaleString()})
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-500 truncate">{location}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Selected Services - Scrollable */}
-              <div className="px-6 pb-6 flex-1 overflow-y-auto">
-                {selectedServices.length > 0 ? (
-                  <div className="space-y-4">
-                    {selectedServices.map((service) => (
-                      <div key={service.id} className="flex justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-gray-900 text-sm mb-0.5">{service.name}</p>
-                          <p className="text-xs text-gray-500">
-                            {formatDurationRange(service.duration, service.durationMax)} • {service.serviceCount || 2} services • {service.gender || 'Male only'} with any professional
-                          </p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="font-semibold text-gray-900 text-sm">AED {service.price.toFixed(0)}</p>
-                          <p className="text-xs text-gray-400 line-through">AED {service.originalPrice.toFixed(0)}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm">No services selected</p>
-                )}
-              </div>
-
-              {/* Divider */}
-              <div className="mx-6 border-t border-gray-100" />
-
-              {/* Total */}
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-gray-900">Total</span>
-                  {selectedServices.length > 0 ? (
-                    <span className="font-bold text-lg text-gray-900">
-                      AED {total.toLocaleString()}
-                    </span>
-                  ) : (
-                    <span className="font-medium text-gray-400">free</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Continue Button - Bottom */}
-              <div className="p-6 pt-0 mt-auto">
-                <button
-                  onClick={handleContinue}
-                  disabled={selectedServices.length === 0}
-                  className={`w-full py-4 rounded-full font-semibold transition-colors ${
-                    selectedServices.length > 0
-                      ? 'bg-gray-900 text-white hover:bg-gray-800'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  Continue
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        </BookingLayout>
       </div>
 
       {/* Bottom padding for mobile */}
       <div className="h-8" />
+
+      {/* Exit Confirmation Modal */}
+      <ExitConfirmModal
+        isOpen={showExitModal}
+        onCancel={() => setShowExitModal(false)}
+        onConfirm={handleConfirmExit}
+      />
     </div>
   );
 }

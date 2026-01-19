@@ -41,11 +41,11 @@ export function ServiceList({ services, onBookService }: ServiceListProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {services.map((service) => (
         <div
           key={service.id}
-          className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+          className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
         >
           <div className="flex items-center justify-between gap-4">
             {/* Service Info */}
@@ -82,7 +82,7 @@ export function ServiceList({ services, onBookService }: ServiceListProps) {
             {/* Book Button */}
             <button
               onClick={() => onBookService?.(service)}
-              className="px-6 py-2.5 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors shrink-0"
+              className="px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors shrink-0"
             >
               Book
             </button>
