@@ -63,8 +63,8 @@ export function VendorSection({
   if (isLoading) {
     return (
       <section className="py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-start mb-6">
             <div className="h-7 w-48 bg-gray-200 rounded animate-pulse" />
           </div>
           <div className={layout === 'grid'
@@ -86,8 +86,8 @@ export function VendorSection({
   if (vendors.length === 0) {
     return (
       <section className="py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-start mb-6">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
               {subtitle && (
@@ -107,8 +107,8 @@ export function VendorSection({
   if (layout === 'grid') {
     return (
       <section className="py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-start mb-6">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
               {subtitle && (
@@ -125,7 +125,7 @@ export function VendorSection({
               </Link>
             )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
             {vendors.map((vendor, index) => (
               <VendorCard key={vendor.id} vendor={vendor} index={index} />
             ))}
@@ -138,9 +138,9 @@ export function VendorSection({
   // Scroll layout (default)
   return (
     <section className="py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-start mb-6">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
             {subtitle && (
@@ -175,10 +175,10 @@ export function VendorSection({
           <div
             ref={scrollContainerRef}
             onScroll={checkScrollPosition}
-            className="flex gap-4 overflow-x-auto hide-scrollbar scroll-smooth pb-2"
+            className="flex gap-4 overflow-x-auto hide-scrollbar scroll-smooth pb-2 justify-start animate-fade-in justify-between"
           >
             {vendors.map((vendor, index) => (
-              <div key={vendor.id} className="flex-shrink-0 w-56 md:w-64">
+              <div key={vendor.id} className="flex-shrink-0 w-[340px]">
                 <VendorCard vendor={vendor} index={index} />
               </div>
             ))}

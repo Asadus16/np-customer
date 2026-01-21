@@ -174,13 +174,23 @@ export default function LoginPage() {
                 </form>
 
                 {/* Sign Up Link */}
-                <div className="mt-4 text-center">
-                  <Link
-                    href="/auth/register"
-                    className="text-[15px] leading-[20px] text-purple-600 hover:text-purple-700 font-medium"
-                  >
-                    Don&apos;t have an account? Sign up
-                  </Link>
+                <div className="mt-4 text-center space-y-2">
+                  <div>
+                    <Link
+                      href={ROUTES.FORGOT_PASSWORD}
+                      className="text-[15px] leading-[20px] text-purple-600 hover:text-purple-700 font-medium"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <div>
+                    <Link
+                      href="/auth/register"
+                      className="text-[15px] leading-[20px] text-purple-600 hover:text-purple-700 font-medium"
+                    >
+                      Don&apos;t have an account? Sign up
+                    </Link>
+                  </div>
                 </div>
               </>
             )}
@@ -335,13 +345,23 @@ export default function LoginPage() {
                 </button>
 
                 {!isSignUp && (
-                  <div className="text-center">
-                    <Link
-                      href="/auth/register"
-                      className="text-sm text-purple-600 hover:text-purple-700 font-medium"
-                    >
-                      Don&apos;t have an account? Sign up
-                    </Link>
+                  <div className="space-y-3">
+                    <div className="text-center">
+                      <Link
+                        href={ROUTES.FORGOT_PASSWORD}
+                        className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <div className="text-center">
+                      <Link
+                        href="/auth/register"
+                        className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                      >
+                        Don&apos;t have an account? Sign up
+                      </Link>
+                    </div>
                   </div>
                 )}
               </form>
