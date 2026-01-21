@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import {
   HeroSection,
+  HomePageLayout,
   VendorSection,
   VendorCard,
   VendorCardData,
@@ -10,73 +11,10 @@ import {
   ReviewsSection,
   StatsSection,
   BusinessSection,
+  BrowseByCitySection,
 } from '@/components/home';
 import { useVendors } from '@/hooks';
 
-// Static recommended vendors data
-const staticRecommendedVendors: VendorCardData[] = [
-  {
-    id: 'static-1',
-    name: "Rooster's Barbershop",
-    logo: null,
-    images: ['/1.jpg'],
-    category: 'Barber',
-    rating: 5.0,
-    reviewCount: 8789,
-    location: 'Ampelokipoi',
-    startingPrice: 0,
-    isVerified: true,
-  },
-  {
-    id: 'static-2',
-    name: 'Hair by Common Studio - Queenstown',
-    logo: null,
-    images: ['/2.jpg'],
-    category: 'Hair Salon',
-    rating: 4.9,
-    reviewCount: 1419,
-    location: 'Queenstown, Singapore',
-    startingPrice: 0,
-    isVerified: true,
-  },
-  {
-    id: 'static-3',
-    name: "Padioi Men's Grooming",
-    logo: null,
-    images: ['/3.jpg'],
-    category: 'Barber',
-    rating: 5.0,
-    reviewCount: 1059,
-    location: "PADIOI Men's Grooming, Prince Sultan Bin Fah...",
-    startingPrice: 0,
-    isVerified: true,
-  },
-  {
-    id: 'static-4',
-    name: 'Luxio Nail Ladies Salon',
-    logo: null,
-    images: ['/4.jpg'],
-    category: 'Nails',
-    rating: 5.0,
-    reviewCount: 779,
-    location: 'Arenco Tower, Shop 8 Exit 33, Dubai Media Cit...',
-    startingPrice: 0,
-    isVerified: true,
-  },
-];
-// Static Demo Vendor for showcase
-const DEMO_VENDOR: VendorCardData = {
-  id: 'demo-vendor-001',
-  name: 'Glamour Beauty Salon & Spa',
-  logo: null,
-  images: ['https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=300&fit=crop'],
-  rating: 4.8,
-  reviewCount: 1247,
-  location: 'Downtown Dubai',
-  category: 'Beauty & Wellness',
-  startingPrice: 0,
-  isFeatured: true,
-};
 
 export default function HomePage() {
   // Fetch all vendors
@@ -101,52 +39,118 @@ export default function HomePage() {
   }, [vendors]);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <HeroSection />
+    <HomePageLayout backgroundClassName="bg-gradient-to-br from-white via-[#fef9f6] to-[#faf8ff]">
+      {/* Wrapper for Hero, New to Platform, and Recommended sections with shared animation */}
+      <div className="relative overflow-x-hidden !overflow-y-hidden w-full">
+        {/* Single Orbital Container for both SVGs - spans across all three sections */}
+        <div 
+          className="absolute pointer-events-none"
+          style={{
+            top: '50%',
+            left: '50%',
+            width: '1500px',
+            height: '1500px',
+            marginTop: '-750px',
+            marginLeft: '-750px',
+            transformOrigin: 'center center',
+            animation: 'orbit-clockwise 30s linear infinite',
+            zIndex: 0,
+          }}
+        >
+          {/* Pink SVG - positioned at top */}
+          <div
+            style={{
+              backgroundImage: 'url(/bg-pink.svg)',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              backgroundSize: 'contain',
+              width: '1200px',
+              height: '1000px',
+              position: 'absolute',
+              top: '0',
+              left: '50%',
+              marginLeft: '-450px',
+              transformOrigin: 'center center',
+              animation: 'rotate-self 20s linear infinite',
+              opacity: 0.4,
+            }}
+          />
+          {/* Purple SVG - positioned at bottom (180 degrees opposite) */}
+          <div
+            style={{
+              backgroundImage: 'url(/bg-purple.svg)',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              backgroundSize: 'contain',
+              width: '1200px',
+              height: '1000px',
+              position: 'absolute',
+              bottom: '0',
+              left: '50%',
+              marginLeft: '-450px',
+              transformOrigin: 'center center',
+              animation: 'rotate-self 25s linear infinite',
+              opacity: 0.4,
+            }}
+          />
+        </div>
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            @keyframes orbit-clockwise {
+              from {
+                transform: rotate(0deg);
+              }
+              to {
+                transform: rotate(360deg);
+              }
+            }
+            @keyframes rotate-self {
+              from {
+                transform: rotate(0deg);
+              }
+              to {
+                transform: rotate(360deg);
+              }
+            }
+          `
+        }} />
+        
+        {/* Hero Section */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <HeroSection />
+        </div>
 
-      {/* Main Content */}
-      <main className="bg-white pb-16">
-        {/* Demo Vendor Section - Always visible */}
-        <section className="py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Featured Venue</h2>
-            </div>
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-56 md:w-64">
-                <VendorCard vendor={DEMO_VENDOR} index={0} href="/demo/vendor" />
+        {/* Main Content */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          {/* Show error message if there's an error and no vendors */}
+          {error && vendors.length === 0 && (
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                <p className="text-yellow-800">
+                  Unable to load vendors. Please try again later.
+                </p>
               </div>
             </div>
-          </div>
-        </section>
+          )}
 
-        {/* Show error message if there's an error and no vendors */}
-        {error && vendors.length === 0 && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-              <p className="text-yellow-800">
-                Unable to load vendors. Please try again later.
-              </p>
-            </div>
-          </div>
-        )}
+          {/* New to Platform Section - Dynamic */}
+          <VendorSection
+            title="New to Platform"
+            vendors={newToFreshaVendors}
+            isLoading={isLoading}
+          />
 
-        {/* New to Platform Section - Dynamic (on top) */}
-        <VendorSection
-          title="New to Platform"
-          vendors={newToFreshaVendors}
-          isLoading={isLoading}
-        />
+          {/* Recommended Section - Dynamic */}
+          <VendorSection
+            title="Recommended"
+            vendors={recommendedVendors}
+            isLoading={isLoading}
+          />
+        </div>
+      </div>
 
-        {/* Static Recommended Section */}
-        <VendorSection
-          title="Recommended"
-          vendors={staticRecommendedVendors}
-          isLoading={false}
-        />
-
-        {/* Dynamic Top Rated Section (if needed) */}
+      {/* Sections below the animation area */}
+      <div>
         {recommendedVendors.length > 0 && (
           <VendorSection
             title="Top Rated"
@@ -166,7 +170,10 @@ export default function HomePage() {
 
         {/* Business Section */}
         <BusinessSection />
-      </main>
-    </div>
+
+        {/* Browse by City Section */}
+        <BrowseByCitySection />
+      </div>
+    </HomePageLayout>
   );
 }

@@ -30,7 +30,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${roobertPro.variable} font-sans antialiased`} suppressHydrationWarning>
         <StoreProvider>
-          <ConditionalLayout>{children}</ConditionalLayout>
+            <ConditionalLayout>{children}</ConditionalLayout>
         </StoreProvider>
       </body>
     </html>
