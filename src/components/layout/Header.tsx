@@ -60,7 +60,7 @@ export function Header() {
       <div className="px-6 lg:px-9">
         <div className="flex items-center h-18 gap-6">
           {/* Logo */}
-          <Link href={ROUTES.HOME} className="flex items-center shrink-0">
+          <Link href={ROUTES.HOME} className={`flex items-center shrink-0 ${isProfilePage ? '-ml-3 lg:-ml-5 mr-3 lg:mr-5' : ''}`}>
             <Image
               src="/logos/Logo.svg"
               alt="No Problem"
