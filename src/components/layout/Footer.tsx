@@ -41,34 +41,27 @@ export function Footer() {
 
           {/* About No Problem */}
           <div>
-            <h3
-              className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4"
-              style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
-            >
+            <h3 className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4">
               About No Problem
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
-                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Careers
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
-                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Help and support
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
-                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Blog
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
-                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Sitemap
                 </Link>
               </li>
@@ -77,34 +70,27 @@ export function Footer() {
 
           {/* For business */}
           <div>
-            <h3
-              className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4"
-              style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
-            >
+            <h3 className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4">
               For business
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
-                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   For partners
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
-                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
-                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Support
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
-                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Status
                 </Link>
               </li>
@@ -113,28 +99,22 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h3
-              className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4"
-              style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
-            >
+            <h3 className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4">
               Legal
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
-                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
-                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Terms of service
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline"
-                    style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}>
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Terms of use
                 </Link>
               </li>
@@ -143,10 +123,7 @@ export function Footer() {
 
           {/* Find us on social */}
           <div>
-            <h3
-              className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4"
-              style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
-            >
+            <h3 className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4">
               Find us on social
             </h3>
             <ul className="space-y-3">
@@ -156,7 +133,6 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
-                  style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="7" y1="17" x2="17" y2="7" />
@@ -171,7 +147,6 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
-                  style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="7" y1="17" x2="17" y2="7" />
@@ -186,7 +161,6 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
-                  style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="7" y1="17" x2="17" y2="7" />
@@ -201,7 +175,6 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
-                  style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="7" y1="17" x2="17" y2="7" />

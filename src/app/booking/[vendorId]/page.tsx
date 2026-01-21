@@ -408,10 +408,7 @@ export default function BookingServicesPage() {
           {isScrolled && (
             <div className="absolute inset-0 pointer-events-none flex items-center">
               <div className="max-w-7xl mx-auto px-6 lg:px-12 w-full">
-                <span
-                  className="text-[20px] font-semibold leading-[28px]"
-                  style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif', color: 'rgb(20, 20, 20)' }}
-                >
+                <span className="text-[20px] font-semibold leading-[28px] text-[rgb(20,20,20)]">
                   Services
                 </span>
               </div>
@@ -437,10 +434,7 @@ export default function BookingServicesPage() {
             />
           }
         >
-            <h1
-              className="text-[37px] font-bold leading-[44px] mb-4"
-              style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif', color: 'rgb(20, 20, 20)' }}
-            >
+            <h1 className="text-[37px] font-bold leading-[44px] mb-4 text-[rgb(20,20,20)]">
               Services
             </h1>
 

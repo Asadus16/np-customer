@@ -8,7 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-inter), sans-serif;
   --color-grey: #717171;
   --color-grey-dim: #dddddd;
   --color-grey-light: #f7f7f7;
@@ -29,23 +29,37 @@ body {
   display: none;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - only visible on hover/scroll */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+}
+
+*:hover::-webkit-scrollbar-thumb {
   background: #c1c1c1;
-  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1a1;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover {
+  scrollbar-color: #c1c1c1 transparent;
 }
 
 /* Focus styles */

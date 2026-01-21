@@ -17,9 +17,17 @@ export interface User {
   phone?: string;
   avatar?: string;
   email_verified_at?: string;
+  phone_verified_at?: string;
   roles?: UserRole[];
   created_at: string;
   updated_at: string;
+  // Additional profile fields
+  nationality?: string;
+  date_of_birth?: string;
+  gender?: string;
+  emirates_id?: string;
+  emirates_id_front?: string;
+  emirates_id_back?: string;
 }
 
 /**

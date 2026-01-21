@@ -29,17 +29,7 @@ export function StatsSection() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 max-w-5xl mx-auto">
             {/* Left Column */}
             <div>
-              <div 
-                className="mb-2"
-                style={{
-                  fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif',
-                  fontStyle: 'normal',
-                  fontWeight: 700,
-                  color: 'rgb(20, 20, 20)',
-                  fontSize: '40px',
-                  lineHeight: '44px',
-                }}
-              >
+              <div className="mb-2 text-[40px] leading-[44px] font-bold text-[rgb(20,20,20)]">
                 130,000+
               </div>
               <p className="text-base md:text-lg text-gray-700">
@@ -49,17 +39,7 @@ export function StatsSection() {
 
             {/* Middle Column */}
             <div>
-              <div 
-                className="mb-2"
-                style={{
-                  fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif',
-                  fontStyle: 'normal',
-                  fontWeight: 700,
-                  color: 'rgb(20, 20, 20)',
-                  fontSize: '40px',
-                  lineHeight: '44px',
-                }}
-              >
+              <div className="mb-2 text-[40px] leading-[44px] font-bold text-[rgb(20,20,20)]">
                 120+ countries
               </div>
               <p className="text-base md:text-lg text-gray-700">
@@ -69,17 +49,7 @@ export function StatsSection() {
 
             {/* Right Column */}
             <div>
-              <div 
-                className="mb-2"
-                style={{
-                  fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif',
-                  fontStyle: 'normal',
-                  fontWeight: 700,
-                  color: 'rgb(20, 20, 20)',
-                  fontSize: '40px',
-                  lineHeight: '44px',
-                }}
-              >
+              <div className="mb-2 text-[40px] leading-[44px] font-bold text-[rgb(20,20,20)]">
                 450,000+
               </div>
               <p className="text-base md:text-lg text-gray-700">
