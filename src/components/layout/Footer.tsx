@@ -206,6 +206,7 @@ export function Footer() {
             &copy; {currentYear} No Problem
           </p>
         </div>
-      </>
+      </div>
+      </footer>
   );
 }
