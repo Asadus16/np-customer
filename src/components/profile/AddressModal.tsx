@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, MapPin, Navigation, Smile, Loader2 } from 'lucide-react';
+import { X, MapPin, Navigation, Loader2 } from 'lucide-react';
 
 interface LocationResult {
   display_name: string;
@@ -43,7 +43,7 @@ export function AddressModal({ isOpen, onClose, onSave, editingAddress, isSubmit
   const [searchResults, setSearchResults] = useState<LocationResult[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null);
   const [isSearching, setIsSearching] = useState(false);
-  const [showResults, setShowResults] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [error, setError] = useState('');
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -86,7 +86,7 @@ export function AddressModal({ isOpen, onClose, onSave, editingAddress, isSubmit
       );
       const data = await response.json();
       setSearchResults(data);
-      setShowResults(true);
+      setShowDropdown(true);
     } catch (err) {
       console.error('Search error:', err);
     } finally {
@@ -134,7 +134,7 @@ export function AddressModal({ isOpen, onClose, onSave, editingAddress, isSubmit
             address: data.address,
           });
           setAddressSearch(data.display_name);
-          setShowResults(false);
+          setShowDropdown(false);
         } catch (err) {
           console.error('Reverse geocode error:', err);
           setError('Could not get address for your location');
@@ -153,7 +153,7 @@ export function AddressModal({ isOpen, onClose, onSave, editingAddress, isSubmit
   const handleSelectLocation = (location: LocationResult) => {
     setSelectedLocation(location);
     setAddressSearch(location.display_name);
-    setShowResults(false);
+    setShowDropdown(false);
     setSearchResults([]);
   };
 
@@ -208,7 +208,7 @@ export function AddressModal({ isOpen, onClose, onSave, editingAddress, isSubmit
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50"
@@ -216,39 +216,35 @@ export function AddressModal({ isOpen, onClose, onSave, editingAddress, isSubmit
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-2xl w-full max-w-[475px] min-h-[750px] flex flex-col">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-full transition-colors z-10"
+        >
+          <X className="h-6 w-6 text-gray-900" />
+        </button>
+
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4">
-          <h2 className="text-2xl font-semibold text-gray-900">
+        <div className="pl-12 pr-8 pt-20 pb-9">
+          <h2 className="text-2xl font-bold text-gray-900">
             {editingAddress ? 'Edit address' : 'Add custom address'}
           </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
         </div>
 
         {/* Content */}
-        <div className="px-6 pb-6 space-y-4">
+        <div className="pl-12 pr-8 flex-1 flex flex-col">
           {/* Error */}
           {error && (
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-red-600 mb-4">{error}</p>
           )}
 
           {/* Address Name */}
-          <div>
+          <div className="mb-4">
             <label className="block text-sm font-medium text-gray-900 mb-2">
               Address name<span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-gray-900 focus-within:border-transparent">
-              <button
-                type="button"
-                className="p-4 hover:bg-gray-50 transition-colors"
-              >
-                <Smile className="h-5 w-5 text-gray-400" />
-              </button>
+            <div className="border border-gray-300 rounded-lg overflow-hidden focus-within:border-[#6950f3]">
               <input
                 type="text"
                 value={addressName}
@@ -256,22 +252,19 @@ export function AddressModal({ isOpen, onClose, onSave, editingAddress, isSubmit
                   setAddressName(e.target.value);
                   setError('');
                 }}
-                placeholder="Custom address name"
-                className="flex-1 py-4 pr-4 outline-none text-gray-900 placeholder-gray-400"
+                placeholder="Address"
+                className="w-full px-4 py-3 outline-none focus-visible:outline-none text-gray-900 placeholder-gray-400"
               />
             </div>
-            {!addressName.trim() && error.includes('name') && (
-              <p className="text-sm text-red-600 mt-1">Address name is required</p>
-            )}
           </div>
 
           {/* Address Search */}
-          <div className="relative">
+          <div className="relative mb-4">
             <label className="block text-sm font-medium text-gray-900 mb-2">
               Address<span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-gray-900 focus-within:border-transparent">
-              <div className="p-4">
+            <div className="flex items-center border border-gray-300 rounded-lg focus-within:border-[#6950f3] [&_*]:outline-none [&_*]:focus-visible:outline-none">
+              <div className="pl-4">
                 <MapPin className="h-5 w-5 text-gray-400" />
               </div>
               <input
@@ -279,34 +272,41 @@ export function AddressModal({ isOpen, onClose, onSave, editingAddress, isSubmit
                 type="text"
                 value={addressSearch}
                 onChange={(e) => handleAddressChange(e.target.value)}
-                onFocus={() => searchResults.length > 0 && setShowResults(true)}
+                onFocus={() => !selectedLocation && setShowDropdown(true)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
                 placeholder="Start typing address"
-                className="flex-1 py-4 pr-4 outline-none text-gray-900 placeholder-gray-400"
+                className="flex-1 px-3 py-3 text-gray-900 placeholder-gray-400"
               />
               {addressSearch && (
                 <button
                   type="button"
                   onClick={handleClearLocation}
-                  className="p-4 hover:bg-gray-50 transition-colors"
+                  className="pr-4 hover:opacity-70 transition-opacity"
                 >
                   <X className="h-4 w-4 text-gray-400" />
                 </button>
               )}
             </div>
 
-            {/* Search Results Dropdown */}
-            {showResults && searchResults.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 max-h-60 overflow-y-auto">
-                {/* Use my location */}
+            {/* Dropdown with Use my location + Search Results */}
+            {showDropdown && !selectedLocation && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.15)] z-10 max-h-60 overflow-y-auto">
+                {/* Use my location option */}
                 <button
                   type="button"
                   onClick={handleUseMyLocation}
+                  disabled={isSearching}
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100"
                 >
-                  <Navigation className="h-5 w-5 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-600">Use my location</span>
+                  {isSearching ? (
+                    <Loader2 className="h-5 w-5 text-[#6950f3] animate-spin" />
+                  ) : (
+                    <Navigation className="h-5 w-5 text-[#6950f3]" />
+                  )}
+                  <span className="text-sm font-medium text-[#6950f3]">Use my location</span>
                 </button>
 
+                {/* Search results */}
                 {searchResults.map((result, index) => (
                   <button
                     key={index}
@@ -319,35 +319,33 @@ export function AddressModal({ isOpen, onClose, onSave, editingAddress, isSubmit
                 ))}
               </div>
             )}
-
-            {/* Use my location - shown when no results */}
-            {!showResults && !selectedLocation && addressSearch.length < 3 && (
-              <button
-                type="button"
-                onClick={handleUseMyLocation}
-                disabled={isSearching}
-                className="w-full flex items-center gap-3 mt-2 px-4 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-              >
-                {isSearching ? (
-                  <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
-                ) : (
-                  <Navigation className="h-5 w-5 text-blue-600" />
-                )}
-                <span className="text-sm font-medium text-blue-600">Use my location</span>
-              </button>
-            )}
           </div>
 
           {/* Selected Location Preview */}
           {selectedLocation && (
-            <div className="border border-gray-200 rounded-xl overflow-hidden">
+            <div className="border border-gray-200 rounded-lg overflow-hidden mb-4 flex-1">
+              {/* Use my location option */}
+              <button
+                type="button"
+                onClick={handleUseMyLocation}
+                disabled={isSearching}
+                className="w-full flex items-center gap-3 px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors"
+              >
+                {isSearching ? (
+                  <Loader2 className="h-5 w-5 text-[#6950f3] animate-spin" />
+                ) : (
+                  <Navigation className="h-5 w-5 text-[#6950f3]" />
+                )}
+                <span className="text-sm font-medium text-[#6950f3]">Use my location</span>
+              </button>
+
               {/* Map placeholder */}
               <div className="h-40 bg-gray-100 relative flex items-center justify-center">
                 <div className="text-center">
                   <MapPin className="h-8 w-8 text-gray-900 mx-auto mb-2" />
-                  <p className="text-xs text-gray-500">Drag the map to adjust the pin</p>
+                  <p className="text-xs bg-gray-800 text-white px-2 py-1 rounded">Drag the map to adjust the pin</p>
                 </div>
-                {/* Zoom controls placeholder */}
+                {/* Zoom controls */}
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col gap-1">
                   <button className="w-8 h-8 bg-white rounded shadow flex items-center justify-center text-gray-600 hover:bg-gray-50">
                     +
@@ -367,7 +365,7 @@ export function AddressModal({ isOpen, onClose, onSave, editingAddress, isSubmit
                 <button
                   type="button"
                   onClick={handleClearLocation}
-                  className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                  className="text-sm font-medium text-[#6950f3] hover:opacity-80"
                 >
                   Edit
                 </button>
@@ -375,11 +373,16 @@ export function AddressModal({ isOpen, onClose, onSave, editingAddress, isSubmit
             </div>
           )}
 
-          {/* Save Button */}
+          {/* Spacer to push button to bottom */}
+          <div className="flex-1" />
+        </div>
+
+        {/* Save Button - Fixed at bottom */}
+        <div className="px-10 pb-8 pt-4">
           <button
             onClick={handleSave}
             disabled={!addressName.trim() || !selectedLocation || isSubmitting}
-            className="w-full py-4 bg-gray-300 text-gray-600 font-medium rounded-xl transition-colors disabled:cursor-not-allowed enabled:bg-gray-900 enabled:text-white enabled:hover:bg-gray-800"
+            className="w-full py-3.5 bg-[#afafaf] text-white text-sm font-semibold rounded-full transition-colors disabled:cursor-not-allowed enabled:bg-gray-900 enabled:text-white enabled:hover:bg-gray-800"
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
