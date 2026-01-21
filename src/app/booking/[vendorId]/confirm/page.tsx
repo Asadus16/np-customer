@@ -222,12 +222,21 @@ export default function BookingConfirmPage() {
 
     try {
       // Prepare order data
+      // Handle "now" order type - use current time formatted as HH:mm
+      let formattedTime: string;
+      if (selectedTime === 'now') {
+        const now = new Date();
+        formattedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      } else {
+        formattedTime = selectedTime.split(':').slice(0, 2).join(':'); // Format as HH:mm
+      }
+
       const orderData: Record<string, any> = {
         vendor_id: vendorId,
         address_id: selectedAddress,
         payment_type: paymentType === 'cash' ? 'cash' : paymentType === 'card' ? 'card' : 'wallet',
         scheduled_date: selectedDate.toISOString().split('T')[0],
-        scheduled_time: selectedTime.split(':').slice(0, 2).join(':'), // Format as HH:mm
+        scheduled_time: formattedTime,
         notes: notes || undefined,
         items: selectedServices.map(service => ({
           sub_service_id: service.id,

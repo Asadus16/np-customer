@@ -23,11 +23,12 @@ interface VendorCardProps {
   vendor: VendorCardData;
   index?: number;
   href?: string;
+  isFavorited?: boolean;
 }
 
-export function VendorCard({ vendor, index = 0, href }: VendorCardProps) {
+export function VendorCard({ vendor, index = 0, href, isFavorited = false }: VendorCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(isFavorited);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -60,8 +61,8 @@ export function VendorCard({ vendor, index = 0, href }: VendorCardProps) {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Image Container */}
-        <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100">
+        {/* 1ntainer */}
+        <div className="relative h-43 rounded-xl overflow-hidden bg-gray-100">
           {/* Featured Badge */}
           {vendor.isFeatured && (
             <div className="absolute top-3 left-3 z-10 bg-white px-3 py-1 rounded-full shadow-sm">
@@ -92,7 +93,7 @@ export function VendorCard({ vendor, index = 0, href }: VendorCardProps) {
             {(() => {
               const imageSrc = vendor.images.length > 0 && vendor.images[currentImageIndex]
                 ? vendor.images[currentImageIndex]
-                : '/placeholder.jpg';
+                : '/placeholder.svg';
 
               // Validate URL - must be http/https URL or absolute path starting with /
               const isValidUrl = imageSrc && (
@@ -101,7 +102,7 @@ export function VendorCard({ vendor, index = 0, href }: VendorCardProps) {
                 imageSrc.startsWith('/')
               );
 
-              const finalSrc = isValidUrl ? imageSrc : '/placeholder.jpg';
+              const finalSrc = isValidUrl ? imageSrc : '/placeholder.svg';
 
               return (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -156,27 +157,25 @@ export function VendorCard({ vendor, index = 0, href }: VendorCardProps) {
         </div>
 
         {/* Content */}
-        <div className="mt-3 space-y-1">
-          {/* Title */}
-          <h3 className="font-medium text-gray-900 text-sm line-clamp-1">
-            {vendor.name}
-          </h3>
-
-          {/* Rating */}
-          {vendor.rating > 0 && (
-            <div className="flex items-center gap-1">
+        <div className="mt-3 space-y-0.5">
+          {/* Title and Rating on same line */}
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="font-medium text-gray-900 text-sm line-clamp-1">
+              {vendor.name}
+            </h3>
+            <div className="flex items-center gap-1 shrink-0">
               <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
               <span className="text-sm text-gray-900 font-medium">
                 {vendor.rating.toFixed(1)} ({vendor.reviewCount})
               </span>
             </div>
-          )}
+          </div>
 
           {/* Location */}
-          <p className="text-xs text-gray-600">{vendor.location}</p>
+          <p className="text-sm text-gray-500">{vendor.location}</p>
 
           {/* Category */}
-          <p className="text-xs text-gray-600">{vendor.category}</p>
+          <p className="text-sm text-gray-500">{vendor.category}</p>
         </div>
       </article>
     </Link>

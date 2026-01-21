@@ -31,13 +31,12 @@ export function AboutSection({
 }: AboutSectionProps) {
   return (
     <div className="space-y-8" id="about">
-      <h2
-        className="text-[28px] font-[550] leading-9 text-[rgb(20,20,20)]"
-        style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
-      >About</h2>
-
-      {/* Description */}
-      <p className="text-gray-700 leading-relaxed">{description}</p>
+      <div>
+        <h2 className="text-[28px] font-semibold leading-9 text-[rgb(20,20,20)] mb-4">
+          About
+        </h2>
+        <p className="text-gray-700 leading-relaxed">{description}</p>
+      </div>
 
       {/* Map */}
       <div className="rounded-xl overflow-hidden">

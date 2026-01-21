@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, Search, Globe, ArrowRight } from 'lucide-react';
+import { Menu, X, Globe, ArrowRight } from 'lucide-react';
 import { ROUTES } from '@/config';
 import { useAuth } from '@/hooks';
 import { UserProfileDropdown } from './UserProfileDropdown';
@@ -77,7 +77,7 @@ export function Header() {
               <div className="flex items-center border border-gray-200 rounded-full shadow-md hover:shadow-lg transition-shadow w-[720px]">
                 {/* All treatments */}
                 <button className="flex-1 flex items-center justify-start gap-3 py-4 pl-4 hover:bg-gray-50 rounded-l-full transition-colors">
-                  <Search className="h-4 w-4 text-gray-400" />
+                  <Image src="/header/headerDropdown/search.svg" alt="" width={16} height={16} />
                   <span className="text-[15px] font-medium leading-[15px] text-[rgb(20,20,20)]">All treatments</span>
                 </button>
 
@@ -160,7 +160,7 @@ export function Header() {
 
           {/* Mobile Search Button */}
           <button className="md:hidden flex items-center gap-2 flex-1 mx-2 px-4 py-2 border border-gray-200 rounded-full shadow-sm">
-            <Search className="h-4 w-4 text-gray-400" />
+            <Image src="/header/headerDropdown/search.svg" alt="" width={16} height={16} />
             <span className="text-sm text-gray-500">Search...</span>
           </button>
 

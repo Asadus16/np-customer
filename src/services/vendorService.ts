@@ -61,7 +61,7 @@ export function mapVendorToCardData(vendor: VendorApiResponse): VendorCardData {
   const logo = vendor.logo && isValidImageUrl(vendor.logo) ? vendor.logo : null;
 
   // For images, use logo if available, otherwise use placeholder
-  const images: string[] = logo ? [logo] : ['/placeholder.jpg'];
+  const images: string[] = logo ? [logo] : ['/placeholder.svg'];
 
   return {
     id: vendor.id,

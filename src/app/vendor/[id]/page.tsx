@@ -588,10 +588,9 @@ export default function VendorDetailPage() {
             <div className="flex-1 min-w-0 space-y-10">
               {/* Services Section */}
               <div id="services" className="pt-6">
-                <h2
-                  className="text-[28px] font-[550] leading-9 text-[rgb(20,20,20)] mb-4"
-                  style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
-                >Services</h2>
+                <h2 className="text-[28px] font-semibold leading-9 text-[rgb(20,20,20)] mb-4">
+                  Services
+                </h2>
 
                 {/* Category Tabs */}
                 {categoryNames.length > 0 && (
