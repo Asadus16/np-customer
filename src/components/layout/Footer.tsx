@@ -1,24 +1,30 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ROUTES } from '@/config';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
- <>
-    <footer className="bg-gray-100 border-t border-gray-200 px-8">
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-12 px-8">
+    <footer className="bg-[#f2f2f2] mt-16">
+      <div className="px-4 md:px-8 lg:px-12 py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand & App Download */}
           <div className="col-span-2 md:col-span-1">
-            <Link href={ROUTES.HOME} className="text-2xl font-bold text-gray-900 lowercase">
-              No Problem
+            <Link href={ROUTES.HOME} className="block">
+              <Image
+                src="/logos/Logo.svg"
+                alt="No Problem"
+                width={160}
+                height={46}
+                className="h-12 w-auto"
+              />
             </Link>
 
             {/* App Download Button */}
-            <button className="mt-6 flex items-center gap-3 px-5 py-3 border border-gray-300 rounded-full hover:bg-white transition-colors">
+            <button className="mt-6 flex items-center gap-3 px-5 py-3 bg-white border border-gray-300 rounded-full hover:shadow-md transition-all">
               <span className="text-sm font-medium text-gray-900">Get the app</span>
               <div className="flex items-center gap-2">
                 {/* Apple Icon */}
@@ -35,27 +41,27 @@ export function Footer() {
 
           {/* About No Problem */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+            <h3 className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4">
               About No Problem
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Careers
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Help and support
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Blog
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Sitemap
                 </Link>
               </li>
@@ -64,27 +70,27 @@ export function Footer() {
 
           {/* For business */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+            <h3 className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4">
               For business
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   For partners
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Support
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Status
                 </Link>
               </li>
@@ -93,22 +99,22 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+            <h3 className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4">
               Legal
             </h3>
             <ul className="space-y-3">
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Terms of service
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-600 hover:text-gray-900 text-sm">
+                <Link href="#" className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline">
                   Terms of use
                 </Link>
               </li>
@@ -117,13 +123,7 @@ export function Footer() {
 
           {/* Find us on social */}
           <div>
-            <h3 
-              className="font-bold mb-4"
-              style={{
-                fontSize: '26px',
-                color: 'rgb(20, 20, 20)'
-              }}
-            >
+            <h3 className="text-[17px] font-semibold leading-6 text-[rgb(20,20,20)] mb-4">
               Find us on social
             </h3>
             <ul className="space-y-3">
@@ -132,13 +132,12 @@ export function Footer() {
                   href="https://facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 font-normal"
-                  style={{
-                    fontSize: '17px',
-                    color: 'rgb(20, 20, 20)'
-                  }}
+                  className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
                 >
-                  <svg className="h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fillRule="evenodd" d="M17.293 6.293a1 1 0 0 1 1.414 0l9 9a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-1.414-1.414L24.586 17H5a1 1 0 1 1 0-2h19.586l-7.293-7.293a1 1 0 0 1 0-1.414" clipRule="evenodd"></path></svg>
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7" />
+                    <polyline points="7 7 17 7 17 17" />
+                  </svg>
                   Facebook
                 </a>
               </li>
@@ -147,13 +146,12 @@ export function Footer() {
                   href="https://twitter.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 font-normal"
-                  style={{
-                    fontSize: '17px',
-                    color: 'rgb(20, 20, 20)'
-                  }}
+                  className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
                 >
-                  <svg className="h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fillRule="evenodd" d="M17.293 6.293a1 1 0 0 1 1.414 0l9 9a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-1.414-1.414L24.586 17H5a1 1 0 1 1 0-2h19.586l-7.293-7.293a1 1 0 0 1 0-1.414" clipRule="evenodd"></path></svg>
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7" />
+                    <polyline points="7 7 17 7 17 17" />
+                  </svg>
                   Twitter
                 </a>
               </li>
@@ -162,13 +160,12 @@ export function Footer() {
                   href="https://linkedin.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 font-normal"
-                  style={{
-                    fontSize: '17px',
-                    color: 'rgb(20, 20, 20)'
-                  }}
+                  className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
                 >
-                  <svg className="h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fillRule="evenodd" d="M17.293 6.293a1 1 0 0 1 1.414 0l9 9a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-1.414-1.414L24.586 17H5a1 1 0 1 1 0-2h19.586l-7.293-7.293a1 1 0 0 1 0-1.414" clipRule="evenodd"></path></svg>
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7" />
+                    <polyline points="7 7 17 7 17 17" />
+                  </svg>
                   Linkedin
                 </a>
               </li>
@@ -177,28 +174,26 @@ export function Footer() {
                   href="https://instagram.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 font-normal"
-                  style={{
-                    fontSize: '17px',
-                    color: 'rgb(20, 20, 20)'
-                  }}
+                  className="text-[15px] leading-5 text-[rgb(20,20,20)] hover:underline flex items-center gap-3"
                 >
-                  <svg className="h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fillRule="evenodd" d="M17.293 6.293a1 1 0 0 1 1.414 0l9 9a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-1.414-1.414L24.586 17H5a1 1 0 1 1 0-2h19.586l-7.293-7.293a1 1 0 0 1 0-1.414" clipRule="evenodd"></path></svg>
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7" />
+                    <polyline points="7 7 17 7 17 17" />
+                  </svg>
                   Instagram
                 </a>
               </li>
             </ul>
           </div>
         </div>
+
       </div>
-      
-    </footer>
-      <div className=" pt-8 p-4 border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4" style={{margin:'10px 46px'}}>
+
+      {/* Trademark Section */}
+      <div className="bg-white px-4 md:px-8 lg:px-12 py-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Language Selector */}
-          <button 
-            className="flex items-center gap-2 text-sm hover:underline"
-            style={{ color: 'rgb(105, 80, 243)' }}
-          >
+          <button className="flex items-center gap-2 text-sm text-blue-600 hover:underline">
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"/>
               <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
@@ -208,7 +203,7 @@ export function Footer() {
 
           {/* Copyright */}
           <p className="text-sm text-gray-500">
-            &copy; {currentYear} Fresha.com SV Ltd
+            &copy; {currentYear} No Problem
           </p>
         </div>
       </>

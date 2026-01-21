@@ -22,9 +22,11 @@ export interface VendorCardData {
 interface VendorCardProps {
   vendor: VendorCardData;
   index?: number;
+  href?: string;
+  isFavorited?: boolean;
 }
 
-export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
+export function VendorCard({ vendor, index = 0, href, isFavorited = false }: VendorCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const imageContainerRef = useRef<HTMLDivElement>(null);
@@ -42,9 +44,10 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
   };
 
   const hasMultipleImages = vendor.images.length > 1;
+  const cardHref = href || `/vendor/${vendor.id}`;
 
   return (
-    <Link href={`/vendor/${vendor.id}`}>
+    <Link href={cardHref}>
       <article
         className="group cursor-pointer w-full h-[300px] flex flex-col  rounded-xl overflow-hidden !bg-transparent"
         onMouseEnter={() => setIsHovered(true)}
@@ -60,7 +63,7 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
             {(() => {
               const imageSrc = vendor.images.length > 0 && vendor.images[currentImageIndex]
                 ? vendor.images[currentImageIndex]
-                : '/placeholder.jpg';
+                : '/placeholder.svg';
 
               // Validate URL - must be http/https URL or absolute path starting with /
               const isValidUrl = imageSrc && (
@@ -69,7 +72,7 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
                 imageSrc.startsWith('/')
               );
 
-              const finalSrc = isValidUrl ? imageSrc : '/placeholder.jpg';
+              const finalSrc = isValidUrl ? imageSrc : '/placeholder.svg';
 
               return (
                 // eslint-disable-next-line @next/next/no-img-element

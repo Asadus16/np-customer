@@ -5,6 +5,7 @@ import {
   HeroSection,
   HomePageLayout,
   VendorSection,
+  VendorCard,
   VendorCardData,
   AppDownloadSection,
   ReviewsSection,

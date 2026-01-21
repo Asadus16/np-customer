@@ -1,14 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Star } from 'lucide-react';
-
-interface VendorNavBarProps {
-  vendorName: string;
-  rating: number;
-  reviewCount: number;
-  onBookNow?: () => void;
-}
+import { useEffect, useState, useRef } from 'react';
 
 type NavSection = 'photos' | 'services' | 'team' | 'reviews' | 'about';
 
@@ -19,14 +11,11 @@ const navItems: { id: NavSection; label: string }[] = [
   { id: 'about', label: 'About' },
 ];
 
-export function VendorNavBar({
-  vendorName,
-  rating,
-  reviewCount,
-  onBookNow,
-}: VendorNavBarProps) {
+export function VendorNavBar() {
   const [showNav, setShowNav] = useState(false);
   const [activeSection, setActiveSection] = useState<NavSection>('photos');
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const tabRefs = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
 
   useEffect(() => {
     // Use hysteresis to prevent jitter - different thresholds for show/hide
@@ -67,11 +56,26 @@ export function VendorNavBar({
     };
   }, [showNav]);
 
+  // Update indicator position when active section changes
+  useEffect(() => {
+    const activeTab = tabRefs.current[activeSection];
+    if (activeTab) {
+      const parentRect = activeTab.parentElement?.getBoundingClientRect();
+      const tabRect = activeTab.getBoundingClientRect();
+      if (parentRect) {
+        setIndicatorStyle({
+          left: tabRect.left - parentRect.left,
+          width: tabRect.width,
+        });
+      }
+    }
+  }, [activeSection, showNav]);
+
   const scrollToSection = (sectionId: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     const section = document.getElementById(sectionId);
     if (section) {
-      const offset = 80; // Account for sticky navbar height
+      const offset = 56; // Account for navbar height
       const elementPosition = section.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - offset;
 
@@ -84,50 +88,36 @@ export function VendorNavBar({
 
   return (
     <div
-      className={`w-full h-[72px] bg-white fixed top-0 left-0 right-0 z-50 flex items-center justify-center border-b border-gray-200 transition-transform duration-300 ease-out ${
+      className={`w-full h-14 bg-white fixed top-0 left-0 right-0 z-[60] flex items-center border-b border-gray-200 transition-transform duration-300 ease-out ${
         showNav ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
-      <nav className="h-full max-w-7xl px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
+      <nav className="h-full px-4 md:px-8 lg:px-12 w-full flex items-center">
         {/* Navigation Tabs */}
-        <div className="h-full flex items-center gap-6">
+        <div className="h-full flex items-center gap-6 relative">
           {navItems.map((item) => (
             <a
               key={item.id}
+              ref={(el) => { tabRefs.current[item.id] = el; }}
               href={`#${item.id}`}
               onClick={scrollToSection(item.id)}
-              className={`text-sm font-medium h-full flex items-center border-b-2 transition-colors ${
+              className={`text-sm font-medium h-full flex items-center transition-colors duration-300 ${
                 activeSection === item.id
-                  ? 'text-gray-900 border-gray-900'
-                  : 'text-gray-500 border-transparent hover:text-gray-900 hover:border-gray-300'
+                  ? 'text-gray-900'
+                  : 'text-gray-500 hover:text-gray-900'
               }`}
             >
               {item.label}
             </a>
           ))}
-        </div>
-
-        {/* Right Side - Rating & Book Button */}
-        <div className="h-full flex items-center gap-5">
-          {/* Vendor Info - Shows when scrolled */}
-          <div className="hidden lg:flex flex-col justify-center">
-            <span className="text-sm font-semibold text-gray-900">
-              {vendorName}
-            </span>
-            <div className="flex items-center gap-1">
-              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              <span className="text-xs font-medium text-gray-900">{rating}</span>
-              <span className="text-xs text-gray-500">({reviewCount})</span>
-            </div>
-          </div>
-
-          {/* Book Now Button */}
-          <button
-            onClick={onBookNow}
-            className="bg-gray-900 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
-          >
-            Book now
-          </button>
+          {/* Sliding indicator */}
+          <div
+            className="absolute bottom-0 h-0.5 bg-gray-900 transition-all duration-300 ease-out"
+            style={{
+              left: indicatorStyle.left,
+              width: indicatorStyle.width,
+            }}
+          />
         </div>
       </nav>
     </div>

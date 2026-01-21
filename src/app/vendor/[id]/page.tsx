@@ -480,16 +480,11 @@ export default function VendorDetailPage() {
   return (
     <>
       {/* Scroll-aware NavBar */}
-      <VendorNavBar
-        vendorName={vendor.name}
-        rating={vendor.rating}
-        reviewCount={vendor.reviewCount}
-        onBookNow={handleBookNow}
-      />
+      <VendorNavBar />
 
       <div className="min-h-screen bg-white pb-24 lg:pb-0">
         {/* Breadcrumb */}
-        <div className="px-4 md:px-8 lg:px-12 py-4">
+        <div className="px-4 md:px-8 lg:pl-12 lg:pr-10 py-4">
           <nav className="flex items-center gap-2 text-sm text-gray-500 overflow-x-auto hide-scrollbar">
             {vendor.breadcrumb.map((item, index) => (
               <div key={index} className="flex items-center gap-2 shrink-0">
@@ -510,15 +505,15 @@ export default function VendorDetailPage() {
         </div>
 
         {/* Vendor Header */}
-        <div className="px-4 md:px-8 lg:px-12 mt-2 mb-4 md:mb-6">
-          <h1 className="font-bold text-2xl md:text-4xl lg:text-5xl text-gray-900">
+        <div className="px-4 md:px-8 lg:pl-12 lg:pr-10 mt-2 mb-2 md:mb-3">
+          <h1 className="font-bold text-2xl md:text-4xl lg:text-5xl text-gray-900 leading-none">
             {vendor.name}
           </h1>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-3 gap-3">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-1 gap-3">
             <div className="flex flex-wrap items-center gap-2 md:gap-3 text-sm md:text-base">
                   {/* Rating */}
                   <div className="flex items-center gap-1">
-                    <span className="font-semibold text-blue-600">
+                    <span className="font-semibold text-gray-900">
                       {vendor.rating.toFixed(1)}
                     </span>
                     <div className="flex items-center">
@@ -552,7 +547,6 @@ export default function VendorDetailPage() {
 
               {/* Location */}
               <div className="flex items-center gap-1 text-gray-600">
-                <MapPin className="h-4 w-4" />
                 <span className="truncate max-w-[150px] md:max-w-none">{vendor.shortLocation}</span>
               </div>
               <button
@@ -565,15 +559,15 @@ export default function VendorDetailPage() {
 
             {/* Action Buttons - Desktop */}
             <div className="hidden md:flex items-center gap-3">
-              <button className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors">
-                <Share className="h-5 w-5" />
+              <button className="h-12 w-12 flex items-center justify-center border border-[#d1d1d1] rounded-full hover:bg-gray-50 transition-colors">
+                <Share className="h-6 w-6" />
               </button>
               <button
                 onClick={() => setIsFavorite(!isFavorite)}
-                className="h-10 w-10 flex items-center justify-center border border-gray-200 rounded-full hover:bg-gray-50 transition-colors"
+                className="h-12 w-12 flex items-center justify-center border border-[#d1d1d1] rounded-full hover:bg-gray-50 transition-colors"
               >
                 <Heart
-                  className={`h-5 w-5 ${
+                  className={`h-6 w-6 ${
                     isFavorite ? 'fill-red-500 text-red-500' : ''
                   }`}
                 />
@@ -583,18 +577,20 @@ export default function VendorDetailPage() {
         </div>
 
         {/* Image Gallery */}
-        <div className="px-4 md:px-8 lg:px-12" id="photos">
+        <div className="px-4 md:px-8 lg:pl-12 lg:pr-10" id="photos">
           <ImageGallery images={vendor.images} vendorName={vendor.name} />
         </div>
 
         {/* Main Content - Two Column Layout */}
-        <div className="px-4 md:px-8 lg:px-12 mt-6">
+        <div className="px-4 md:px-8 lg:pl-12 lg:pr-10 mt-6">
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
             {/* Left Column - Main Content */}
             <div className="flex-1 min-w-0 space-y-10">
               {/* Services Section */}
-              <div id="services">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Services</h2>
+              <div id="services" className="pt-6">
+                <h2 className="text-[28px] font-semibold leading-9 text-[rgb(20,20,20)] mb-4">
+                  Services
+                </h2>
 
                 {/* Category Tabs */}
                 {categoryNames.length > 0 && (
@@ -606,7 +602,7 @@ export default function VendorDetailPage() {
                 )}
 
                 {/* Service List */}
-                <div className="mt-4">
+                <div className="mt-6">
                   {activeServices.length > 0 ? (
                     <ServiceList
                       services={activeServices}
@@ -640,8 +636,8 @@ export default function VendorDetailPage() {
             </div>
 
             {/* Right Column - Side Card (Desktop Only) */}
-            <div className="hidden lg:block w-110 shrink-0">
-              <div className="sticky top-20">
+            <div className="hidden lg:block w-110 shrink-0 mt-8">
+              <div className="sticky top-28">
                 <FreshaSideCard
                   vendorName={vendor.name}
                   rating={vendor.rating}
@@ -659,12 +655,12 @@ export default function VendorDetailPage() {
         </div>
 
         {/* Full Width Sections */}
-        <div className="px-4 md:px-8 lg:px-12 mt-10">
+        <div className="px-4 md:px-8 lg:pl-12 lg:pr-10 mt-16 pt-8">
           {/* Venues Nearby */}
           <VenuesNearby venues={nearbyVenues} />
         </div>
 
-        <div className="px-4 md:px-8 lg:px-12">
+        <div className="px-4 md:px-8 lg:pl-12 lg:pr-10 mt-10">
           {/* Treat Yourself Section */}
           <TreatYourselfSection
             location={vendor.shortLocation}
