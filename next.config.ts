@@ -40,7 +40,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     // Priority: BACKEND_URL (server-only) > NEXT_PUBLIC_API_URL (can be used by both)
     // Format: http://YOUR_AWS_IP:8000 (with or without /api - we'll handle it)
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
+    // Default to localhost:8000 for development if not set
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     
     // If no backend URL is set, don't add rewrites (will cause errors)
     if (!backendUrl) {

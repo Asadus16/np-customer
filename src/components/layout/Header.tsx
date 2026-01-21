@@ -12,6 +12,7 @@ import { UserProfileDropdown } from './UserProfileDropdown';
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const desktopMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isVendorPage = pathname?.startsWith('/vendor');
@@ -29,10 +30,36 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Handle scroll to change background from transparent to white
+  useEffect(() => {
+    function handleScroll() {
+      // Get scroll position
+      const scrollPosition = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+      // At top (≤10px) = transparent, when scrolled (>10px) = white background
+      setIsScrolled(scrollPosition > 10);
+    }
+
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Check initial position after mount
+    requestAnimationFrame(() => {
+      handleScroll();
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
-    <header className="bg-white sticky top-0 z-50">
-      <div className="px-8 lg:px-12">
-        <div className="flex items-center h-20 gap-6">
+    <header
+      className={`sticky top-0 z-50 transition-colors duration-300   ${
+        isScrolled ? 'bg-white' : 'bg-transparent'
+      } ${isScrolled ? 'h-[72px]' : 'h-[0px]'}`}
+    >
+      <div className="max-w-[90rem] mx-auto px-1 sm:px-3 lg:px-4">
+        <div className="flex items-center h-[72px] gap-6">
           {/* Logo */}
           <Link href={ROUTES.HOME} className="flex items-center shrink-0">
             <Image

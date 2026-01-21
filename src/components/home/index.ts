@@ -1,4 +1,6 @@
 export { HeroSection } from './HeroSection';
+export { HomePageLayout } from './HomePageLayout';
+export { AnimatedSpotlight } from './AnimatedSpotlight';
 export { CategoryTabs, CATEGORIES } from './CategoryTabs';
 export { VendorCard, VendorCardSkeleton, type VendorCardData } from './VendorCard';
 export { VendorSection } from './VendorSection';
@@ -6,3 +8,4 @@ export { AppDownloadSection } from './AppDownloadSection';
 export { ReviewsSection } from './ReviewsSection';
 export { StatsSection } from './StatsSection';
 export { BusinessSection } from './BusinessSection';
+export { BrowseByCitySection } from './BrowseByCitySection';

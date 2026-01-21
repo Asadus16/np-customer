@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { Star, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 
 export interface VendorCardData {
   id: string;
@@ -26,7 +26,6 @@ interface VendorCardProps {
 
 export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -42,46 +41,17 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
     setCurrentImageIndex((prev) => (prev < vendor.images.length - 1 ? prev + 1 : 0));
   };
 
-  const handleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsFavorite(!isFavorite);
-  };
-
   const hasMultipleImages = vendor.images.length > 1;
 
   return (
     <Link href={`/vendor/${vendor.id}`}>
       <article
-        className="group cursor-pointer animate-fade-in"
-        style={{ animationDelay: `${index * 50}ms` }}
+        className="group cursor-pointer w-full h-[300px] flex flex-col  rounded-xl overflow-hidden !bg-transparent"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Image Container */}
-        <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100">
-          {/* Featured Badge */}
-          {vendor.isFeatured && (
-            <div className="absolute top-3 left-3 z-10 bg-white px-3 py-1 rounded-full shadow-sm">
-              <span className="text-xs font-medium text-gray-900">Featured</span>
-            </div>
-          )}
-
-          {/* Favorite Button */}
-          <button
-            onClick={handleFavorite}
-            className="absolute top-3 right-3 z-10 p-1.5 rounded-full hover:scale-110 transition-transform"
-            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-          >
-            <Heart
-              className={`h-5 w-5 ${
-                isFavorite
-                  ? 'fill-red-500 text-red-500'
-                  : 'fill-black/30 text-white stroke-2'
-              }`}
-            />
-          </button>
-
+        <div className="relative h-[210px] overflow-hidden bg-gray-100 rounded-xl ">
           {/* Image Carousel */}
           <div
             ref={imageContainerRef}
@@ -106,7 +76,7 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
                 <img
                   src={finalSrc}
                   alt={vendor.name}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 "
                 />
               );
             })()}
@@ -154,27 +124,36 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
         </div>
 
         {/* Content */}
-        <div className="mt-3 space-y-1">
-          {/* Title */}
-          <h3 className="font-medium text-gray-900 text-sm line-clamp-1">
-            {vendor.name}
-          </h3>
+        <div className="px-3 pb-3 pt-2 h-[90px] flex flex-col justify-between rounded-b-xl bg-transparent">
+          <div className="space-y-1.5 flex items-center justify-between">
+            {/* Title */}
+            <h3 className="font-bold text-gray-900 text-base line-clamp-1">
+              {vendor.name}
+            </h3>
 
-          {/* Rating */}
-          {vendor.rating > 0 && (
+            {/* Rating */}
+            {vendor.rating > 0 && (
+              <div className="flex items-center gap-1">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <span className="text-sm text-gray-900 font-medium">
+                  {vendor.rating.toFixed(1)}
+                </span>
+                <span className="text-sm text-gray-900 font-medium">
+                  ({vendor.reviewCount.toLocaleString()})
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            {/* Location */}
             <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm text-gray-900 font-medium">
-                {vendor.rating.toFixed(1)} ({vendor.reviewCount})
-              </span>
+              <p className="text-sm text-gray-600 line-clamp-1">{vendor.location || 'Location not available'}</p>
             </div>
-          )}
 
-          {/* Location */}
-          <p className="text-xs text-gray-600">{vendor.location}</p>
-
-          {/* Category */}
-          <p className="text-xs text-gray-600">{vendor.category}</p>
+            {/* Category */}
+            <p className="text-sm text-gray-600 line-clamp-1">{vendor.category}</p>
+          </div>
         </div>
       </article>
     </Link>
@@ -184,9 +163,9 @@ export function VendorCard({ vendor, index = 0 }: VendorCardProps) {
 // Skeleton loader for vendor card
 export function VendorCardSkeleton() {
   return (
-    <div className="animate-pulse">
-      <div className="aspect-[4/3] rounded-xl bg-gray-200" />
-      <div className="mt-3 space-y-2">
+    <div className="animate-pulse w-[382px] h-[282px] flex flex-col">
+      <div className="h-[210px] rounded-xl bg-gray-200" />
+      <div className="mt-3 space-y-2 flex-shrink-0">
         <div className="h-4 bg-gray-200 rounded w-3/4" />
         <div className="h-3 bg-gray-200 rounded w-1/2" />
         <div className="h-3 bg-gray-200 rounded w-1/3" />

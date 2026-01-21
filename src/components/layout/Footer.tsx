@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { ROUTES } from '@/config';
-import { ExternalLink } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-100 border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+ <>
+    <footer className="bg-gray-100 border-t border-gray-200 px-8">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-12 px-8">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand & App Download */}
           <div className="col-span-2 md:col-span-1">
@@ -117,7 +117,13 @@ export function Footer() {
 
           {/* Find us on social */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+            <h3 
+              className="font-bold mb-4"
+              style={{
+                fontSize: '26px',
+                color: 'rgb(20, 20, 20)'
+              }}
+            >
               Find us on social
             </h3>
             <ul className="space-y-3">
@@ -126,10 +132,14 @@ export function Footer() {
                   href="https://facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-2"
+                  className="flex items-center gap-2 font-normal"
+                  style={{
+                    fontSize: '17px',
+                    color: 'rgb(20, 20, 20)'
+                  }}
                 >
+                  <svg className="h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fillRule="evenodd" d="M17.293 6.293a1 1 0 0 1 1.414 0l9 9a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-1.414-1.414L24.586 17H5a1 1 0 1 1 0-2h19.586l-7.293-7.293a1 1 0 0 1 0-1.414" clipRule="evenodd"></path></svg>
                   Facebook
-                  <ExternalLink className="h-3 w-3" />
                 </a>
               </li>
               <li>
@@ -137,10 +147,14 @@ export function Footer() {
                   href="https://twitter.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-2"
+                  className="flex items-center gap-2 font-normal"
+                  style={{
+                    fontSize: '17px',
+                    color: 'rgb(20, 20, 20)'
+                  }}
                 >
+                  <svg className="h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fillRule="evenodd" d="M17.293 6.293a1 1 0 0 1 1.414 0l9 9a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-1.414-1.414L24.586 17H5a1 1 0 1 1 0-2h19.586l-7.293-7.293a1 1 0 0 1 0-1.414" clipRule="evenodd"></path></svg>
                   Twitter
-                  <ExternalLink className="h-3 w-3" />
                 </a>
               </li>
               <li>
@@ -148,10 +162,14 @@ export function Footer() {
                   href="https://linkedin.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-2"
+                  className="flex items-center gap-2 font-normal"
+                  style={{
+                    fontSize: '17px',
+                    color: 'rgb(20, 20, 20)'
+                  }}
                 >
+                  <svg className="h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fillRule="evenodd" d="M17.293 6.293a1 1 0 0 1 1.414 0l9 9a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-1.414-1.414L24.586 17H5a1 1 0 1 1 0-2h19.586l-7.293-7.293a1 1 0 0 1 0-1.414" clipRule="evenodd"></path></svg>
                   Linkedin
-                  <ExternalLink className="h-3 w-3" />
                 </a>
               </li>
               <li>
@@ -159,20 +177,28 @@ export function Footer() {
                   href="https://instagram.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-900 text-sm flex items-center gap-2"
+                  className="flex items-center gap-2 font-normal"
+                  style={{
+                    fontSize: '17px',
+                    color: 'rgb(20, 20, 20)'
+                  }}
                 >
+                  <svg className="h-4 w-4" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fillRule="evenodd" d="M17.293 6.293a1 1 0 0 1 1.414 0l9 9a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-1.414-1.414L24.586 17H5a1 1 0 1 1 0-2h19.586l-7.293-7.293a1 1 0 0 1 0-1.414" clipRule="evenodd"></path></svg>
                   Instagram
-                  <ExternalLink className="h-3 w-3" />
                 </a>
               </li>
             </ul>
           </div>
         </div>
-
-        {/* Bottom */}
-        <div className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+      </div>
+      
+    </footer>
+      <div className=" pt-8 p-4 border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4" style={{margin:'10px 46px'}}>
           {/* Language Selector */}
-          <button className="flex items-center gap-2 text-sm text-green-600 hover:underline">
+          <button 
+            className="flex items-center gap-2 text-sm hover:underline"
+            style={{ color: 'rgb(105, 80, 243)' }}
+          >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"/>
               <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
@@ -185,7 +211,6 @@ export function Footer() {
             &copy; {currentYear} Fresha.com SV Ltd
           </p>
         </div>
-      </div>
-    </footer>
+      </>
   );
 }

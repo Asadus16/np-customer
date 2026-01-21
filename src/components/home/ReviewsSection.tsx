@@ -90,7 +90,7 @@ export function ReviewsSection() {
 
   return (
     <section className="py-8 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-gray-900">Reviews</h2>
@@ -102,15 +102,15 @@ export function ReviewsSection() {
           <div
             ref={scrollContainerRef}
             onScroll={checkScrollPosition}
-            className="flex gap-4 overflow-x-auto hide-scrollbar scroll-smooth pb-2"
+            className="flex gap-4 overflow-x-auto hide-scrollbar scroll-smooth pb-2 justify-between "
           >
             {staticReviews.map((review) => (
               <div
                 key={review.id}
-                className="flex-shrink-0 w-80 bg-gray-50 rounded-xl p-6 border border-gray-200"
+                className="flex-shrink-0 w-[326px] bg-[#F2F2F2] rounded-xl p-8  flex flex-col h-[376px]"
               >
                 {/* Rating Stars */}
-                <div className="flex items-center gap-1 mb-3">
+                <div className="flex items-center gap-1 mb-4">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
@@ -120,18 +120,18 @@ export function ReviewsSection() {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
                   {review.title}
                 </h3>
 
                 {/* Review Text */}
-                <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                <p className="text-base text-gray-900 mb-6 leading-relaxed flex-grow">
                   {review.text}
                 </p>
 
                 {/* Reviewer Info */}
-                <div className="flex items-center gap-3">
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                <div className="flex items-center gap-3 mt-auto">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
                     {review.avatar ? (
                       <Image
                         src={review.avatar}
@@ -148,10 +148,10 @@ export function ReviewsSection() {
                     )}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-base font-normal text-gray-900">
                       {review.reviewerName}
                     </p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-sm text-gray-600">
                       {review.reviewerLocation}
                     </p>
                   </div>
