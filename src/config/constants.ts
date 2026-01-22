@@ -3,17 +3,14 @@
  */
 
 // API Configuration
-// Use relative path to leverage Next.js API rewrites (configured in next.config.ts)
-// This avoids mixed content errors by proxying through Next.js server
-// The rewrite proxies /api/* requests to your HTTP backend
+// Use NEXT_PUBLIC_API_URL directly for backend API calls
 const getApiBaseUrl = (): string => {
-  // If explicitly set to use direct URL (not using rewrites), use it
-  if (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_DIRECT === 'true') {
+  // Use NEXT_PUBLIC_API_URL if set, otherwise default to relative path
+  if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
   
-  // Use relative path - Next.js rewrites will proxy to backend
-  // This works for both development and production
+  // Fallback to relative path (for local development without env var)
   return '/api';
 };
 
