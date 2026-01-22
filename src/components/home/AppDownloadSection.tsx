@@ -69,7 +69,7 @@ export function AppDownloadSection() {
             <div className="flex gap-4 justify-center lg:justify-end items-center">
               {/* Left Phone - Image (Trendy Studio) */}
               <div className="relative aspect-[9/16] w-56 md:w-72 lg:w-80">
-                <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden ">
+                <div className="absolute inset-0 rounded-[18px] overflow-hidden ">
                   <Image
                     src="/homeImage.webp"
                     alt="Trendy Studio - noproblem app preview"
@@ -82,7 +82,7 @@ export function AppDownloadSection() {
 
               {/* Right Phone - Video */}
               <div className="relative aspect-[9/16] w-48 md:w-60 lg:w-64">
-                <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden  border-2 border-gray-900">
+                <div className="absolute inset-0 rounded-[18px] overflow-hidden  border-2 border-gray-900">
                   <video
                     ref={videoRef}
                     src="/homeVideo.mp4"

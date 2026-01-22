@@ -215,7 +215,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative">
+    <section className="relative" style={{ minHeight: '100dvh' }}>
       <div className="relative max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24" style={{ zIndex: 1 }}>
         <div className="text-center max-w-[80%] mx-auto mt-[30px] pt-[60px] ">
           <h1 
@@ -575,7 +575,7 @@ export function HeroSection() {
           </form>    
 
           {/* Appointment Count - dark pink/purple color */}
-          <div className="mt-7">
+          <div className="mt-7 mb-8">
             <p className="text-lg font-bold animate-fade-in">
               {count.toLocaleString()} appointments booked today
             </p>
