@@ -8,12 +8,14 @@ import { Menu, X, Globe, ArrowRight } from 'lucide-react';
 import { ROUTES } from '@/config';
 import { useAuth } from '@/hooks';
 import { UserProfileDropdown } from './UserProfileDropdown';
+import { SearchBar } from './SearchBar';
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const desktopMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const isVendorPage = pathname?.startsWith('/vendor');
@@ -80,12 +82,12 @@ export function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-colors duration-300   ${
-        isScrolled ? 'bg-white' : 'bg-transparent'
-      } ${isScrolled ? 'h-[72px]' : 'h-[0px]'}`}
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white shadow-sm' : 'bg-transparent'
+      } ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}
     >
       <div className="max-w-[90rem] mx-auto px-1 sm:px-3 lg:px-4">
-        <div className="flex items-center h-[72px] gap-6">
+        <div className={`flex items-center gap-6 transition-all duration-300 ${isSearchExpanded ? 'py-5' : 'py-3'}`}>
           {/* Logo */}
           <Link href={ROUTES.HOME} className={`flex items-center shrink-0 ${isProfilePage ? '-ml-3 lg:-ml-5 mr-3 lg:mr-5' : ''}`}>
             <Image
@@ -101,29 +103,7 @@ export function Header() {
           {/* Search Bar - Desktop */}
           {showSearchBar && (
             <div className="hidden md:flex flex-1 justify-start ml-37">
-              <div className="flex items-center border border-gray-200 rounded-full shadow-md hover:shadow-lg transition-shadow w-[720px]">
-                {/* All treatments */}
-                <button className="flex-1 flex items-center justify-start gap-3 py-4 pl-4 hover:bg-gray-50 rounded-l-full transition-colors">
-                  <Image src="/header/headerDropdown/search.svg" alt="" width={16} height={16} />
-                  <span className="text-[15px] font-medium leading-[15px] text-[rgb(20,20,20)]">All treatments</span>
-                </button>
-
-                {/* Divider */}
-                <div className="h-7 w-px bg-gray-200" />
-
-                {/* Location */}
-                <button className="flex-1 flex items-center justify-start gap-3 py-4 pl-4 hover:bg-gray-50 transition-colors">
-                  <span className="text-[15px] font-medium leading-[15px] text-[rgb(20,20,20)]">Current location</span>
-                </button>
-
-                {/* Divider */}
-                <div className="h-7 w-px bg-gray-200" />
-
-                {/* Time */}
-                <button className="flex-1 flex items-center justify-start gap-3 py-4 pl-4 hover:bg-gray-50 rounded-r-full transition-colors">
-                  <span className="text-[15px] font-medium leading-[15px] text-[rgb(20,20,20)]">Any time</span>
-                </button>
-              </div>
+              <SearchBar className="w-[720px]" onExpandChange={setIsSearchExpanded} />
             </div>
           )}
 
