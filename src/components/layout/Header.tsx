@@ -13,7 +13,6 @@ import { SearchBar } from './SearchBar';
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
-  const [isHidden, setIsHidden] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const desktopMenuRef = useRef<HTMLDivElement>(null);
@@ -35,28 +34,6 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Hide header on scroll for vendor pages
-  useEffect(() => {
-    if (!isVendorPage) {
-      setIsHidden(false);
-      return;
-    }
-
-    const SHOW_THRESHOLD = 350;
-    const HIDE_THRESHOLD = 400;
-
-    function handleScroll() {
-      const scrollY = window.scrollY;
-      if (scrollY > HIDE_THRESHOLD && !isHidden) {
-        setIsHidden(true);
-      } else if (scrollY < SHOW_THRESHOLD && isHidden) {
-        setIsHidden(false);
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isVendorPage, isHidden]);
 
   // Handle scroll to change background from transparent to white
   useEffect(() => {
@@ -82,9 +59,9 @@ export function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-sm' : 'bg-transparent'
-      } ${isHidden ? '-translate-y-full' : 'translate-y-0'}`}
+      className={`${isVendorPage ? 'relative' : 'sticky top-0'} z-50 transition-all duration-300 ${
+        isScrolled && !isVendorPage ? 'bg-white shadow-sm' : isVendorPage ? 'bg-white' : 'bg-transparent'
+      } ${isProfilePage ? 'border-b border-gray-200' : ''}`}
     >
       <div className="max-w-[90rem] mx-auto px-1 sm:px-3 lg:px-4">
         <div className={`flex items-center gap-6 transition-all duration-300 ${isSearchExpanded ? 'py-5' : 'py-3'}`}>
