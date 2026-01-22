@@ -70,7 +70,7 @@ export function UserProfileDropdown() {
       {/* Profile Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-20 pl-1 pr-3 py-1 bg-white border border-[#d3d3d3] rounded-full hover:shadow-sm transition-all"
+        className="flex items-center justify-between w-20 pl-1 pr-3 py-1 bg-white border border-[#d3d3d3] rounded-full hover:shadow-sm active:scale-[0.97] transition-all"
       >
         {/* Avatar */}
         <div className="w-9 h-9 rounded-full bg-[#f0f0ff] flex items-center justify-center text-sm font-semibold text-blue-600">

@@ -87,7 +87,7 @@ export function Header() {
       <div className="max-w-[90rem] mx-auto px-1 sm:px-3 lg:px-4">
         <div className="flex items-center h-[72px] gap-6">
           {/* Logo */}
-          <Link href={ROUTES.HOME} className="flex items-center shrink-0">
+          <Link href={ROUTES.HOME} className={`flex items-center shrink-0 ${isProfilePage ? '-ml-3 lg:-ml-5 mr-3 lg:mr-5' : ''}`}>
             <Image
               src="/logos/Logo.svg"
               alt="No Problem"

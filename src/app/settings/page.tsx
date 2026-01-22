@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/hooks';
 import { ROUTES } from '@/config';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X, Eye, EyeOff } from 'lucide-react';
 import { ProfileLayout } from '@/components/layout/ProfileLayout';
 
 interface ToggleSwitchProps {
@@ -46,7 +46,7 @@ interface NotificationSettings {
 }
 
 export default function SettingsPage() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
   const router = useRouter();
 
   const [notifications, setNotifications] = useState<NotificationSettings>({
@@ -61,7 +61,7 @@ export default function SettingsPage() {
     },
   });
 
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -89,11 +89,6 @@ export default function SettingsPage() {
     console.log(`Connect ${provider}`);
   };
 
-  const handleUpdatePassword = () => {
-    // TODO: Implement password update modal/flow
-    console.log('Update password');
-  };
-
   const handleDeleteAccount = () => {
     // TODO: Implement delete account confirmation
     if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
@@ -117,9 +112,9 @@ export default function SettingsPage() {
 
   return (
     <ProfileLayout title="Settings">
-      <div className="ml-19 max-w-[600px] space-y-6">
+      <div className="ml-19 max-w-[525px] space-y-6">
         {/* My social logins */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl border border-gray-200 pt-10 pl-10 pr-8 pb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-1">My social logins</h2>
           <p className="text-gray-500 text-sm mb-6">
             Link social profiles for easier access to your account.
@@ -141,7 +136,7 @@ export default function SettingsPage() {
               </div>
               <button
                 onClick={() => handleConnectSocial('facebook')}
-                className="px-6 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
+                className="px-5 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
               >
                 Connect
               </button>
@@ -162,7 +157,7 @@ export default function SettingsPage() {
               </div>
               <button
                 onClick={() => handleConnectSocial('google')}
-                className="px-6 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
+                className="px-5 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
               >
                 Connect
               </button>
@@ -171,7 +166,7 @@ export default function SettingsPage() {
         </div>
 
         {/* My notifications */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl border border-gray-200 pt-10 pl-10 pr-8 pb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-1">My notifications</h2>
           <p className="text-gray-500 text-sm mb-6">
             We will send you updates about your appointments, news and offers.
@@ -232,11 +227,11 @@ export default function SettingsPage() {
         </div>
 
         {/* Change password */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl border border-gray-200 pt-10 pl-10 pr-8 pb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-1">Change password</h2>
           <p className="text-gray-500 text-sm mb-6">Update your password</p>
           <button
-            onClick={handleUpdatePassword}
+            onClick={() => setShowPasswordModal(true)}
             className="px-6 py-2.5 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
           >
             Update my password
@@ -244,7 +239,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Delete account */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl border border-gray-200 pt-10 pl-10 pr-8 pb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-1">Delete account</h2>
           <p className="text-gray-500 text-sm mb-6">Are you sure you want to leave?</p>
           <button
@@ -255,6 +250,180 @@ export default function SettingsPage() {
           </button>
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <ChangePasswordModal
+          email={user?.email || ''}
+          onClose={() => setShowPasswordModal(false)}
+        />
+      )}
     </ProfileLayout>
+  );
+}
+
+interface ChangePasswordModalProps {
+  email: string;
+  onClose: () => void;
+}
+
+function ChangePasswordModal({ email, onClose }: ChangePasswordModalProps) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      // TODO: API call to change password
+      console.log('Change password:', { currentPassword, newPassword });
+      onClose();
+    } catch (err) {
+      setError('Failed to update password. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-[475px] overflow-hidden relative">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-full transition-colors z-10"
+        >
+          <X className="w-6 h-6 text-gray-900" />
+        </button>
+
+        {/* Header */}
+        <div className="px-8 pt-8 pb-2">
+          <h2 className="text-2xl font-bold text-gray-900">Change password</h2>
+        </div>
+
+        {/* Content */}
+        <div className="px-8 pt-2 pb-8">
+          <p className="text-gray-600 text-sm mb-6">
+            Please enter a new password for <span className="font-medium text-gray-900">{email}</span>
+          </p>
+
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm mb-4">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Current Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Enter current password
+              </label>
+              <div className="relative">
+                <input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6950f3] focus:border-transparent pr-12"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* New Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Enter new password
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6950f3] focus:border-transparent pr-12"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm New Password */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                Confirm new password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6950f3] focus:border-transparent pr-12"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Forgot password link */}
+            <p className="text-sm text-gray-600 pt-2">
+              If you forgot your password,{' '}
+              <a href="#" className="text-[#6950f3] hover:underline">
+                you can reset by clicking on this link.
+              </a>
+            </p>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-3.5 bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+              ) : (
+                'Update'
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }
