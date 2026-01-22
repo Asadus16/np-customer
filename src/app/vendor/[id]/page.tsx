@@ -335,6 +335,11 @@ export default function VendorDetailPage() {
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [isFavorite, setIsFavorite] = useState(false);
 
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Map API data to component format
   const vendor = useMemo(() => {
     if (!apiVendor) return null;
