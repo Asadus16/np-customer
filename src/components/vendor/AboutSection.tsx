@@ -32,7 +32,7 @@ export function AboutSection({
   return (
     <div className="space-y-8" id="about">
       <div>
-        <h2 className="text-[28px] font-semibold leading-9 text-[rgb(20,20,20)] mb-4">
+        <h2 className="text-2xl md:text-[28px] font-semibold leading-9 text-[rgb(20,20,20)] mb-4">
           About
         </h2>
         <p className="text-gray-700 leading-relaxed">{description}</p>

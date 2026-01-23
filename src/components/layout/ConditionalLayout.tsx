@@ -12,13 +12,18 @@ export function ConditionalLayout({
   const isAuthPage = pathname?.startsWith('/auth') ?? false;
   const isBookingPage = pathname?.startsWith('/booking') ?? false;
   const isDemoBookingPage = pathname?.startsWith('/demo/booking') ?? false;
-  const isProfilePage = pathname === '/profile' || pathname === '/appointments' || pathname === '/wallet' || pathname === '/favorites' || pathname === '/forms' || pathname === '/orders' || pathname === '/settings';
-  const shouldShowLayout = !isAuthPage && !isBookingPage && !isDemoBookingPage;
-  const shouldShowFooter = shouldShowLayout && !isProfilePage;
+  const isMenuPage = pathname === '/menu';
+  const isProfilePage = pathname === '/profile' || pathname === '/appointments' || pathname === '/wallet' || pathname === '/favorites' || pathname === '/settings';
+  const shouldHideLayout = isAuthPage || isBookingPage || isDemoBookingPage || isMenuPage;
+  const shouldShowFooter = !shouldHideLayout && !isProfilePage;
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {shouldShowLayout && <Header />}
+      {!shouldHideLayout && (
+        <div className={isProfilePage ? 'hidden lg:block' : ''}>
+          <Header />
+        </div>
+      )}
       <main className="flex-1 bg-white">{children}</main>
       {shouldShowFooter && <Footer />}
     </div>

@@ -215,40 +215,37 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative" style={{ minHeight: '100dvh' }}>
-      <div className="relative max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24" style={{ zIndex: 1 }}>
-        <div className="text-center max-w-[80%] mx-auto mt-[30px] pt-[60px] ">
-          <h1 
+    <section className="relative">
+      <div className="relative max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-24" style={{ zIndex: 1 }}>
+        <div className="text-left lg:text-center max-w-full lg:max-w-[80%] mx-auto mt-2 lg:mt-[30px] pt-4 lg:pt-[60px]">
+          <h1
+            className="text-[40px] leading-[44px] lg:text-[64px] lg:leading-[68px]"
             style={{
               fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif',
               fontStyle: 'normal',
               fontWeight: 700,
               color: 'rgb(20, 20, 20)',
-              fontSize: '64px',
-              lineHeight: '68px'
             }}
           >
             Book local selfcare services
           </h1>
-          <p 
-            className="mt-4 mx-auto"
-            style={{ 
+          <p
+            className="mt-3 lg:mt-4 lg:mx-auto text-base lg:text-[20px] leading-[24px] lg:leading-[28px] lg:px-0"
+            style={{
               fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif',
               fontStyle: 'normal',
               fontWeight: 400,
               color: 'rgb(20, 20, 20)',
-              fontSize: '20px',
-              lineHeight: '28px'
             }}
           >
             Discover top-rated salons, barbers, medspas, wellness studios and beauty experts trusted by millions worldwide
           </p>
 
           {/* Search Form */}
-      <form onSubmit={handleSearch} className="mt-12  mx-auto relative z-[100]">
-            <div className="py-0.5 bg-white rounded-[50px] border border-purple-200 flex flex-col md:flex-row items-center rounded-4xl border-6 relative focus-within:border-purple-200 focus-within:ring-0">
+      <form onSubmit={handleSearch} className="mt-6 lg:mt-12 mx-auto relative z-[100]">
+            <div className="py-0.5 bg-white rounded-2xl lg:rounded-[50px] border border-purple-200 flex flex-col lg:flex-row items-center border-6 relative focus-within:border-purple-200 focus-within:ring-0 shadow-sm lg:shadow-none">
               {/* Service Search - 4 columns (3x4=12) */}
-              <div className="w-full md:w-4/12 flex items-center p-[21px] border-b md:border-b-0 hover:bg-[#F2F2F2] ml-[1px] hover:rounded-full relative md:after:content-[''] md:after:absolute md:after:right-0 md:after:top-1/2 md:after:-translate-y-1/2 md:after:h-[60%] md:after:w-px md:after:bg-gray-200 md:hover:after:hidden">
+              <div className="w-full lg:w-4/12 flex items-center p-4 lg:p-[21px] border-b lg:border-b-0 hover:bg-[#F2F2F2] lg:ml-[1px] hover:rounded-xl lg:hover:rounded-full relative lg:after:content-[''] lg:after:absolute lg:after:right-0 lg:after:top-1/2 lg:after:-translate-y-1/2 lg:after:h-[60%] lg:after:w-px lg:after:bg-gray-200 lg:hover:after:hidden">
                 <Search className="h-5 w-5 text-gray-900 flex-shrink-0" />
                 <input
                   ref={inputRef}
@@ -307,7 +304,7 @@ export function HeroSection() {
               </div>
 
               {/* Location - 4 columns (3x4=12) */}
-              <div className="w-full md:w-4/12 flex items-center p-[21px] border-b md:border-b-0 hover:bg-[#F2F2F2] ml-[1px] hover:rounded-full relative md:after:content-[''] md:after:absolute md:after:right-0 md:after:top-1/2 md:after:-translate-y-1/2 md:after:h-[60%] md:after:w-px md:after:bg-gray-200 md:hover:after:hidden">
+              <div className="w-full lg:w-4/12 flex items-center p-4 lg:p-[21px] border-b lg:border-b-0 hover:bg-[#F2F2F2] lg:ml-[1px] hover:rounded-xl lg:hover:rounded-full relative lg:after:content-[''] lg:after:absolute lg:after:right-0 lg:after:top-1/2 lg:after:-translate-y-1/2 lg:after:h-[60%] lg:after:w-px lg:after:bg-gray-200 lg:hover:after:hidden">
                 <MapPin className="h-5 w-5 text-gray-900 flex-shrink-0" />
                 <input
                   ref={locationInputRef}
@@ -412,7 +409,7 @@ export function HeroSection() {
               </div>
 
               {/* Date - 4 columns (3x4=12) */}
-              <div className="w-full md:w-4/12 flex items-center p-[21px] hover:bg-[#F2F2F2] ml-[1px] hover:rounded-full relative">
+              <div className="w-full lg:w-4/12 flex items-center p-4 lg:p-[21px] hover:bg-[#F2F2F2] lg:ml-[1px] hover:rounded-xl lg:hover:rounded-full relative">
                 <Calendar className="h-5 w-5 text-gray-900 flex-shrink-0" />
                 <input
                   ref={dateInputRef}
@@ -429,12 +426,12 @@ export function HeroSection() {
                 {showDateDropdown && (
                   <div
                     ref={dateDropdownRef}
-                    className="absolute top-full left-0 mt-2 w-[600px] bg-white rounded-lg shadow-lg border border-gray-200 z-[9999] p-4"
+                    className="absolute top-full left-0 lg:left-0 mt-2 w-[calc(100vw-2rem)] lg:w-[600px] max-w-[600px] bg-white rounded-lg shadow-lg border border-gray-200 z-[9999] p-3 lg:p-4 -ml-4 lg:ml-0"
                     style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
                   >
-                    <div className="flex gap-4">
+                    <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
                       {/* Left Panel - Quick Date Selectors */}
-                      <div className="flex flex-col gap-2 w-32">
+                      <div className="flex flex-row lg:flex-col gap-2 w-full lg:w-32 overflow-x-auto lg:overflow-visible">
                         <button
                           type="button"
                           onClick={() => handleDateSelect(getToday())}
@@ -527,10 +524,10 @@ export function HeroSection() {
                     </div>
 
                     {/* Time Selectors */}
-                    <div className="mt-6 pt-4 border-t border-gray-200">
-                      <div className="flex items-center gap-3">
+                    <div className="mt-4 lg:mt-6 pt-3 lg:pt-4 border-t border-gray-200">
+                      <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3">
                         <label className="text-sm font-semibold text-gray-900">Select time</label>
-                        <div className="flex gap-2 flex-wrap">
+                        <div className="flex gap-2 flex-wrap overflow-x-auto lg:overflow-visible pb-1 lg:pb-0">
                           {[
                             { id: 'any', label: 'Any time' },
                             { id: 'morning', label: 'Morning', subtitle: '9 am - 12 pm' },
@@ -563,10 +560,10 @@ export function HeroSection() {
               </div>
 
               {/* Search Button - integrated on the right */}
-              <div className="w-full md:w-auto flex items-center justify-center md:justify-end px-2 py-2 md:py-1">
+              <div className="w-full lg:w-auto flex items-center justify-center lg:justify-end p-3 lg:px-2 lg:py-1">
                 <button
                   type="submit"
-                  className="bg-gray-900 hover:bg-gray-800 text-white px-5 py-3.5 rounded-full font-bold transition-colors w-full md:w-auto"
+                  className="bg-gray-900 hover:bg-gray-800 text-white px-5 py-3.5 rounded-full font-bold transition-colors w-full lg:w-auto"
                 >
                   Search
                 </button>
@@ -575,15 +572,15 @@ export function HeroSection() {
           </form>    
 
           {/* Appointment Count - dark pink/purple color */}
-          <div className="mt-7 mb-8">
-            <p className="text-lg font-bold animate-fade-in">
+          <div className="mt-5 lg:mt-7 mb-4 lg:mb-8">
+            <p className="text-base lg:text-lg font-bold animate-fade-in">
               {count.toLocaleString()} appointments booked today
             </p>
           </div>
 
           {/* Get the app button - white with border */}
-          <div className="mt-10 relative inline-block group">
-            <button className="bg-white border border-gray-300 hover:border-gray-400 text-gray-900 px-6 py-3 rounded-[50px] font-bold transition-colors flex items-center gap-2 mx-auto">
+          <div className="mt-4 lg:mt-10 relative inline-block group">
+            <button className="bg-white border border-gray-300 hover:border-gray-400 text-gray-900 px-6 py-3 rounded-[50px] font-bold transition-colors flex items-center gap-2 lg:mx-auto">
               {/* Apps/Grid icon - 2x3 grid */}
              
               <span>Get the app</span>

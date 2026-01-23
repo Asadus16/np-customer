@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Share2, Heart } from 'lucide-react';
 
 type NavSection = 'photos' | 'services' | 'team' | 'reviews' | 'about';
 
@@ -11,7 +13,14 @@ const navItems: { id: NavSection; label: string }[] = [
   { id: 'about', label: 'About' },
 ];
 
-export function VendorNavBar() {
+interface VendorNavBarProps {
+  vendorName?: string;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
+}
+
+export function VendorNavBar({ vendorName = '', isFavorite = false, onToggleFavorite }: VendorNavBarProps) {
+  const router = useRouter();
   const [showNav, setShowNav] = useState(false);
   const [activeSection, setActiveSection] = useState<NavSection>('photos');
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
@@ -19,8 +28,9 @@ export function VendorNavBar() {
 
   useEffect(() => {
     // Use hysteresis to prevent jitter - different thresholds for show/hide
-    const SHOW_THRESHOLD = 400;
-    const HIDE_THRESHOLD = 350;
+    // Lower threshold for mobile
+    const SHOW_THRESHOLD = window.innerWidth < 768 ? 200 : 400;
+    const HIDE_THRESHOLD = window.innerWidth < 768 ? 150 : 350;
 
     function handleScroll() {
       const scrollY = window.scrollY;
@@ -75,7 +85,7 @@ export function VendorNavBar() {
     e.preventDefault();
     const section = document.getElementById(sectionId);
     if (section) {
-      const offset = 56; // Account for navbar height
+      const offset = window.innerWidth < 768 ? 110 : 56; // Account for navbar height (taller on mobile)
       const elementPosition = section.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - offset;
 
@@ -86,22 +96,56 @@ export function VendorNavBar() {
     }
   };
 
+  const handleBack = () => {
+    router.back();
+  };
+
   return (
     <div
-      className={`w-full h-14 bg-white fixed top-0 left-0 right-0 z-[60] flex items-center border-b border-gray-200 transition-transform duration-300 ease-out ${
+      className={`w-full bg-white fixed top-0 left-0 right-0 z-[60] border-b border-gray-200 transition-transform duration-300 ease-out ${
         showNav ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
-      <nav className="h-full px-4 md:px-8 lg:px-12 w-full flex items-center">
-        {/* Navigation Tabs */}
-        <div className="h-full flex items-center gap-6 relative">
+      {/* Mobile Header */}
+      <div className="md:hidden flex items-center justify-between px-4 py-3">
+        <button
+          onClick={handleBack}
+          className="h-10 w-10 flex items-center justify-center -ml-2"
+        >
+          <ArrowLeft className="h-5 w-5 text-gray-900" />
+        </button>
+
+        <h1 className="flex-1 text-center font-semibold text-gray-900 truncate px-2">
+          {vendorName}
+        </h1>
+
+        <div className="flex items-center gap-1">
+          <button className="h-10 w-10 flex items-center justify-center">
+            <Share2 className="h-5 w-5 text-gray-700" />
+          </button>
+          <button
+            onClick={onToggleFavorite}
+            className="h-10 w-10 flex items-center justify-center"
+          >
+            <Heart
+              className={`h-5 w-5 ${
+                isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-700'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <nav className="h-12 md:h-14 px-4 md:px-8 lg:px-12 w-full flex items-center overflow-x-auto hide-scrollbar">
+        <div className="h-full flex items-center gap-5 md:gap-6 relative">
           {navItems.map((item) => (
             <a
               key={item.id}
               ref={(el) => { tabRefs.current[item.id] = el; }}
               href={`#${item.id}`}
               onClick={scrollToSection(item.id)}
-              className={`text-sm font-medium h-full flex items-center transition-colors duration-300 ${
+              className={`text-sm font-medium h-full flex items-center transition-colors duration-300 whitespace-nowrap ${
                 activeSection === item.id
                   ? 'text-gray-900'
                   : 'text-gray-500 hover:text-gray-900'

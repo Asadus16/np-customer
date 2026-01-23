@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, X, Grid3X3, Share, Heart } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { ChevronLeft, ChevronRight, X, Grid3X3, Share, Heart, ArrowLeft } from 'lucide-react';
 
 interface ImageGalleryProps {
   images: string[];
@@ -16,9 +17,40 @@ function isLocalUrl(url: string): boolean {
 }
 
 export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  // Touch handlers for swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchEndX.current;
+    const threshold = 50; // Minimum swipe distance
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        // Swipe left - next image
+        handleNext();
+      } else {
+        // Swipe right - previous image
+        handlePrev();
+      }
+    }
+  };
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
@@ -50,7 +82,12 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
     <>
       {/* Mobile Carousel */}
       <div className="md:hidden relative">
-        <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
+        <div
+          className="relative aspect-[4/3] overflow-hidden"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={images[currentIndex]}
@@ -58,48 +95,29 @@ export function ImageGallery({ images, vendorName }: ImageGalleryProps) {
             className="absolute inset-0 w-full h-full object-cover"
           />
 
-          {/* Navigation */}
-          {images.length > 1 && (
-            <>
-              <button
-                onClick={handlePrev}
-                className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 bg-white/90 rounded-full flex items-center justify-center shadow-md"
-              >
-                <ChevronLeft className="h-5 w-5 text-gray-700" />
-              </button>
-              <button
-                onClick={handleNext}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 bg-white/90 rounded-full flex items-center justify-center shadow-md"
-              >
-                <ChevronRight className="h-5 w-5 text-gray-700" />
-              </button>
-            </>
-          )}
 
-          {/* Indicators */}
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {images.slice(0, 5).map((_, idx) => (
-              <span
-                key={idx}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  idx === currentIndex ? 'bg-white' : 'bg-white/50'
-                }`}
-              />
-            ))}
-            {images.length > 5 && (
-              <span className="w-2 h-2 rounded-full bg-white/50" />
-            )}
+          {/* Counter Pagination */}
+          <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs font-medium px-2 py-1 rounded-full">
+            {currentIndex + 1}/{images.length}
           </div>
         </div>
 
+        {/* Back Button */}
+        <button
+          onClick={handleBack}
+          className="absolute top-3 left-3 h-9 w-9 bg-white rounded-full flex items-center justify-center shadow-md"
+        >
+          <ArrowLeft className="h-5 w-5 text-gray-900" />
+        </button>
+
         {/* Action Buttons */}
         <div className="absolute top-3 right-3 flex gap-2">
-          <button className="h-8 w-8 bg-white rounded-full flex items-center justify-center shadow-md">
+          <button className="h-9 w-9 bg-white rounded-full flex items-center justify-center shadow-md">
             <Share className="h-4 w-4 text-gray-700" />
           </button>
           <button
             onClick={() => setIsFavorite(!isFavorite)}
-            className="h-8 w-8 bg-white rounded-full flex items-center justify-center shadow-md"
+            className="h-9 w-9 bg-white rounded-full flex items-center justify-center shadow-md"
           >
             <Heart
               className={`h-4 w-4 ${

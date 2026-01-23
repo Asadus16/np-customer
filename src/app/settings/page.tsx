@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/hooks';
 import { ROUTES } from '@/config';
-import { Loader2, X, Eye, EyeOff } from 'lucide-react';
+import { Loader2, X, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { ProfileLayout } from '@/components/layout/ProfileLayout';
 
 interface ToggleSwitchProps {
@@ -111,11 +111,22 @@ export default function SettingsPage() {
   }
 
   return (
-    <ProfileLayout title="Settings">
-      <div className="ml-19 max-w-[525px] space-y-6">
+    <ProfileLayout title="Settings" showMobileBackButton={false} showMobileTitle={false}>
+      {/* Mobile Back Button */}
+      <button
+        onClick={() => router.push('/menu')}
+        className="lg:hidden mb-4 -ml-2 mt-2 h-10 w-10 flex items-center justify-center"
+      >
+        <ArrowLeft className="h-5 w-5 text-gray-900" />
+      </button>
+
+      {/* Mobile Title */}
+      <h1 className="lg:hidden text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+
+      <div className="lg:ml-19 max-w-full lg:max-w-[525px] space-y-6">
         {/* My social logins */}
-        <div className="bg-white rounded-2xl border border-gray-200 pt-10 pl-10 pr-8 pb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">My social logins</h2>
+        <div className="bg-white rounded-2xl lg:border lg:border-gray-200 pt-0 lg:pt-10 pl-0 lg:pl-10 pr-0 lg:pr-8 pb-6 lg:pb-8">
+          <h2 className="text-lg lg:text-xl font-semibold text-gray-900 mb-1">My social logins</h2>
           <p className="text-gray-500 text-sm mb-6">
             Link social profiles for easier access to your account.
           </p>
@@ -123,20 +134,21 @@ export default function SettingsPage() {
           <div className="space-y-0">
             {/* Facebook */}
             <div className="flex items-center justify-between py-4 border-b border-gray-100">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden">
+              <div className="flex items-center gap-3 lg:gap-4">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden">
                   <Image
                     src="/settings/facebook.svg"
                     alt="Facebook"
                     width={28}
                     height={28}
+                    className="w-6 h-6 lg:w-7 lg:h-7"
                   />
                 </div>
-                <span className="font-medium text-gray-900">Facebook</span>
+                <span className="font-medium text-gray-900 text-sm lg:text-base">Facebook</span>
               </div>
               <button
                 onClick={() => handleConnectSocial('facebook')}
-                className="px-5 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
+                className="px-4 lg:px-5 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
               >
                 Connect
               </button>
@@ -144,20 +156,21 @@ export default function SettingsPage() {
 
             {/* Google */}
             <div className="flex items-center justify-between py-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden">
+              <div className="flex items-center gap-3 lg:gap-4">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden">
                   <Image
                     src="/settings/google.svg"
                     alt="Google"
                     width={28}
                     height={28}
+                    className="w-6 h-6 lg:w-7 lg:h-7"
                   />
                 </div>
-                <span className="font-medium text-gray-900">Google</span>
+                <span className="font-medium text-gray-900 text-sm lg:text-base">Google</span>
               </div>
               <button
                 onClick={() => handleConnectSocial('google')}
-                className="px-5 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
+                className="px-4 lg:px-5 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
               >
                 Connect
               </button>
@@ -166,8 +179,8 @@ export default function SettingsPage() {
         </div>
 
         {/* My notifications */}
-        <div className="bg-white rounded-2xl border border-gray-200 pt-10 pl-10 pr-8 pb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">My notifications</h2>
+        <div className="bg-white rounded-2xl lg:border lg:border-gray-200 pt-0 lg:pt-10 pl-0 lg:pl-10 pr-0 lg:pr-8 pb-6 lg:pb-8">
+          <h2 className="text-lg lg:text-xl font-semibold text-gray-900 mb-1">My notifications</h2>
           <p className="text-gray-500 text-sm mb-6">
             We will send you updates about your appointments, news and offers.
           </p>
@@ -227,8 +240,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Change password */}
-        <div className="bg-white rounded-2xl border border-gray-200 pt-10 pl-10 pr-8 pb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">Change password</h2>
+        <div className="bg-white rounded-2xl lg:border lg:border-gray-200 pt-0 lg:pt-10 pl-0 lg:pl-10 pr-0 lg:pr-8 pb-6 lg:pb-8">
+          <h2 className="text-lg lg:text-xl font-semibold text-gray-900 mb-1">Change password</h2>
           <p className="text-gray-500 text-sm mb-6">Update your password</p>
           <button
             onClick={() => setShowPasswordModal(true)}
@@ -239,8 +252,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Delete account */}
-        <div className="bg-white rounded-2xl border border-gray-200 pt-10 pl-10 pr-8 pb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">Delete account</h2>
+        <div className="bg-white rounded-2xl lg:border lg:border-gray-200 pt-0 lg:pt-10 pl-0 lg:pl-10 pr-0 lg:pr-8 pb-6 lg:pb-8">
+          <h2 className="text-lg lg:text-xl font-semibold text-gray-900 mb-1">Delete account</h2>
           <p className="text-gray-500 text-sm mb-6">Are you sure you want to leave?</p>
           <button
             onClick={handleDeleteAccount}
@@ -304,8 +317,8 @@ function ChangePasswordModal({ email, onClose }: ChangePasswordModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-[475px] overflow-hidden relative">
+    <div className="fixed inset-0 bg-black/50 flex items-end lg:items-center justify-center z-50 lg:p-4">
+      <div className="bg-white rounded-t-2xl lg:rounded-2xl w-full max-w-full lg:max-w-[475px] overflow-hidden relative max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -315,12 +328,12 @@ function ChangePasswordModal({ email, onClose }: ChangePasswordModalProps) {
         </button>
 
         {/* Header */}
-        <div className="px-8 pt-8 pb-2">
-          <h2 className="text-2xl font-bold text-gray-900">Change password</h2>
+        <div className="px-4 lg:px-8 pt-6 lg:pt-8 pb-2">
+          <h2 className="text-xl lg:text-2xl font-bold text-gray-900">Change password</h2>
         </div>
 
         {/* Content */}
-        <div className="px-8 pt-2 pb-8">
+        <div className="px-4 lg:px-8 pt-2 pb-6 lg:pb-8">
           <p className="text-gray-600 text-sm mb-6">
             Please enter a new password for <span className="font-medium text-gray-900">{email}</span>
           </p>
