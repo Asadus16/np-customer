@@ -1,6 +1,13 @@
 import api, { ApiResponse } from '@/lib/api';
 import { VendorCardData } from '@/components/home';
 
+export interface VendorServiceApiResponse {
+  id: string;
+  name: string;
+  description?: string;
+  image?: string;
+}
+
 export interface VendorApiResponse {
   id: string;
   name: string;
@@ -15,6 +22,7 @@ export interface VendorApiResponse {
     id: string;
     name: string;
   }>;
+  services?: VendorServiceApiResponse[];
   rating: number;
   reviews_count: number;
   starting_price: number;
@@ -60,8 +68,27 @@ export function mapVendorToCardData(vendor: VendorApiResponse): VendorCardData {
   // Handle logo - use actual logo URL if available, otherwise use initials
   const logo = vendor.logo && isValidImageUrl(vendor.logo) ? vendor.logo : null;
 
-  // For images, use logo if available, otherwise use placeholder
-  const images: string[] = logo ? [logo] : ['/placeholder.svg'];
+  // For images, first try logo, then try service images, fallback to placeholder
+  let images: string[] = [];
+
+  // Use logo if available
+  if (logo) {
+    images.push(logo);
+  }
+
+  // Add service images
+  if (vendor.services && vendor.services.length > 0) {
+    vendor.services.forEach(service => {
+      if (service.image && isValidImageUrl(service.image) && !images.includes(service.image)) {
+        images.push(service.image);
+      }
+    });
+  }
+
+  // Fallback to placeholder if no images found
+  if (images.length === 0) {
+    images = ['/placeholder.svg'];
+  }
 
   return {
     id: vendor.id,
