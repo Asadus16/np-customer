@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/hooks';
 import { ROUTES } from '@/config';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import { ProfileLayout } from '@/components/layout/ProfileLayout';
 import { VendorCard, VendorCardData } from '@/components/home/VendorCard';
 import { getFavorites, FavoriteVendor } from '@/lib/favorites';
@@ -90,7 +90,20 @@ export default function FavoritesPage() {
   const showTitle = !isLoading && !error && favorites.length > 0;
 
   return (
-    <ProfileLayout title={showTitle ? "Favorites" : undefined}>
+    <ProfileLayout title={showTitle ? "Favorites" : undefined} showMobileBackButton={false} showMobileTitle={false}>
+      {/* Mobile Back Button */}
+      <button
+        onClick={() => router.push('/menu')}
+        className="lg:hidden mb-4 -ml-2 mt-2 h-10 w-10 flex items-center justify-center"
+      >
+        <ArrowLeft className="h-5 w-5 text-gray-900" />
+      </button>
+
+      {/* Mobile Title */}
+      {showTitle && (
+        <h1 className="lg:hidden text-2xl font-bold text-gray-900 mb-6">Favorites</h1>
+      )}
+
       {isLoading ? (
         <div className="flex items-center justify-center py-32">
           <div className="text-center">
@@ -106,7 +119,7 @@ export default function FavoritesPage() {
         </div>
       ) : favorites.length === 0 ? (
         /* Empty State - Centered like appointments */
-        <div className="flex items-center justify-center min-h-[calc(100vh-200px)] pt-16">
+        <div className="flex items-center justify-center min-h-[calc(100vh-300px)] lg:min-h-[calc(100vh-200px)]">
           <div className="text-center">
             <div className="mb-6">
               <Image
@@ -120,7 +133,7 @@ export default function FavoritesPage() {
             <h2 className="text-[20px] font-semibold leading-[28px] text-[rgb(20,20,20)] mb-2">
               No favorites
             </h2>
-            <p className="text-[15px] font-normal leading-[20px] text-[rgb(118,118,118)] mb-6">
+            <p className="text-[15px] font-normal leading-[20px] text-[rgb(118,118,118)] mb-6 px-4">
               Your favorites list is empty. Let's fill it up!
             </p>
             <Link
@@ -133,8 +146,8 @@ export default function FavoritesPage() {
         </div>
       ) : (
         /* Favorites Grid */
-        <div className="ml-19">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 *:w-76">
+        <div className="lg:ml-19">
+          <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 lg:*:w-76">
             {favorites.map((vendor, index) => (
               <VendorCard
                 key={vendor.id}

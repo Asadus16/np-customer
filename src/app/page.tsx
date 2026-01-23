@@ -7,6 +7,7 @@ import {
   VendorSection,
   VendorCard,
   VendorCardData,
+  BookAgainSection,
   AppDownloadSection,
   ReviewsSection,
   StatsSection,
@@ -118,6 +119,11 @@ export default function HomePage() {
         {/* Hero Section */}
         <div style={{ position: 'relative', zIndex: 1 }}>
           <HeroSection />
+        </div>
+
+        {/* Book Again Section - Shows past orders for logged in users */}
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <BookAgainSection />
         </div>
 
         {/* Main Content */}

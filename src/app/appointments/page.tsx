@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, CheckCircle2, EyeOff } from 'lucide-react';
+import { Loader2, CheckCircle2, EyeOff, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/hooks';
 import api from '@/lib/api';
 import { ROUTES } from '@/config';
@@ -51,6 +51,7 @@ export default function AppointmentsPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showMobileDetails, setShowMobileDetails] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -116,6 +117,18 @@ export default function AppointmentsPage() {
     const day = date.getDate();
     const month = monthNames[date.getMonth()];
     return `${dayName}, ${day} ${month}`;
+  };
+
+  // Format date short - "Tue, 20 Jan 2026"
+  const formatDateShort = (dateString: string) => {
+    const date = new Date(dateString);
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const dayName = dayNames[date.getDay()];
+    const day = date.getDate();
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+    return `${dayName}, ${day} ${month} ${year}`;
   };
 
   // Format time - "4:30 pm"
@@ -196,7 +209,7 @@ export default function AppointmentsPage() {
   }
 
   return (
-    <ProfileLayout>
+    <ProfileLayout showMobileBackButton={false}>
       {isLoading ? (
         <div className="flex items-center justify-center py-32">
           <div className="text-center">
@@ -217,7 +230,7 @@ export default function AppointmentsPage() {
         </div>
       ) : orders.length === 0 ? (
         /* Empty State */
-        <div className="flex items-center justify-center min-h-[calc(100vh-200px)] pt-16">
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)] px-4 lg:pt-16">
           <div className="text-center">
             <div className="mb-6">
               <Image
@@ -228,10 +241,10 @@ export default function AppointmentsPage() {
                 className="mx-auto"
               />
             </div>
-            <h2 className="text-[20px] font-semibold leading-[28px] text-[rgb(20,20,20)] mb-2">
+            <h2 className="text-lg lg:text-[20px] font-semibold leading-[28px] text-[rgb(20,20,20)] mb-2">
               No appointments yet
             </h2>
-            <p className="text-[15px] font-normal leading-[20px] text-[rgb(118,118,118)] mb-6">
+            <p className="text-sm lg:text-[15px] font-normal leading-[20px] text-[rgb(118,118,118)] mb-6">
               Your upcoming and past appointments will appear when you book
             </p>
             <Link
@@ -244,12 +257,19 @@ export default function AppointmentsPage() {
         </div>
       ) : (
         /* Two Column Layout */
-        <div className="flex gap-16 ml-19">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-16 lg:ml-19">
           {/* Left Column - Appointments List */}
-          <div className="w-[357px] shrink-0">
+          <div className={`w-full lg:w-[357px] shrink-0 ${showMobileDetails ? 'hidden lg:block' : 'block'}`}>
+            {/* Mobile Back Button */}
+            <button
+              onClick={() => router.push('/menu')}
+              className="lg:hidden mb-4 -ml-2 mt-2 h-10 w-10 flex items-center justify-center"
+            >
+              <ArrowLeft className="h-5 w-5 text-gray-900" />
+            </button>
             <h1
-              className="text-[28px] leading-[36px] text-[rgb(20,20,20)] mb-6"
-              style={{ fontFamily: 'var(--font-roobert), sans-serif', fontWeight: 650 }}
+              className="text-2xl lg:text-[28px] leading-[36px] text-[rgb(20,20,20)] mb-6 font-bold lg:font-semibold"
+              style={{ fontFamily: 'var(--font-roobert), sans-serif' }}
             >
               Appointments
             </h1>
@@ -262,7 +282,7 @@ export default function AppointmentsPage() {
 
               {upcomingOrders.length === 0 ? (
                 /* Empty Upcoming State */
-                <div className="border border-gray-200 rounded-lg p-8 text-center bg-[#f9f9f9]">
+                <div className="border border-gray-200 rounded-lg p-6 lg:p-8 text-center bg-[#f9f9f9]">
                   <div className="mb-4">
                     <Image
                       src="/appointments/calendar.png"
@@ -272,7 +292,7 @@ export default function AppointmentsPage() {
                       className="mx-auto"
                     />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-1">
                     No upcoming appointments
                   </h3>
                   <p className="text-sm text-gray-500 mb-4">
@@ -291,7 +311,10 @@ export default function AppointmentsPage() {
                   {upcomingOrders.map((order) => (
                     <button
                       key={order.id}
-                      onClick={() => setSelectedOrder(order)}
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        setShowMobileDetails(true);
+                      }}
                       className={`w-full text-left flex rounded-lg border overflow-hidden transition-all bg-white ${
                         selectedOrder?.id === order.id
                           ? 'border-[#6C5CE7] ring-2 ring-[#6C5CE7]/20'
@@ -299,7 +322,7 @@ export default function AppointmentsPage() {
                       }`}
                     >
                       {/* Thumbnail */}
-                      <div className="relative w-32 h-28 shrink-0 bg-gradient-to-br from-[#6C5CE7] to-[#8B7CF7] flex items-center justify-center">
+                      <div className="relative w-24 lg:w-32 h-24 lg:h-28 shrink-0 bg-gradient-to-br from-[#6C5CE7] to-[#8B7CF7] flex items-center justify-center">
                         {getVendorImage(order.vendor) ? (
                           <img
                             src={getVendorImage(order.vendor)!}
@@ -307,7 +330,7 @@ export default function AppointmentsPage() {
                             className="absolute inset-0 w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-white text-2xl font-bold">
+                          <span className="text-white text-xl lg:text-2xl font-bold">
                             {getVendorInitials(order.vendor?.name)}
                           </span>
                         )}
@@ -315,13 +338,13 @@ export default function AppointmentsPage() {
 
                       {/* Card Content */}
                       <div className="flex-1 p-3">
-                        <h3 className="font-semibold text-gray-900 text-sm mb-1">
+                        <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-1">
                           {order.vendor?.name || 'Vendor'}
                         </h3>
-                        <p className="text-sm text-gray-600 mb-1">
+                        <p className="text-xs lg:text-sm text-gray-600 mb-1">
                           {formatDateDisplay(order.scheduled_date)} at {formatTime(order.scheduled_time)}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs lg:text-sm text-gray-500">
                           AED {order.total} · {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
                         </p>
                       </div>
@@ -342,19 +365,20 @@ export default function AppointmentsPage() {
                 </div>
 
                 {/* Past Appointment Cards */}
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {pastOrders.map((order) => (
-                    <button
+                    <div
                       key={order.id}
-                      onClick={() => setSelectedOrder(order)}
-                      className={`w-full text-left flex rounded-lg border overflow-hidden transition-all bg-white ${
-                        selectedOrder?.id === order.id
-                          ? 'border-[#6C5CE7] ring-2 ring-[#6C5CE7]/20'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      className="flex items-center gap-3 lg:gap-4"
                     >
                       {/* Thumbnail */}
-                      <div className="relative w-32 shrink-0 bg-gradient-to-br from-[#6C5CE7] to-[#8B7CF7] flex items-center justify-center self-stretch">
+                      <button
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setShowMobileDetails(true);
+                        }}
+                        className="relative w-14 h-14 lg:w-20 lg:h-20 shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[#6C5CE7] to-[#8B7CF7] flex items-center justify-center"
+                      >
                         {getVendorImage(order.vendor) ? (
                           <img
                             src={getVendorImage(order.vendor)!}
@@ -362,32 +386,39 @@ export default function AppointmentsPage() {
                             className="absolute inset-0 w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-white text-2xl font-bold">
+                          <span className="text-white text-base lg:text-xl font-bold">
                             {getVendorInitials(order.vendor?.name)}
                           </span>
                         )}
-                      </div>
+                      </button>
 
                       {/* Card Content */}
-                      <div className="flex-1 p-3">
-                        <h3 className="font-semibold text-gray-900 text-sm mb-1">
+                      <button
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setShowMobileDetails(true);
+                        }}
+                        className="flex-1 text-left min-w-0"
+                      >
+                        <h3 className="font-semibold text-gray-900 text-base mb-0.5 line-clamp-1">
                           {order.vendor?.name || 'Vendor'}
                         </h3>
-                        <p className="text-xs text-gray-600 mb-1">
+                        <p className="text-sm text-gray-600 mb-0.5">
                           {formatDateDisplay(order.scheduled_date)} at {formatTime(order.scheduled_time)}
                         </p>
-                        <p className="text-xs text-gray-500 mb-1">
+                        <p className="text-sm text-gray-500">
                           AED {order.total} · {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
                         </p>
-                        <Link
-                          href={`/vendor/${order.vendor?.id}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-xs text-[#6C5CE7] font-medium hover:underline"
-                        >
-                          Book again
-                        </Link>
-                      </div>
-                    </button>
+                      </button>
+
+                      {/* Rebook Button */}
+                      <Link
+                        href={`/vendor/${order.vendor?.id}`}
+                        className="shrink-0 px-4 py-2 border border-gray-300 rounded-full text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
+                      >
+                        Rebook
+                      </Link>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -396,9 +427,9 @@ export default function AppointmentsPage() {
 
           {/* Right Column - Appointment Details */}
           {selectedOrder && (
-            <div className="flex-1 max-w-xl bg-white border border-gray-200 rounded-xl overflow-hidden mt-[76px]">
+            <div className={`flex-1 lg:max-w-xl bg-white lg:border lg:border-gray-200 lg:rounded-xl overflow-hidden lg:mt-[76px] ${showMobileDetails ? 'block -mx-4 lg:mx-0' : 'hidden lg:block'}`}>
               {/* Hero Image - Full Width */}
-              <div className="relative h-80 bg-gradient-to-br from-[#6C5CE7] to-[#8B7CF7] flex items-center justify-center">
+              <div className="relative h-56 lg:h-80 bg-gradient-to-br from-[#6C5CE7] to-[#8B7CF7] flex items-center justify-center">
                 {getVendorImage(selectedOrder.vendor) ? (
                   <img
                     src={getVendorImage(selectedOrder.vendor)!}
@@ -406,20 +437,27 @@ export default function AppointmentsPage() {
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-white text-8xl font-bold">
+                  <span className="text-white text-5xl lg:text-8xl font-bold">
                     {getVendorInitials(selectedOrder.vendor?.name)}
                   </span>
                 )}
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                {/* Mobile Back Button - Overlaid on image */}
+                <button
+                  onClick={() => setShowMobileDetails(false)}
+                  className="lg:hidden absolute top-4 left-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"
+                >
+                  <ArrowLeft className="h-5 w-5 text-gray-900" />
+                </button>
                 {/* Vendor Name */}
-                <h2 className="absolute bottom-6 left-6 text-3xl font-bold text-white">
+                <h2 className="absolute bottom-4 left-4 lg:bottom-6 lg:left-6 text-xl lg:text-3xl font-bold text-white">
                   {selectedOrder.vendor?.name || 'Vendor'}
                 </h2>
               </div>
 
               {/* Content below image */}
-              <div className="pt-10 pl-10 pr-6 pb-6">
+              <div className="pt-6 px-4 pb-6 lg:pt-10 lg:pl-10 lg:pr-6">
 
               {/* Status Badge */}
               <div className="mb-4">
@@ -435,10 +473,10 @@ export default function AppointmentsPage() {
 
               {/* Date & Time */}
               <div className="mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">
-                  {formatDateDisplay(selectedOrder.scheduled_date)} at {formatTime(selectedOrder.scheduled_time)}
+                <h3 className="text-xl lg:text-2xl font-bold text-gray-900">
+                  {formatDateShort(selectedOrder.scheduled_date)} at {formatTime(selectedOrder.scheduled_time)}
                 </h3>
-                <p className="text-gray-600 mt-1">
+                <p className="text-sm lg:text-base text-gray-600 mt-1">
                   {getTotalDuration(selectedOrder.items)} minutes duration
                 </p>
               </div>
@@ -539,7 +577,7 @@ export default function AppointmentsPage() {
 
               {/* Overview Section */}
               <div className="mb-6">
-                <h4 className="text-lg font-bold text-gray-900 mb-4">Overview</h4>
+                <h4 className="text-base lg:text-lg font-bold text-gray-900 mb-4">Overview</h4>
                 <div className="space-y-3">
                   {selectedOrder.items?.map((item) => (
                     <div key={item.id} className="flex justify-between items-start">
@@ -567,17 +605,31 @@ export default function AppointmentsPage() {
               {/* Cancellation Policy - Only for upcoming orders */}
               {!isPastOrder && (
                 <div className="mb-6">
-                  <h4 className="text-lg font-bold text-gray-900 mb-2">Cancellation policy</h4>
-                  <p className="text-gray-600">
+                  <h4 className="text-base lg:text-lg font-bold text-gray-900 mb-2">Cancellation policy</h4>
+                  <p className="text-sm lg:text-base text-gray-600">
                     {selectedOrder.cancellation_policy || 'Cancel for free anytime.'}
                   </p>
                 </div>
               )}
 
               {/* Booking Reference */}
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 mb-6">
                 Booking ref: {selectedOrder.order_number}
               </p>
+
+              {/* Download the app banner - Mobile only */}
+              <div className="lg:hidden bg-white rounded-2xl border border-gray-200 shadow-lg p-4 flex items-center justify-between">
+                <span className="text-gray-900 font-medium">Download the app</span>
+                <a
+                  href="#"
+                  className="bg-black text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                  App Store
+                </a>
+              </div>
               </div>
             </div>
           )}

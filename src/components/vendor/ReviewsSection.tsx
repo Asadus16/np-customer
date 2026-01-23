@@ -32,7 +32,7 @@ export function ReviewsSection({
     <div className="space-y-6" id="reviews">
       {/* Header */}
       <div>
-        <h2 className="text-[28px] font-semibold leading-9 text-[rgb(20,20,20)] mb-6">
+        <h2 className="text-2xl md:text-[28px] font-semibold leading-9 text-[rgb(20,20,20)] mb-6">
           Reviews
         </h2>
 
