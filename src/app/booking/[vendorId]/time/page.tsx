@@ -66,6 +66,38 @@ export default function BookingTimePage() {
     return days[dayOfWeek];
   };
 
+  // Check if vendor is currently open
+  const isVendorCurrentlyOpen = useMemo(() => {
+    if (!vendor?.company_hours || vendor.company_hours.length === 0) {
+      return true; // Assume open if no hours data
+    }
+
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const dayString = getDayString(dayOfWeek);
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const todayHours = vendor.company_hours.find((ch: any) => ch.day === dayString);
+
+    if (!todayHours || !todayHours.is_available || !todayHours.slots || todayHours.slots.length === 0) {
+      return false;
+    }
+
+    // Check if current time is within any slot
+    for (const slot of todayHours.slots) {
+      if (!slot.start_time || !slot.end_time) continue;
+
+      const startTime = slot.start_time.substring(0, 5); // Get HH:mm
+      const endTime = slot.end_time.substring(0, 5);
+
+      if (currentTime >= startTime && currentTime <= endTime) {
+        return true;
+      }
+    }
+
+    return false;
+  }, [vendor]);
+
   // Generate time slots based on company hours (10-minute intervals)
   useEffect(() => {
     if (!vendor?.company_hours || vendor.company_hours.length === 0) {
@@ -82,6 +114,11 @@ export default function BookingTimePage() {
       return;
     }
 
+    // Check if selected date is today
+    const now = new Date();
+    const isToday = selectedDate.toDateString() === now.toDateString();
+    const currentMinutes = isToday ? now.getHours() * 60 + now.getMinutes() : 0;
+
     const slots: TimeSlot[] = [];
 
     companyHour.slots.forEach((slot: any) => {
@@ -95,6 +132,11 @@ export default function BookingTimePage() {
 
       // Generate 10-minute intervals
       for (let minutes = startMinutes; minutes < endMinutes; minutes += 10) {
+        // Skip past time slots if selected date is today
+        if (isToday && minutes <= currentMinutes) {
+          continue;
+        }
+
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
         const timeString = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;
@@ -383,18 +425,23 @@ export default function BookingTimePage() {
             <div className="mb-8">
               <div className="grid grid-cols-3 gap-3">
                 <button
-                  onClick={() => handleOrderTypeSelect('now')}
+                  onClick={() => isVendorCurrentlyOpen && handleOrderTypeSelect('now')}
+                  disabled={!isVendorCurrentlyOpen}
                   className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
-                    orderType === 'now'
+                    !isVendorCurrentlyOpen
+                      ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+                      : orderType === 'now'
                       ? 'border-[#6950f3] bg-[#6950f3]/5'
                       : 'border-gray-200 hover:border-gray-300 bg-white'
                   }`}
                 >
-                  <Zap className={`h-6 w-6 mb-2 ${orderType === 'now' ? 'text-[#6950f3]' : 'text-gray-600'}`} />
-                  <span className={`text-sm font-semibold ${orderType === 'now' ? 'text-[#6950f3]' : 'text-gray-900'}`}>
+                  <Zap className={`h-6 w-6 mb-2 ${!isVendorCurrentlyOpen ? 'text-gray-400' : orderType === 'now' ? 'text-[#6950f3]' : 'text-gray-600'}`} />
+                  <span className={`text-sm font-semibold ${!isVendorCurrentlyOpen ? 'text-gray-400' : orderType === 'now' ? 'text-[#6950f3]' : 'text-gray-900'}`}>
                     Order Now
                   </span>
-                  <span className="text-xs text-gray-500 mt-1">As soon as possible</span>
+                  <span className={`text-xs mt-1 ${!isVendorCurrentlyOpen ? 'text-red-500' : 'text-gray-500'}`}>
+                    {isVendorCurrentlyOpen ? 'As soon as possible' : 'Vendor is closed'}
+                  </span>
                 </button>
 
                 <button

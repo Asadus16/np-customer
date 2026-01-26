@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Star, MapPin, Share, Heart, Loader2, AlertCircle } from 'lucide-react';
+import { Star, MapPin, Share, Loader2, AlertCircle } from 'lucide-react';
 import {
   ImageGallery,
   ServiceList,
@@ -14,6 +14,7 @@ import {
   VendorNavBar,
   VenuesNearby,
   TreatYourselfSection,
+  FavoriteButton,
   Service,
   ServiceCategory,
   Review,
@@ -21,7 +22,8 @@ import {
   NearbyVenue,
   ServiceLink,
 } from '@/components/vendor';
-import { useVendor, useVendorReviews, useNearbyVendors } from '@/hooks';
+import { useVendor, useVendorReviews, useNearbyVendors, useFavorite, useAuth } from '@/hooks';
+import { getFavorites } from '@/lib/favorites';
 import { VendorDetailApiResponse, CompanyHourApiResponse, ReviewApiResponse, VendorApiResponse } from '@/services/vendorService';
 
 const DAYS_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -333,7 +335,35 @@ export default function VendorDetailPage() {
   const { nearbyVendors: apiNearbyVendors } = useNearbyVendors(vendorId, 4);
 
   const [activeCategory, setActiveCategory] = useState<string>('');
-  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Auth state
+  const { isAuthenticated } = useAuth();
+
+  // Favorite management
+  const {
+    isFavorite,
+    isLoading: favoriteLoading,
+    toggleFavorite,
+    setInitialFavorite
+  } = useFavorite(vendorId, false);
+
+  // Fetch favorites when authenticated to check if this vendor is favorited
+  useEffect(() => {
+    async function checkFavoriteStatus() {
+      if (!isAuthenticated || !vendorId) return;
+
+      try {
+        const response = await getFavorites();
+        const isFav = response.data.some(fav => fav.id === vendorId);
+        setInitialFavorite(isFav);
+      } catch (err) {
+        // Silently fail - user just won't see favorite status
+        console.error('Failed to fetch favorites:', err);
+      }
+    }
+
+    checkFavoriteStatus();
+  }, [isAuthenticated, vendorId, setInitialFavorite]);
 
   // Scroll to top on page load
   useEffect(() => {
@@ -488,7 +518,8 @@ export default function VendorDetailPage() {
       <VendorNavBar
         vendorName={vendor.name}
         isFavorite={isFavorite}
-        onToggleFavorite={() => setIsFavorite(!isFavorite)}
+        isLoading={favoriteLoading}
+        onToggleFavorite={toggleFavorite}
       />
 
       <div className="min-h-screen bg-white pb-24 lg:pb-0">
@@ -571,16 +602,12 @@ export default function VendorDetailPage() {
               <button className="h-12 w-12 flex items-center justify-center border border-[#d1d1d1] rounded-full hover:bg-gray-50 transition-colors">
                 <Share className="h-6 w-6" />
               </button>
-              <button
-                onClick={() => setIsFavorite(!isFavorite)}
-                className="h-12 w-12 flex items-center justify-center border border-[#d1d1d1] rounded-full hover:bg-gray-50 transition-colors"
-              >
-                <Heart
-                  className={`h-6 w-6 ${
-                    isFavorite ? 'fill-red-500 text-red-500' : ''
-                  }`}
-                />
-              </button>
+              <FavoriteButton
+                isFavorite={isFavorite}
+                isLoading={favoriteLoading}
+                onToggle={toggleFavorite}
+                size="md"
+              />
             </div>
           </div>
         </div>
