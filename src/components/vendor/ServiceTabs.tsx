@@ -61,9 +61,9 @@ export function ServiceTabs({
         ref={scrollContainerRef}
         className="flex items-center gap-6 overflow-x-auto hide-scrollbar flex-1"
       >
-        {categories.map((category) => (
+        {categories.map((category,index) => (
           <button
-            key={category}
+          key={index}
             onClick={() => onCategoryChange(category)}
             className={`whitespace-nowrap transition-colors ${
               activeCategory === category
