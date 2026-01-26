@@ -1,11 +1,34 @@
 import api, { ApiResponse } from '@/lib/api';
 import { VendorCardData } from '@/components/home';
 
+export interface VendorSubServiceApiResponse {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  duration: number;
+  images?: string[];
+}
+
 export interface VendorServiceApiResponse {
   id: string;
   name: string;
   description?: string;
   image?: string;
+  sub_services?: VendorSubServiceApiResponse[];
+}
+
+export interface CompanyHourSlotApi {
+  id?: string;
+  start_time: string;
+  end_time: string;
+}
+
+export interface CompanyHourApi {
+  id: string;
+  day: string;
+  is_available: boolean;
+  slots: CompanyHourSlotApi[];
 }
 
 export interface VendorApiResponse {
@@ -23,6 +46,7 @@ export interface VendorApiResponse {
     name: string;
   }>;
   services?: VendorServiceApiResponse[];
+  company_hours?: CompanyHourApi[];
   rating: number;
   reviews_count: number;
   starting_price: number;
@@ -90,6 +114,41 @@ export function mapVendorToCardData(vendor: VendorApiResponse): VendorCardData {
     images = ['/placeholder.svg'];
   }
 
+  // Extract services (sub_services) for display
+  const services: { id: string; name: string; duration?: number; price: number }[] = [];
+  let totalServices = 0;
+
+  if (vendor.services && vendor.services.length > 0) {
+    vendor.services.forEach(service => {
+      if (service.sub_services && service.sub_services.length > 0) {
+        service.sub_services.forEach(subService => {
+          totalServices++;
+          // Only collect first 3 for display
+          if (services.length < 3) {
+            services.push({
+              id: subService.id,
+              name: subService.name,
+              duration: subService.duration,
+              price: subService.price,
+            });
+          }
+        });
+      }
+    });
+  }
+
+  // Map company hours
+  const companyHours = vendor.company_hours?.map(hour => ({
+    id: hour.id,
+    day: hour.day,
+    is_available: hour.is_available,
+    slots: hour.slots.map(slot => ({
+      id: slot.id,
+      start_time: slot.start_time,
+      end_time: slot.end_time,
+    })),
+  }));
+
   return {
     id: vendor.id,
     name: vendor.name,
@@ -103,6 +162,12 @@ export function mapVendorToCardData(vendor: VendorApiResponse): VendorCardData {
     startingPrice: vendor.starting_price || 0,
     isVerified: true, // All approved vendors are verified
     isFeatured: false, // You can add this field to the API if needed
+    latitude: vendor.latitude,
+    longitude: vendor.longitude,
+    distanceKm: vendor.distance_km,
+    services: services.length > 0 ? services : undefined,
+    totalServices: totalServices > 0 ? totalServices : undefined,
+    companyHours: companyHours,
   };
 }
 
@@ -112,6 +177,7 @@ export function mapVendorToCardData(vendor: VendorApiResponse): VendorCardData {
 export async function fetchVendors(params?: {
   search?: string;
   category?: string;
+  service_area?: string;
   sort?: string;
   page?: number;
   per_page?: number;

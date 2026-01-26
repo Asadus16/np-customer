@@ -10,3 +10,4 @@ export { ServiceTabs } from './ServiceTabs';
 export { VenuesNearby, type NearbyVenue } from './VenuesNearby';
 export { TreatYourselfSection, type ServiceLink } from './TreatYourselfSection';
 export { VendorMap } from './VendorMap';
+export { FavoriteButton } from './FavoriteButton';

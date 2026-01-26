@@ -177,18 +177,30 @@ export function FreshaSideCard({
               <div className="mt-4 space-y-3">
                 {openingHours.map((item) => {
                   const isClosed = item.hours === 'Closed' || item.hours === 'Not set';
+                  // Split multiple slots by comma
+                  const slots = item.hours.split(', ');
+                  const hasMultipleSlots = slots.length > 1;
+
                   return (
                     <div
                       key={item.day}
-                      className={`flex items-center justify-between ${
-                        item.isToday ? 'font-semibold' : ''
-                      }`}
+                      className={`flex items-start justify-between gap-4 ${item.isToday ? 'font-semibold' : ''}`}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         <span className={`w-2 h-2 rounded-full shrink-0 ${isClosed ? 'bg-gray-400' : 'bg-green-500'}`} />
                         <span className="text-gray-900">{item.day}</span>
                       </div>
-                      <span className={isClosed ? 'text-gray-500' : 'text-gray-700'}>{item.hours}</span>
+                      {hasMultipleSlots ? (
+                        <div className="text-right space-y-0.5">
+                          {slots.map((slot, index) => (
+                            <div key={index} className="text-gray-700">
+                              {slot.trim()}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className={isClosed ? 'text-gray-500' : 'text-gray-700'}>{item.hours}</span>
+                      )}
                     </div>
                   );
                 })}

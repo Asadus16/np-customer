@@ -117,7 +117,7 @@ export default function HomePage() {
         }} />
         
         {/* Hero Section */}
-        <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ position: 'relative', zIndex: 10 }}>
           <HeroSection />
         </div>
 
