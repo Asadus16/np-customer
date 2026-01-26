@@ -114,6 +114,11 @@ export default function BookingTimePage() {
       return;
     }
 
+    // Check if selected date is today
+    const now = new Date();
+    const isToday = selectedDate.toDateString() === now.toDateString();
+    const currentMinutes = isToday ? now.getHours() * 60 + now.getMinutes() : 0;
+
     const slots: TimeSlot[] = [];
 
     companyHour.slots.forEach((slot: any) => {
@@ -127,6 +132,11 @@ export default function BookingTimePage() {
 
       // Generate 10-minute intervals
       for (let minutes = startMinutes; minutes < endMinutes; minutes += 10) {
+        // Skip past time slots if selected date is today
+        if (isToday && minutes <= currentMinutes) {
+          continue;
+        }
+
         const hours = Math.floor(minutes / 60);
         const mins = minutes % 60;
         const timeString = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:00`;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, Suspense } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
@@ -11,6 +11,11 @@ import { VendorSearchMap } from '@/components/map';
 
 function VendorsPageContent() {
   const router = useRouter();
+
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const [isMapVisible, setIsMapVisible] = useState(true);
   const [hoveredVendorId, setHoveredVendorId] = useState<string | null>(null);
   const [showFiltersDrawer, setShowFiltersDrawer] = useState(false);

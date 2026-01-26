@@ -183,8 +183,9 @@ export function HeroSection() {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-    
+    // Convert to Monday-first (0=Mon, 1=Tue, ..., 6=Sun)
+    const startingDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+
     const days = [];
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
@@ -195,6 +196,15 @@ export function HeroSection() {
       days.push(new Date(year, month, i));
     }
     return days;
+  };
+
+  const isPastDate = (date: Date | null) => {
+    if (!date) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const compareDate = new Date(date);
+    compareDate.setHours(0, 0, 0, 0);
+    return compareDate < today;
   };
 
   const isToday = (date: Date | null) => {
@@ -210,7 +220,7 @@ export function HeroSection() {
 
   return (
     <section className="relative">
-      <div className="relative max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-24" style={{ zIndex: 1 }}>
+      <div className="relative max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-24">
         <div className="text-left lg:text-center max-w-full lg:max-w-[80%] mx-auto mt-2 lg:mt-[30px] pt-4 lg:pt-[60px]">
           <h1
             className="text-[40px] leading-[44px] lg:text-[64px] lg:leading-[68px]"
@@ -428,7 +438,10 @@ export function HeroSection() {
               </div>
 
               {/* Date - 4 columns (3x4=12) */}
-              <div className="w-full lg:w-4/12 flex items-center p-4 lg:p-[21px] hover:bg-[#F2F2F2] lg:ml-[1px] hover:rounded-xl lg:hover:rounded-full relative">
+              <div
+                className="w-full lg:w-4/12 flex items-center p-4 lg:p-[21px] hover:bg-[#F2F2F2] lg:ml-[1px] hover:rounded-xl lg:hover:rounded-full relative cursor-pointer"
+                onClick={() => setShowDateDropdown(true)}
+              >
                 <Calendar className="h-5 w-5 text-gray-900 flex-shrink-0" />
                 <input
                   ref={dateInputRef}
@@ -517,13 +530,17 @@ export function HeroSection() {
                             }
                             const isDayToday = isToday(day);
                             const isDaySelected = isSelected(day);
+                            const isDayPast = isPastDate(day);
                             return (
                               <button
                                 key={day.toISOString()}
                                 type="button"
-                                onClick={() => handleDateSelect(day)}
-                                className={`aspect-square flex items-center justify-center text-sm rounded transition-colors ${
-                                  isDaySelected
+                                onClick={() => !isDayPast && handleDateSelect(day)}
+                                disabled={isDayPast}
+                                className={`aspect-square flex items-center justify-center text-sm rounded transition-colors cursor-pointer ${
+                                  isDayPast
+                                    ? 'text-gray-300 cursor-not-allowed'
+                                    : isDaySelected
                                     ? 'bg-gray-200 text-gray-900 font-semibold'
                                     : isDayToday
                                     ? 'bg-gray-100 text-gray-900 font-medium'
