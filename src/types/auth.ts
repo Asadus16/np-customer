@@ -60,6 +60,7 @@ export interface RegisterData {
   password: string;
   password_confirmation: string;
   nationality?: string;
+  date_of_birth?: string;
 }
 
 /**
