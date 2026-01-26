@@ -4,6 +4,7 @@ export { AnimatedSpotlight } from './AnimatedSpotlight';
 export { CategoryTabs, CATEGORIES } from './CategoryTabs';
 export { VendorCard, VendorCardSkeleton, type VendorCardData } from './VendorCard';
 export { VendorSection } from './VendorSection';
+export { BookAgainSection } from './BookAgainSection';
 export { AppDownloadSection } from './AppDownloadSection';
 export { ReviewsSection } from './ReviewsSection';
 export { StatsSection } from './StatsSection';

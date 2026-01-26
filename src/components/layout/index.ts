@@ -5,3 +5,4 @@ export { UserProfileDropdown } from './UserProfileDropdown';
 export { ProfileSidebar } from './ProfileSidebar';
 export { ProfileLayout } from './ProfileLayout';
 export { LogoutConfirmModal } from './LogoutConfirmModal';
+export { SearchBar } from './SearchBar';

@@ -62,17 +62,17 @@ export function VendorSection({
   // Loading state
   if (isLoading) {
     return (
-      <section className="py-8">
+      <section className="py-6 lg:py-8">
         <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-start mb-6">
-            <div className="h-7 w-48 bg-gray-200 rounded animate-pulse" />
+          <div className="flex items-center justify-start mb-4 lg:mb-6">
+            <div className="h-6 lg:h-7 w-36 lg:w-48 bg-gray-200 rounded animate-pulse" />
           </div>
           <div className={layout === 'grid'
-            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'
-            : 'flex gap-4 overflow-hidden'
+            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6'
+            : 'flex gap-3 lg:gap-4 overflow-hidden'
           }>
             {Array.from({ length: layout === 'grid' ? 8 : 5 }).map((_, i) => (
-              <div key={i} className={layout === 'scroll' ? 'flex-shrink-0 w-64' : ''}>
+              <div key={i} className={layout === 'scroll' ? 'flex-shrink-0 w-[280px] lg:w-64' : ''}>
                 <VendorCardSkeleton />
               </div>
             ))}
@@ -85,18 +85,18 @@ export function VendorSection({
   // Empty state
   if (vendors.length === 0) {
     return (
-      <section className="py-8">
+      <section className="py-6 lg:py-8">
         <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-start mb-6">
+          <div className="flex items-center justify-start mb-4 lg:mb-6">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+              <h2 className="text-lg lg:text-xl font-semibold text-gray-900">{title}</h2>
               {subtitle && (
                 <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
               )}
             </div>
           </div>
-          <div className="text-center py-12 bg-gray-50 rounded-xl">
-            <p className="text-gray-500">No vendors available at the moment</p>
+          <div className="text-center py-8 lg:py-12 bg-gray-50 rounded-xl">
+            <p className="text-gray-500 text-sm lg:text-base">No vendors available at the moment</p>
           </div>
         </div>
       </section>
@@ -106,11 +106,11 @@ export function VendorSection({
   // Grid layout
   if (layout === 'grid') {
     return (
-      <section className="py-8">
+      <section className="py-6 lg:py-8">
         <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-start mb-6">
+          <div className="flex items-center justify-start mb-4 lg:mb-6">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+              <h2 className="text-lg lg:text-xl font-semibold text-gray-900">{title}</h2>
               {subtitle && (
                 <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
               )}
@@ -125,7 +125,7 @@ export function VendorSection({
               </Link>
             )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fade-in">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 animate-fade-in">
             {vendors.map((vendor, index) => (
               <VendorCard key={vendor.id} vendor={vendor} index={index} />
             ))}
@@ -137,12 +137,12 @@ export function VendorSection({
 
   // Scroll layout (default)
   return (
-    <section className="py-8">
+    <section className="py-6 lg:py-8">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center justify-start mb-6">
+        <div className="flex items-center justify-start mb-4 lg:mb-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+            <h2 className="text-lg lg:text-xl font-semibold text-gray-900">{title}</h2>
             {subtitle && (
               <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
             )}
@@ -160,11 +160,11 @@ export function VendorSection({
 
         {/* Scrollable Container */}
         <div className="relative">
-          {/* Left Scroll Button */}
+          {/* Left Scroll Button - Desktop only */}
           {canScrollLeft && (
             <button
               onClick={() => handleScroll('left')}
-              className="absolute left-2 top-1/2 -translate-y-[calc(50%+2rem)] z-10 h-9 w-9 bg-white border border-gray-200 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center"
+              className="hidden lg:flex absolute left-2 top-1/2 -translate-y-[calc(50%+2rem)] z-10 h-9 w-9 bg-white border border-gray-200 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all items-center justify-center"
               aria-label="Scroll left"
             >
               <ChevronLeft className="h-5 w-5 text-gray-600" />
@@ -175,20 +175,20 @@ export function VendorSection({
           <div
             ref={scrollContainerRef}
             onScroll={checkScrollPosition}
-            className="flex gap-4 overflow-x-auto hide-scrollbar scroll-smooth pb-2 justify-start animate-fade-in justify-between"
+            className="flex gap-3 lg:gap-4 overflow-x-auto hide-scrollbar scroll-smooth pb-2 justify-start animate-fade-in"
           >
             {vendors.map((vendor, index) => (
-              <div key={vendor.id} className="flex-shrink-0 w-[340px]">
+              <div key={vendor.id} className="flex-shrink-0 w-[280px] lg:w-[340px]">
                 <VendorCard vendor={vendor} index={index} />
               </div>
             ))}
           </div>
 
-          {/* Right Scroll Button */}
+          {/* Right Scroll Button - Desktop only */}
           {canScrollRight && (
             <button
               onClick={() => handleScroll('right')}
-              className="absolute right-2 top-1/2 -translate-y-[calc(50%+2rem)] z-10 h-9 w-9 bg-white border border-gray-200 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all flex items-center justify-center"
+              className="hidden lg:flex absolute right-2 top-1/2 -translate-y-[calc(50%+2rem)] z-10 h-9 w-9 bg-white border border-gray-200 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all items-center justify-center"
               aria-label="Scroll right"
             >
               <ChevronRight className="h-5 w-5 text-gray-600" />

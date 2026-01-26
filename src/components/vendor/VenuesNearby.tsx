@@ -63,7 +63,7 @@ export function VenuesNearby({ venues, title = 'Venues nearby' }: VenuesNearbyPr
 
   return (
     <div className="relative">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">{title}</h2>
+      <h2 className="text-2xl md:text-[28px] font-bold text-gray-900 mb-6">{title}</h2>
 
       {venues.length === 0 ? (
         <div className="flex items-center justify-center min-h-[80px] md:min-h-[300px]">

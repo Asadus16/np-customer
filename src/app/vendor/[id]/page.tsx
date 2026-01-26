@@ -335,6 +335,11 @@ export default function VendorDetailPage() {
   const [activeCategory, setActiveCategory] = useState<string>('');
   const [isFavorite, setIsFavorite] = useState(false);
 
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Map API data to component format
   const vendor = useMemo(() => {
     if (!apiVendor) return null;
@@ -480,11 +485,15 @@ export default function VendorDetailPage() {
   return (
     <>
       {/* Scroll-aware NavBar */}
-      <VendorNavBar />
+      <VendorNavBar
+        vendorName={vendor.name}
+        isFavorite={isFavorite}
+        onToggleFavorite={() => setIsFavorite(!isFavorite)}
+      />
 
       <div className="min-h-screen bg-white pb-24 lg:pb-0">
         {/* Breadcrumb */}
-        <div className="px-4 md:px-8 lg:pl-12 lg:pr-10 py-4">
+        <div className="px-4 md:px-8 lg:pl-12 lg:pr-10 py-4.5 md:py-4">
           <nav className="flex items-center gap-2 text-sm text-gray-500 overflow-x-auto hide-scrollbar">
             {vendor.breadcrumb.map((item, index) => (
               <div key={index} className="flex items-center gap-2 shrink-0">
@@ -504,8 +513,8 @@ export default function VendorDetailPage() {
           </nav>
         </div>
 
-        {/* Vendor Header */}
-        <div className="px-4 md:px-8 lg:pl-12 lg:pr-10 mt-2 mb-2 md:mb-3">
+        {/* Vendor Header - Desktop only (above image) */}
+        <div className="hidden md:block px-4 md:px-8 lg:pl-12 lg:pr-10 mt-2 mb-2 md:mb-3">
           <h1 className="font-bold text-2xl md:text-4xl lg:text-5xl text-gray-900 leading-none">
             {vendor.name}
           </h1>
@@ -577,8 +586,59 @@ export default function VendorDetailPage() {
         </div>
 
         {/* Image Gallery */}
-        <div className="px-4 md:px-8 lg:pl-12 lg:pr-10" id="photos">
+        <div className="md:px-8 lg:pl-12 lg:pr-10" id="photos">
           <ImageGallery images={vendor.images} vendorName={vendor.name} />
+        </div>
+
+        {/* Vendor Header - Mobile only (below image) */}
+        <div className="md:hidden px-4 mt-4 mb-2">
+          <h1 className="font-bold text-[28px] text-gray-900 leading-tight">
+            {vendor.name}
+          </h1>
+
+          {/* Rating */}
+          <div className="flex items-center gap-1.5 mt-3 text-base">
+            <span className="font-semibold text-gray-900">
+              {vendor.rating.toFixed(1)}
+            </span>
+            <div className="flex items-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`h-4 w-4 ${
+                    star <= Math.round(vendor.rating)
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : 'fill-gray-200 text-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-blue-600 font-medium">
+              ({vendor.reviewCount.toLocaleString()})
+            </span>
+          </div>
+
+          {/* Location */}
+          <div className="flex items-center gap-1.5 mt-2 text-base text-gray-600">
+            <span>{vendor.location}</span>
+          </div>
+
+          {/* Open Status */}
+          <div className="mt-2 text-base">
+            <span className={`font-medium ${openStatus.isOpen ? 'text-green-600' : 'text-red-600'}`}>
+              {openStatus.isOpen ? 'Open' : 'Closed'}
+            </span>
+            {openStatus.closeTime && (
+              <span className="text-gray-600"> until {openStatus.closeTime}</span>
+            )}
+          </div>
+
+          {/* Tags (Deals, Featured, etc.) */}
+          <div className="flex flex-wrap gap-2 mt-3">
+            <span className="px-3 py-1.5 text-sm font-medium text-green-600 bg-green-50 rounded-full">
+              Deals
+            </span>
+          </div>
         </div>
 
         {/* Main Content - Two Column Layout */}
@@ -588,7 +648,7 @@ export default function VendorDetailPage() {
             <div className="flex-1 min-w-0 space-y-10">
               {/* Services Section */}
               <div id="services" className="pt-6">
-                <h2 className="text-[28px] font-semibold leading-9 text-[rgb(20,20,20)] mb-4">
+                <h2 className="text-2xl md:text-[28px] font-semibold leading-9 text-[rgb(20,20,20)] mb-4">
                   Services
                 </h2>
 
@@ -669,23 +729,14 @@ export default function VendorDetailPage() {
         </div>
 
         {/* Mobile Bottom Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 lg:hidden z-40">
-          <div className="flex items-center justify-between max-w-7xl mx-auto">
-            <div>
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-semibold">{vendor.rating.toFixed(1)}</span>
-                <span className="text-sm text-gray-500">
-                  ({vendor.reviewCount.toLocaleString()})
-                </span>
-              </div>
-              <p className={`text-sm font-medium ${openStatus.isOpen ? 'text-blue-600' : 'text-red-600'}`}>
-                {openStatus.isOpen ? `Open until ${openStatus.closeTime}` : 'Closed'}
-              </p>
-            </div>
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 lg:hidden z-40">
+          <div className="flex items-center justify-between max-w-7xl mx-auto gap-4">
+            <p className="text-sm text-gray-600">
+              {serviceCategories.reduce((total, cat) => total + cat.services.length, 0)} services available
+            </p>
             <button
               onClick={handleBookNow}
-              className="bg-gray-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+              className="bg-gray-900 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-gray-800 transition-colors"
             >
               Book now
             </button>

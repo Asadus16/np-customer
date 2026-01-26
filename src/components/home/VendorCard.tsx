@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import Link from 'next/link';
-import { Star, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight, MapPin, Heart } from 'lucide-react';
 
 export interface VendorCardData {
   id: string;
@@ -49,12 +49,12 @@ export function VendorCard({ vendor, index = 0, href, isFavorited = false }: Ven
   return (
     <Link href={cardHref}>
       <article
-        className="group cursor-pointer w-full h-[300px] flex flex-col  rounded-xl overflow-hidden !bg-transparent"
+        className="group cursor-pointer w-full h-auto lg:h-[265px] flex flex-col rounded-xl overflow-hidden !bg-transparent"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Image Container */}
-        <div className="relative h-[210px] overflow-hidden bg-gray-100 rounded-xl ">
+        <div className="relative aspect-video lg:aspect-auto lg:h-44 overflow-hidden bg-gray-100 rounded-xl">
           {/* Image Carousel */}
           <div
             ref={imageContainerRef}
@@ -124,35 +124,38 @@ export function VendorCard({ vendor, index = 0, href, isFavorited = false }: Ven
               ))}
             </div>
           )}
+
+          {/* Favorite Heart Icon */}
+          {isFavorited && (
+            <div className="absolute top-3 right-3 z-10">
+              <Heart className="h-5 w-5 fill-red-500 text-red-500" />
+            </div>
+          )}
         </div>
 
         {/* Content */}
-        <div className="px-3 pb-3 pt-2 h-[90px] flex flex-col justify-between rounded-b-xl bg-transparent">
-          <div className="space-y-1.5 flex items-center justify-between">
+        <div className="px-1 lg:px-3 pb-3 pt-2 lg:h-[90px] flex flex-col rounded-b-xl bg-transparent">
+          <div className="flex items-center justify-between">
             {/* Title */}
             <h3 className="font-bold text-gray-900 text-base line-clamp-1">
               {vendor.name}
             </h3>
 
             {/* Rating */}
-            {vendor.rating > 0 && (
-              <div className="flex items-center gap-1">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm text-gray-900 font-medium">
-                  {vendor.rating.toFixed(1)}
-                </span>
-                <span className="text-sm text-gray-900 font-medium">
-                  ({vendor.reviewCount.toLocaleString()})
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-1 shrink-0">
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm text-gray-900 font-medium">
+                {(vendor.rating || 0).toFixed(1)}
+              </span>
+              <span className="text-sm text-gray-500">
+                ({vendor.reviewCount || 0})
+              </span>
+            </div>
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {/* Location */}
-            <div className="flex items-center gap-1">
-              <p className="text-sm text-gray-600 line-clamp-1">{vendor.location || 'Location not available'}</p>
-            </div>
+            <p className="text-sm text-gray-600 line-clamp-1">{vendor.location || 'Location not available'}</p>
 
             {/* Category */}
             <p className="text-sm text-gray-600 line-clamp-1">{vendor.category}</p>
