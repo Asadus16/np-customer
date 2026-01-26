@@ -1,28 +1,23 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, Calendar, Smartphone, Grid3x3, Sparkles, Scissors, Droplets, Eye, Smile, Home, Briefcase, X, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Search, MapPin, Calendar, Grid3x3, Home, Briefcase, X, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-const categories = [
-  { id: 'all', name: 'All treatments', icon: Grid3x3 },
-  { id: 'hair', name: 'Hair & styling', icon: Scissors },
-  { id: 'nails', name: 'Nails', icon: Sparkles },
-  { id: 'hair-removal', name: 'Hair removal', icon: Droplets },
-  { id: 'eyebrows', name: 'Eyebrows & eyelashes', icon: Eye },
-  { id: 'facials', name: 'Facials & skincare', icon: Smile },
-];
+import { useCategories } from '@/hooks/useCategories';
+import { useServiceAreas } from '@/hooks/useServiceAreas';
 
 export function HeroSection() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
+  const [locationSearch, setLocationSearch] = useState('');
   const [date, setDate] = useState('');
   const [count, setCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [showDateDropdown, setShowDateDropdown] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedServiceArea, setSelectedServiceArea] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>('any');
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -34,15 +29,17 @@ export function HeroSection() {
   const dateInputRef = useRef<HTMLInputElement>(null);
   const targetCount = 427212;
 
-  // Mock data for saved and recent locations
+  // Fetch dynamic categories and service areas
+  const { categories, isLoading: categoriesLoading } = useCategories();
+  const { serviceAreas, isLoading: serviceAreasLoading } = useServiceAreas({
+    search: locationSearch,
+    enabled: showLocationDropdown
+  });
+
+  // Saved locations for quick access
   const savedLocations = [
     { id: 'home', name: 'Add Home', icon: Home, address: '' },
     { id: 'work', name: 'Add Work', icon: Briefcase, address: '' },
-  ];
-
-  const recentLocations = [
-    { id: '1', name: 'D.H.A. Phase 2', address: 'Phase 2 Defence Housing Authority, Karachi, Pakistan' },
-    { id: '2', name: 'DHA Phase 5', address: 'Lahore, Pakistan' },
   ];
 
   useEffect(() => {
@@ -108,8 +105,9 @@ export function HeroSection() {
     e.preventDefault();
     const params = new URLSearchParams();
     if (searchQuery) params.set('q', searchQuery);
-    if (location) params.set('location', location);
-    if (date) params.set('date', date);
+    if (selectedServiceArea) params.set('service_area', selectedServiceArea);
+    if (selectedDate) params.set('date', selectedDate.toISOString().split('T')[0]);
+    if (selectedTime && selectedTime !== 'any') params.set('time', selectedTime);
     if (selectedCategory && selectedCategory !== 'all') params.set('category', selectedCategory);
     router.push(`/vendors?${params.toString()}`);
   };
@@ -120,13 +118,9 @@ export function HeroSection() {
     setShowDropdown(false);
   };
 
-  const handleLocationSelect = (locationName: string, address?: string) => {
+  const handleLocationSelect = (locationName: string, serviceAreaId?: string) => {
     setLocation(locationName);
-    setShowLocationDropdown(false);
-  };
-
-  const handleClearRecent = () => {
-    // Clear recent locations logic here
+    setSelectedServiceArea(serviceAreaId || null);
     setShowLocationDropdown(false);
   };
 
@@ -189,8 +183,9 @@ export function HeroSection() {
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-    
+    // Convert to Monday-first (0=Mon, 1=Tue, ..., 6=Sun)
+    const startingDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+
     const days = [];
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
@@ -201,6 +196,15 @@ export function HeroSection() {
       days.push(new Date(year, month, i));
     }
     return days;
+  };
+
+  const isPastDate = (date: Date | null) => {
+    if (!date) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const compareDate = new Date(date);
+    compareDate.setHours(0, 0, 0, 0);
+    return compareDate < today;
   };
 
   const isToday = (date: Date | null) => {
@@ -216,7 +220,7 @@ export function HeroSection() {
 
   return (
     <section className="relative">
-      <div className="relative max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-24" style={{ zIndex: 1 }}>
+      <div className="relative max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-24">
         <div className="text-left lg:text-center max-w-full lg:max-w-[80%] mx-auto mt-2 lg:mt-[30px] pt-4 lg:pt-[60px]">
           <h1
             className="text-[40px] leading-[44px] lg:text-[64px] lg:leading-[68px]"
@@ -262,8 +266,8 @@ export function HeroSection() {
                 {showDropdown && (
                   <div
                     ref={dropdownRef}
-                    className="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-[9999] max-h-[400px] overflow-y-auto dropdown-scrollbar h-[235px]"
-                    style={{ 
+                    className="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-[9999] max-h-[400px] overflow-y-auto dropdown-scrollbar"
+                    style={{
                       fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif',
                       scrollbarWidth: 'thin',
                       scrollbarColor: '#d1d5db #f3f4f6'
@@ -284,21 +288,34 @@ export function HeroSection() {
                       <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Top categories</h3>
                     </div>
 
-                    {/* Category list */}
-                    {categories.filter(cat => cat.id !== 'all').map((category) => {
-                      const IconComponent = category.icon;
-                      return (
-                        <button
-                          key={category.id}
-                          type="button"
-                          onClick={() => handleCategorySelect(category.id, category.name)}
-                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left transition-colors"
-                        >
-                          <IconComponent className="h-5 w-5 text-gray-600 flex-shrink-0" />
-                          <span className="text-[15px] font-normal text-gray-900">{category.name}</span>
-                        </button>
-                      );
-                    })}
+                    {/* Loading state */}
+                    {categoriesLoading && (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                      </div>
+                    )}
+
+                    {/* Category list - dynamic from API */}
+                    {!categoriesLoading && categories.map((category) => (
+                      <button
+                        key={category.id}
+                        type="button"
+                        onClick={() => handleCategorySelect(category.id, category.name)}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left transition-colors"
+                      >
+                        {category.image ? (
+                          <img src={category.image} alt="" className="h-5 w-5 object-cover rounded flex-shrink-0" />
+                        ) : (
+                          <Grid3x3 className="h-5 w-5 text-gray-600 flex-shrink-0" />
+                        )}
+                        <span className="text-[15px] font-normal text-gray-900">{category.name}</span>
+                      </button>
+                    ))}
+
+                    {/* Empty state */}
+                    {!categoriesLoading && categories.length === 0 && (
+                      <div className="px-4 py-3 text-sm text-gray-500">No categories available</div>
+                    )}
                   </div>
                 )}
               </div>
@@ -309,9 +326,13 @@ export function HeroSection() {
                 <input
                   ref={locationInputRef}
                   type="text"
-                  placeholder="Current location"
+                  placeholder="Select Service Area"
                   value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  onChange={(e) => {
+                    setLocation(e.target.value);
+                    setLocationSearch(e.target.value);
+                    setSelectedServiceArea(null);
+                  }}
                   onFocus={() => setShowLocationDropdown(true)}
                   className="ml-3 flex-1 bg-transparent border-none outline-none text-gray-900 text-[15px] leading-[15px] font-medium placeholder:text-[rgb(20,20,20)] focus:outline-none focus:ring-0 focus:border-none"
                   style={{ fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif' }}
@@ -322,6 +343,8 @@ export function HeroSection() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setLocation('');
+                      setLocationSearch('');
+                      setSelectedServiceArea(null);
                     }}
                     className="ml-2 p-1 hover:bg-gray-200 rounded-full transition-colors"
                   >
@@ -333,22 +356,56 @@ export function HeroSection() {
                 {showLocationDropdown && (
                   <div
                     ref={locationDropdownRef}
-                    className="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-[9999] max-h-[230px] overflow-y-auto dropdown-scrollbar"
-                    style={{ 
+                    className="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-200 z-[9999] max-h-[300px] overflow-y-auto dropdown-scrollbar"
+                    style={{
                       fontFamily: 'RoobertPRO, AktivGroteskVF, sans-serif',
                       scrollbarWidth: 'thin',
                       scrollbarColor: '#d1d5db #f3f4f6'
                     }}
                   >
-                    {/* Current location option */}
-                    <button
+                    {/* Current location option - commented out, using service areas only */}
+                    {/* <button
                       type="button"
                       onClick={() => handleLocationSelect('Current location')}
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left transition-colors"
                     >
-                      <ChevronRight className="h-5 w-5 text-purple-600 flex-shrink-0" />
+                      <ChevronRight className="h-5 w-5 text-purple-600 shrink-0" />
                       <span className="text-[15px] font-normal text-gray-900">Current location</span>
-                    </button>
+                    </button> */}
+
+                    {/* Service Areas section */}
+                    <div className="border-t border-gray-100">
+                      <div className="px-4 py-2">
+                        <h3 className="text-sm font-semibold text-gray-900">Service Areas</h3>
+                      </div>
+
+                      {/* Loading state */}
+                      {serviceAreasLoading && (
+                        <div className="flex items-center justify-center py-4">
+                          <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                        </div>
+                      )}
+
+                      {/* Service areas list */}
+                      {!serviceAreasLoading && serviceAreas.map((area) => (
+                        <button
+                          key={area.id}
+                          type="button"
+                          onClick={() => handleLocationSelect(area.name, area.id)}
+                          className="w-full flex items-start gap-3 px-4 py-3 hover:bg-gray-50 text-left transition-colors"
+                        >
+                          <MapPin className="h-5 w-5 text-purple-600 shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-[15px] font-normal text-gray-900">{area.name}</p>
+                          </div>
+                        </button>
+                      ))}
+
+                      {/* Empty state */}
+                      {!serviceAreasLoading && serviceAreas.length === 0 && locationSearch && (
+                        <div className="px-4 py-3 text-sm text-gray-500">No service areas found for &quot;{locationSearch}&quot;</div>
+                      )}
+                    </div>
 
                     {/* Saved section */}
                     <div className="border-t border-gray-100">
@@ -370,46 +427,21 @@ export function HeroSection() {
                             onClick={() => handleLocationSelect(saved.name)}
                             className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left transition-colors"
                           >
-                            <IconComponent className="h-5 w-5 text-gray-600 flex-shrink-0" />
+                            <IconComponent className="h-5 w-5 text-gray-600 shrink-0" />
                             <span className="text-[15px] font-normal text-gray-900">{saved.name}</span>
                           </button>
                         );
                       })}
-                    </div>
-
-                    {/* Recent section */}
-                    <div className="border-t border-gray-100">
-                      <div className="flex items-center justify-between px-4 py-2">
-                        <h3 className="text-sm font-semibold text-gray-900">Recent</h3>
-                        <button
-                          type="button"
-                          onClick={handleClearRecent}
-                          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                        >
-                          Clear
-                        </button>
-                      </div>
-                      {recentLocations.map((recent) => (
-                        <button
-                          key={recent.id}
-                          type="button"
-                          onClick={() => handleLocationSelect(recent.name, recent.address)}
-                          className="w-full flex items-start gap-3 px-4 py-3 hover:bg-gray-50 text-left transition-colors"
-                        >
-                          <MapPin className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
-                          <div className="flex-1">
-                            <p className="text-[15px] font-normal text-gray-900">{recent.name}</p>
-                            <p className="text-xs text-gray-500 mt-0.5">{recent.address}</p>
-                          </div>
-                        </button>
-                      ))}
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Date - 4 columns (3x4=12) */}
-              <div className="w-full lg:w-4/12 flex items-center p-4 lg:p-[21px] hover:bg-[#F2F2F2] lg:ml-[1px] hover:rounded-xl lg:hover:rounded-full relative">
+              <div
+                className="w-full lg:w-4/12 flex items-center p-4 lg:p-[21px] hover:bg-[#F2F2F2] lg:ml-[1px] hover:rounded-xl lg:hover:rounded-full relative cursor-pointer"
+                onClick={() => setShowDateDropdown(true)}
+              >
                 <Calendar className="h-5 w-5 text-gray-900 flex-shrink-0" />
                 <input
                   ref={dateInputRef}
@@ -498,13 +530,17 @@ export function HeroSection() {
                             }
                             const isDayToday = isToday(day);
                             const isDaySelected = isSelected(day);
+                            const isDayPast = isPastDate(day);
                             return (
                               <button
                                 key={day.toISOString()}
                                 type="button"
-                                onClick={() => handleDateSelect(day)}
-                                className={`aspect-square flex items-center justify-center text-sm rounded transition-colors ${
-                                  isDaySelected
+                                onClick={() => !isDayPast && handleDateSelect(day)}
+                                disabled={isDayPast}
+                                className={`aspect-square flex items-center justify-center text-sm rounded transition-colors cursor-pointer ${
+                                  isDayPast
+                                    ? 'text-gray-300 cursor-not-allowed'
+                                    : isDaySelected
                                     ? 'bg-gray-200 text-gray-900 font-semibold'
                                     : isDayToday
                                     ? 'bg-gray-100 text-gray-900 font-medium'

@@ -4,6 +4,26 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { Star, ChevronLeft, ChevronRight, MapPin, Heart } from 'lucide-react';
 
+export interface VendorService {
+  id: string;
+  name: string;
+  duration?: number; // in minutes
+  price: number;
+}
+
+export interface CompanyHourSlot {
+  id?: string;
+  start_time: string; // HH:mm format
+  end_time: string; // HH:mm format
+}
+
+export interface CompanyHour {
+  id: string;
+  day: string;
+  is_available: boolean;
+  slots: CompanyHourSlot[];
+}
+
 export interface VendorCardData {
   id: string;
   name: string;
@@ -17,6 +37,13 @@ export interface VendorCardData {
   startingPrice: number;
   isVerified?: boolean;
   isFeatured?: boolean;
+  latitude?: number;
+  longitude?: number;
+  distanceKm?: number;
+  services?: VendorService[];
+  totalServices?: number;
+  companyHours?: CompanyHour[];
+  isOpenAtSelectedTime?: boolean; // Used for time filtering
 }
 
 interface VendorCardProps {

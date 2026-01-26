@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Share2, Heart } from 'lucide-react';
+import { ArrowLeft, Share2 } from 'lucide-react';
+import { FavoriteButton } from './FavoriteButton';
 
 type NavSection = 'photos' | 'services' | 'team' | 'reviews' | 'about';
 
@@ -16,10 +17,11 @@ const navItems: { id: NavSection; label: string }[] = [
 interface VendorNavBarProps {
   vendorName?: string;
   isFavorite?: boolean;
-  onToggleFavorite?: () => void;
+  isLoading?: boolean;
+  onToggleFavorite?: () => Promise<boolean>;
 }
 
-export function VendorNavBar({ vendorName = '', isFavorite = false, onToggleFavorite }: VendorNavBarProps) {
+export function VendorNavBar({ vendorName = '', isFavorite = false, isLoading = false, onToggleFavorite }: VendorNavBarProps) {
   const router = useRouter();
   const [showNav, setShowNav] = useState(false);
   const [activeSection, setActiveSection] = useState<NavSection>('photos');
@@ -123,16 +125,15 @@ export function VendorNavBar({ vendorName = '', isFavorite = false, onToggleFavo
           <button className="h-10 w-10 flex items-center justify-center">
             <Share2 className="h-5 w-5 text-gray-700" />
           </button>
-          <button
-            onClick={onToggleFavorite}
-            className="h-10 w-10 flex items-center justify-center"
-          >
-            <Heart
-              className={`h-5 w-5 ${
-                isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-700'
-              }`}
+{onToggleFavorite && (
+            <FavoriteButton
+              isFavorite={isFavorite}
+              isLoading={isLoading}
+              onToggle={onToggleFavorite}
+              size="sm"
+              className="border-0"
             />
-          </button>
+          )}
         </div>
       </div>
 
