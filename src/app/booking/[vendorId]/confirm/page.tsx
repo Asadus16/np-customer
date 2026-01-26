@@ -242,15 +242,23 @@ export default function BookingConfirmPage() {
           sub_service_id: service.id,
           quantity: 1,
         })),
-        coupon_code: appliedCoupon ? discountCode : undefined,
       };
+
+      // Add coupon code if applied
+      if (appliedCoupon && discountCode) {
+        orderData.coupon_code = discountCode;
+      }
 
       // Add payment method ID if paying with card
       if (paymentType === 'card' && selectedPaymentMethod) {
         orderData.payment_method_id = selectedPaymentMethod;
       }
 
-      await api.post('/customer/orders', orderData);
+      console.log('Creating order with data:', orderData);
+      console.log('API Base URL:', process.env.NEXT_PUBLIC_API_URL || 'Not set');
+
+      const response = await api.post('/customer/orders', orderData);
+      console.log('Order created successfully:', response.data);
 
       // Clear session storage
       if (typeof window !== 'undefined') {
@@ -269,7 +277,21 @@ export default function BookingConfirmPage() {
       }, 3000);
     } catch (error: any) {
       console.error('Failed to create order', error);
-      alert(error.response?.data?.message || 'Failed to create order. Please try again.');
+      
+      // Handle network errors
+      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+        alert('Network error: Unable to connect to the server. Please check your internet connection and ensure the API server is running.');
+        console.error('API Base URL:', process.env.NEXT_PUBLIC_API_URL || 'Not set (using default)');
+      } else if (error.response) {
+        // Server responded with error status
+        const errorMessage = error.response?.data?.message || 
+                            error.response?.data?.error ||
+                            `Server error: ${error.response.status} ${error.response.statusText}`;
+        alert(errorMessage);
+      } else {
+        // Other errors
+        alert(error.message || 'Failed to create order. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
