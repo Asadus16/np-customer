@@ -99,6 +99,19 @@ interface FormData {
 export default function RegisterPage() {
   const router = useRouter();
   const { clearError } = useAuth();
+  
+  // Get return URL from query params
+  const [returnUrl, setReturnUrl] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const url = params.get('returnUrl');
+      if (url) {
+        setReturnUrl(decodeURIComponent(url));
+      }
+    }
+  }, []);
   const [currentStep, setCurrentStep] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [serviceAreas, setServiceAreas] = useState<ServiceArea[]>([]);
@@ -319,8 +332,9 @@ export default function RegisterPage() {
       localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
       localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
 
-      // Redirect to home - auth will be initialized from localStorage
-      window.location.href = ROUTES.HOME;
+      // Redirect to return URL if provided, otherwise to home
+      const redirectUrl = returnUrl || ROUTES.HOME;
+      window.location.href = redirectUrl;
     } catch (err: any) {
       console.error('Registration error', err);
       if (err.response?.data?.errors) {

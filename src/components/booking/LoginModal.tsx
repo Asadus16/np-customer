@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { X, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/hooks';
+import { ROUTES } from '@/config';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -10,21 +12,17 @@ interface LoginModalProps {
   onSuccess: () => void;
 }
 
-type Step = 'email' | 'password' | 'signup';
+type Step = 'email' | 'password';
 
 export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
-  const { login, register, isLoading, error, clearError } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { login, isLoading, error, clearError } = useAuth();
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-
-  // Signup fields
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [passwordConfirmation, setPasswordConfirmation] = useState('');
 
   if (!isOpen) return null;
 
@@ -34,10 +32,6 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
     setPassword('');
     setShowPassword(false);
     setPasswordError(null);
-    setFirstName('');
-    setLastName('');
-    setPhone('');
-    setPasswordConfirmation('');
     clearError();
   };
 
@@ -47,7 +41,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
   };
 
   const handleBack = () => {
-    if (step === 'password' || step === 'signup') {
+    if (step === 'password') {
       setStep('email');
       setPassword('');
       setPasswordError(null);
@@ -63,6 +57,14 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
     }
   };
 
+  const handleSignupClick = () => {
+    // Get the current path as return URL
+    const returnUrl = encodeURIComponent(pathname || '/');
+    // Redirect to signup page with return URL
+    router.push(`${ROUTES.REGISTER}?returnUrl=${returnUrl}`);
+  };
+
+
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
@@ -74,39 +76,6 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
     }
 
     const success = await login({ email: email.trim(), password }, true);
-    if (success) {
-      resetForm();
-      onSuccess();
-    } else if (error && (error.toLowerCase().includes('not found') || error.toLowerCase().includes('invalid'))) {
-      // User doesn't exist or wrong password, switch to signup
-      setStep('signup');
-    }
-  };
-
-  const handleSignupSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearError();
-    setPasswordError(null);
-
-    if (!password) {
-      setPasswordError('Password is required');
-      return;
-    }
-
-    if (password !== passwordConfirmation) {
-      setPasswordError('Passwords do not match');
-      return;
-    }
-
-    const success = await register({
-      email: email.trim(),
-      password,
-      password_confirmation: passwordConfirmation,
-      first_name: firstName,
-      last_name: lastName,
-      phone: phone || '',
-    }, true);
-
     if (success) {
       resetForm();
       onSuccess();
@@ -157,15 +126,16 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
             {step === 'email' && (
               <>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  Log in or sign up
+                  Log in
                 </h2>
                 <p className="text-sm text-gray-600 mb-6">
-                  Log in or sign up to complete your booking
+                  Log in to complete your booking
                 </p>
 
                 {/* Social Login Buttons */}
                 <div className="space-y-3 mb-6">
                   <button
+                    type="button"
                     onClick={() => handleSocialLogin('facebook')}
                     className="w-full relative flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
                   >
@@ -176,6 +146,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => handleSocialLogin('google')}
                     className="w-full relative flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
                   >
@@ -211,7 +182,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                   </div>
                 </div>
 
-                {/* Email Form */}
+                {/* Login Form */}
                 <form onSubmit={handleEmailSubmit} className="space-y-4">
                   <input
                     type="email"
@@ -229,6 +200,20 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                     Continue
                   </button>
                 </form>
+
+                {/* Sign up link */}
+                <div className="mt-6 text-center">
+                  <p className="text-sm text-gray-600">
+                    Don&apos;t have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={handleSignupClick}
+                      className="text-gray-900 font-semibold hover:underline"
+                    >
+                      Sign up
+                    </button>
+                  </p>
+                </div>
               </>
             )}
 
@@ -297,127 +282,20 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 </form>
 
                 <div className="mt-4 text-center">
-                  <button
-                    type="button"
-                    onClick={() => setStep('signup')}
-                    className="text-sm text-gray-600 hover:text-gray-900"
-                  >
-                    Don&apos;t have an account? <span className="font-medium text-blue-600">Sign up</span>
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Step 3: Sign Up */}
-            {step === 'signup' && (
-              <>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  Create account
-                </h2>
-                <p className="text-sm text-gray-600 mb-6">
-                  Sign up to complete your booking
-                </p>
-
-                <form onSubmit={handleSignupSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="First name"
-                      required
-                      className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
-                    />
-                    <input
-                      type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      placeholder="Last name"
-                      required
-                      className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
-                    />
-                  </div>
-
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email address"
-                    required
-                    className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
-                  />
-
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="Phone number (optional)"
-                    className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
-                  />
-
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        setPasswordError(null);
-                      }}
-                      placeholder="Create password"
-                      required
-                      className={`w-full px-4 py-3.5 pr-12 border rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400 ${
-                        passwordError ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    />
+                  <p className="text-sm text-gray-600">
+                    Don&apos;t have an account?{' '}
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      onClick={handleSignupClick}
+                      className="text-gray-900 font-semibold hover:underline"
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
+                      Sign up
                     </button>
-                  </div>
-
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={passwordConfirmation}
-                    onChange={(e) => setPasswordConfirmation(e.target.value)}
-                    placeholder="Confirm password"
-                    required
-                    className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
-                  />
-
-                  {passwordError && (
-                    <p className="text-sm text-red-500">{passwordError}</p>
-                  )}
-                  {error && !passwordError && (
-                    <p className="text-sm text-red-500">{error}</p>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full py-3.5 bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                  >
-                    {isLoading ? 'Creating account...' : 'Create account'}
-                  </button>
-                </form>
-
-                <div className="mt-4 text-center">
-                  <button
-                    type="button"
-                    onClick={() => setStep('password')}
-                    className="text-sm text-gray-600 hover:text-gray-900"
-                  >
-                    Already have an account? <span className="font-medium text-blue-600">Log in</span>
-                  </button>
+                  </p>
                 </div>
               </>
             )}
+
           </div>
         </div>
       </div>
