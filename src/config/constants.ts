@@ -5,13 +5,26 @@
 // API Configuration
 // Use NEXT_PUBLIC_API_URL directly for backend API calls
 const getApiBaseUrl = (): string => {
-  // Use NEXT_PUBLIC_API_URL if set, otherwise default to relative path
+  // Use NEXT_PUBLIC_API_URL if set
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
   
-  // Fallback to relative path (for local development without env var)
-  return '/api';
+  // Fallback to localhost:8000 for development
+  // This assumes Laravel backend is running on port 8000
+  if (typeof window !== 'undefined') {
+    // Client-side: use current origin or default to localhost:8000
+    const origin = window.location.origin;
+    // If running on localhost, try to use port 8000 for API
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return 'http://localhost:8000/api';
+    }
+    // For production, you might want to use the same origin
+    return `${origin}/api`;
+  }
+  
+  // Server-side fallback
+  return 'http://localhost:8000/api';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
