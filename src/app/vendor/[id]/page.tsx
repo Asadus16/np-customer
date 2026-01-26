@@ -21,7 +21,7 @@ import {
   NearbyVenue,
   ServiceLink,
 } from '@/components/vendor';
-import { useVendor, useVendorReviews, useNearbyVendors } from '@/hooks';
+import { useVendor, useVendorReviews, useNearbyVendors, useFavorite } from '@/hooks';
 import { VendorDetailApiResponse, CompanyHourApiResponse, ReviewApiResponse, VendorApiResponse } from '@/services/vendorService';
 
 const DAYS_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -333,7 +333,21 @@ export default function VendorDetailPage() {
   const { nearbyVendors: apiNearbyVendors } = useNearbyVendors(vendorId, 4);
 
   const [activeCategory, setActiveCategory] = useState<string>('');
-  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Favorite management
+  const {
+    isFavorite,
+    isLoading: favoriteLoading,
+    toggleFavorite,
+    setInitialFavorite
+  } = useFavorite(vendorId, false);
+
+  // Set initial favorite state from API response
+  useEffect(() => {
+    if (apiVendor?.is_favorite !== undefined) {
+      setInitialFavorite(apiVendor.is_favorite);
+    }
+  }, [apiVendor?.is_favorite, setInitialFavorite]);
 
   // Scroll to top on page load
   useEffect(() => {
@@ -488,7 +502,7 @@ export default function VendorDetailPage() {
       <VendorNavBar
         vendorName={vendor.name}
         isFavorite={isFavorite}
-        onToggleFavorite={() => setIsFavorite(!isFavorite)}
+        onToggleFavorite={toggleFavorite}
       />
 
       <div className="min-h-screen bg-white pb-24 lg:pb-0">
@@ -572,8 +586,9 @@ export default function VendorDetailPage() {
                 <Share className="h-6 w-6" />
               </button>
               <button
-                onClick={() => setIsFavorite(!isFavorite)}
-                className="h-12 w-12 flex items-center justify-center border border-[#d1d1d1] rounded-full hover:bg-gray-50 transition-colors"
+                onClick={toggleFavorite}
+                disabled={favoriteLoading}
+                className={`h-12 w-12 flex items-center justify-center border border-[#d1d1d1] rounded-full hover:bg-gray-50 transition-colors ${favoriteLoading ? 'opacity-50' : ''}`}
               >
                 <Heart
                   className={`h-6 w-6 ${

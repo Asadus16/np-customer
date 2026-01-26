@@ -5,6 +5,7 @@ import { VendorCardData } from '@/components/home';
 interface UseVendorsOptions {
   search?: string;
   category?: string;
+  serviceArea?: string;
   sort?: string;
   page?: number;
   perPage?: number;
@@ -23,6 +24,7 @@ export function useVendors(options: UseVendorsOptions = {}): UseVendorsReturn {
   const {
     search,
     category,
+    serviceArea,
     sort = 'distance',
     page = 1,
     perPage = 20,
@@ -44,6 +46,7 @@ export function useVendors(options: UseVendorsOptions = {}): UseVendorsReturn {
       const response = await fetchVendors({
         search,
         category,
+        service_area: serviceArea,
         sort,
         page,
         per_page: perPage,
@@ -59,7 +62,7 @@ export function useVendors(options: UseVendorsOptions = {}): UseVendorsReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [search, category, sort, page, perPage, enabled]);
+  }, [search, category, serviceArea, sort, page, perPage, enabled]);
 
   useEffect(() => {
     loadVendors();

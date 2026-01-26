@@ -14,8 +14,9 @@ export function ConditionalLayout({
   const isDemoBookingPage = pathname?.startsWith('/demo/booking') ?? false;
   const isMenuPage = pathname === '/menu';
   const isProfilePage = pathname === '/profile' || pathname === '/appointments' || pathname === '/wallet' || pathname === '/favorites' || pathname === '/settings';
+  const isVendorsPage = pathname === '/vendors';
   const shouldHideLayout = isAuthPage || isBookingPage || isDemoBookingPage || isMenuPage;
-  const shouldShowFooter = !shouldHideLayout && !isProfilePage;
+  const shouldShowFooter = !shouldHideLayout && !isProfilePage && !isVendorsPage;
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
