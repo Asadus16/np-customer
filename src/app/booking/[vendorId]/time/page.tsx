@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, X, ChevronLeft, ChevronRight, Calendar, Zap, Clock, Repeat } from 'lucide-react';
 import { useVendor, useAuth } from '@/hooks';
 import { BookingBreadcrumb, BookingLayout, BookingSidebar, ExitConfirmModal, LoginModal } from '@/components/booking';
+import { getAvailableTimeSlots } from '@/lib/vendor';
 
 type OrderType = 'now' | 'schedule' | 'recurring';
 type RecurringFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly';
@@ -45,6 +46,7 @@ export default function BookingTimePage() {
   const [orderType, setOrderType] = useState<OrderType | null>(null);
   const [recurringFrequency, setRecurringFrequency] = useState<RecurringFrequency>('weekly');
   const [showExitModal, setShowExitModal] = useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   // Load selected services from session storage
   useEffect(() => {
@@ -98,11 +100,17 @@ export default function BookingTimePage() {
     return false;
   }, [vendor]);
 
-  // Generate time slots based on company hours (10-minute intervals)
-  useEffect(() => {
+  // Calculate total duration from selected services
+  const totalDuration = useMemo(() => {
+    return selectedServices.reduce((sum, service) => {
+      return sum + (service.duration || 0);
+    }, 0);
+  }, [selectedServices]);
+
+  // Generate basic time slots from company hours (without API check)
+  const generateBasicTimeSlots = useCallback(() => {
     if (!vendor?.company_hours || vendor.company_hours.length === 0) {
-      setTimeSlots([]);
-      return;
+      return [];
     }
 
     const dayOfWeek = selectedDate.getDay();
@@ -110,8 +118,7 @@ export default function BookingTimePage() {
     const companyHour = vendor.company_hours.find((ch: any) => ch.day === dayString);
 
     if (!companyHour || !companyHour.is_available || !companyHour.slots || companyHour.slots.length === 0) {
-      setTimeSlots([]);
-      return;
+      return [];
     }
 
     // Check if selected date is today
@@ -148,8 +155,72 @@ export default function BookingTimePage() {
       }
     });
 
-    setTimeSlots(slots);
+    return slots;
   }, [vendor, selectedDate]);
+
+  // Fetch available time slots from API and update time slots
+  useEffect(() => {
+    if (!vendor || !selectedDate || selectedServices.length === 0) {
+      const basicSlots = generateBasicTimeSlots();
+      setTimeSlots(basicSlots);
+      return;
+    }
+
+    // Only fetch availability for scheduled/recurring orders with duration > 0
+    if (orderType !== 'schedule' && orderType !== 'recurring') {
+      const basicSlots = generateBasicTimeSlots();
+      setTimeSlots(basicSlots);
+      return;
+    }
+
+    if (totalDuration <= 0) {
+      const basicSlots = generateBasicTimeSlots();
+      setTimeSlots(basicSlots);
+      return;
+    }
+
+    const fetchAvailability = async () => {
+      setLoadingSlots(true);
+      try {
+        const dateString = selectedDate.toISOString().split('T')[0];
+        const response = await getAvailableTimeSlots(vendorId, dateString, totalDuration);
+        
+        // Generate all possible time slots first
+        const allSlots = generateBasicTimeSlots();
+        
+        // Create a map of available times from API response
+        // Normalize time format for comparison (backend returns "HH:MM", frontend uses "HH:MM:SS")
+        const availableTimesMap = new Map<string, boolean>();
+        response.data.forEach((slot) => {
+          // Normalize backend time to match frontend format (add :00 if needed)
+          const normalizedTime = slot.time.length === 5 ? `${slot.time}:00` : slot.time;
+          availableTimesMap.set(normalizedTime, slot.available_count > 0);
+        });
+
+        // Update slots with availability from API
+        const updatedSlots = allSlots.map((slot) => {
+          // Check if this slot exists in the API response and has available technicians
+          // If slot is not in the response, it means no technicians are available (all booked)
+          const isAvailable = availableTimesMap.get(slot.time) ?? false;
+          return {
+            ...slot,
+            available: isAvailable,
+          };
+        });
+
+        setTimeSlots(updatedSlots);
+      } catch (error) {
+        console.error('Failed to fetch available time slots:', error);
+        // Fallback to basic slots if API fails
+        const basicSlots = generateBasicTimeSlots();
+        setTimeSlots(basicSlots);
+      } finally {
+        setLoadingSlots(false);
+      }
+    };
+
+    fetchAvailability();
+  }, [vendor, selectedDate, orderType, totalDuration, vendorId, generateBasicTimeSlots, selectedServices.length]);
 
   // Calculate total
   const total = useMemo(() => {
@@ -605,10 +676,11 @@ export default function BookingTimePage() {
                             ? 'bg-gray-100 text-gray-900 border-2 border-[#6950f3] cursor-pointer'
                             : slot.available
                             ? 'bg-white border border-gray-200 text-gray-700 hover:border-gray-300 cursor-pointer'
-                            : 'bg-gray-50 border border-gray-100 text-gray-300 cursor-not-allowed'
+                            : 'bg-gray-50 border border-gray-100 text-gray-300 cursor-not-allowed opacity-60'
                         }`}
                       >
                         {formatTime(slot.time)}
+                        {!slot.available && <span className="ml-2 text-xs">(Unavailable)</span>}
                       </button>
                     );
                   })}
