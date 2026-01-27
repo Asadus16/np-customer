@@ -209,9 +209,33 @@ export default function BookingTimePage() {
         });
 
         setTimeSlots(updatedSlots);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Failed to fetch available time slots:', error);
-        // Fallback to basic slots if API fails
+        
+        // If 401 (unauthorized), show login modal instead of redirecting
+        // Check for axios error structure
+        const axiosError = error as { 
+          response?: { status?: number }; 
+          status?: number;
+          code?: string;
+        };
+        
+        const is401Error = 
+          axiosError?.response?.status === 401 || 
+          axiosError?.status === 401;
+        
+        // If 401 error and user is not authenticated, just use basic slots
+        // Don't show login modal here - it will show when they click Continue/Book
+        if (is401Error && !isAuthenticated) {
+          console.log('401 error detected for unauthenticated user, using basic slots');
+          // Use basic slots so user can still see and select times
+          const basicSlots = generateBasicTimeSlots();
+          setTimeSlots(basicSlots);
+          setLoadingSlots(false);
+          return;
+        }
+        
+        // Fallback to basic slots if API fails for other reasons
         const basicSlots = generateBasicTimeSlots();
         setTimeSlots(basicSlots);
       } finally {
@@ -220,7 +244,7 @@ export default function BookingTimePage() {
     };
 
     fetchAvailability();
-  }, [vendor, selectedDate, orderType, totalDuration, vendorId, generateBasicTimeSlots, selectedServices.length]);
+  }, [vendor, selectedDate, orderType, totalDuration, vendorId, generateBasicTimeSlots, selectedServices.length, isAuthenticated]);
 
   // Calculate total
   const total = useMemo(() => {
@@ -295,14 +319,27 @@ export default function BookingTimePage() {
 
   // Handle continue
   const handleContinue = () => {
+    // Validate required fields first
     if (orderType === 'schedule' && !selectedTime) return;
     if (orderType === 'recurring' && !selectedTime) return;
 
+    // Check authentication - show login modal if not authenticated
+    // Only show modal when user actually tries to book (clicks Continue)
     if (!isAuthenticated) {
+      // Save current selections to session storage so they can be restored after login
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(`booking_${vendorId}_date`, selectedDate.toISOString());
+        sessionStorage.setItem(`booking_${vendorId}_time`, selectedTime || '');
+        sessionStorage.setItem(`booking_${vendorId}_order_type`, orderType || 'schedule');
+        if (orderType === 'recurring') {
+          sessionStorage.setItem(`booking_${vendorId}_recurring_frequency`, recurringFrequency);
+        }
+      }
       setShowLoginModal(true);
       return;
     }
 
+    // User is authenticated, proceed to confirm
     if (typeof window !== 'undefined') {
       sessionStorage.setItem(`booking_${vendorId}_date`, selectedDate.toISOString());
       sessionStorage.setItem(`booking_${vendorId}_time`, selectedTime || '');
@@ -317,12 +354,31 @@ export default function BookingTimePage() {
   // Handle successful login
   const handleLoginSuccess = () => {
     setShowLoginModal(false);
-    if (selectedTime) {
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem(`booking_${vendorId}_date`, selectedDate.toISOString());
-        sessionStorage.setItem(`booking_${vendorId}_time`, selectedTime);
+    // Restore state from session storage if available
+    if (typeof window !== 'undefined') {
+      const storedDate = sessionStorage.getItem(`booking_${vendorId}_date`);
+      const storedTime = sessionStorage.getItem(`booking_${vendorId}_time`);
+      const storedOrderType = sessionStorage.getItem(`booking_${vendorId}_order_type`);
+      
+      if (storedDate) {
+        setSelectedDate(new Date(storedDate));
       }
-      router.push(`/booking/${vendorId}/confirm`);
+      if (storedTime) {
+        setSelectedTime(storedTime);
+      }
+      if (storedOrderType) {
+        setOrderType(storedOrderType as OrderType);
+      }
+      
+      // If time is already selected, proceed to confirm
+      const timeToUse = storedTime || selectedTime;
+      if (timeToUse) {
+        const dateToUse = storedDate ? new Date(storedDate) : selectedDate;
+        sessionStorage.setItem(`booking_${vendorId}_date`, dateToUse.toISOString());
+        sessionStorage.setItem(`booking_${vendorId}_time`, timeToUse);
+        router.push(`/booking/${vendorId}/confirm`);
+      }
+      // Otherwise, stay on the page - the useEffect will re-fetch availability now that user is authenticated
     }
   };
 
