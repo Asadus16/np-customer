@@ -44,11 +44,18 @@ api.interceptors.response.use(
       const isPublicEndpoint = url.includes('/public/');
       
       if (!isPublicEndpoint && typeof window !== 'undefined') {
-        // Clear auth and redirect only for protected endpoints
+        // Clear auth
         localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
         localStorage.removeItem(STORAGE_KEYS.USER);
-        // Don't redirect if we're already on a public page
-        if (!window.location.pathname.startsWith('/auth/')) {
+        
+        // Don't redirect if:
+        // 1. We're already on an auth page
+        // 2. We're on a booking page (let the component handle it with login modal)
+        const currentPath = window.location.pathname;
+        const isAuthPage = currentPath.startsWith('/auth/');
+        const isBookingPage = currentPath.startsWith('/booking/');
+        
+        if (!isAuthPage && !isBookingPage) {
           window.location.href = '/auth/login';
         }
       }
