@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef } from 'react';
@@ -83,33 +84,17 @@ export function VendorCard({ vendor, index = 0, href, isFavorited = false }: Ven
         {/* Image Container */}
         <div className="relative aspect-video lg:aspect-auto lg:h-44 overflow-hidden bg-gray-100 rounded-xl">
           {/* Image Carousel */}
+          
           <div
             ref={imageContainerRef}
             className="relative w-full h-full"
           >
-            {(() => {
-              const imageSrc = vendor.images.length > 0 && vendor.images[currentImageIndex]
-                ? vendor.images[currentImageIndex]
-                : '/placeholder.svg';
 
-              // Validate URL - must be http/https URL or absolute path starting with /
-              const isValidUrl = imageSrc && (
-                imageSrc.startsWith('http://') ||
-                imageSrc.startsWith('https://') ||
-                imageSrc.startsWith('/')
-              );
-
-              const finalSrc = isValidUrl ? imageSrc : '/placeholder.svg';
-
-              return (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={finalSrc}
-                  alt={vendor.name}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 "
-                />
-              );
-            })()}
+            <img
+              src={vendor.images?.[0] ?? '/placeholder.svg'}
+              alt={vendor.name}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
           </div>
 
           {/* Navigation Arrows */}
